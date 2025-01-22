@@ -180,7 +180,7 @@ class SectionWithHeader extends StatelessWidget {
                 child: Text(
                   'View All',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Colors.blue,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

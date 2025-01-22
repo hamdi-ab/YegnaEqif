@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:yegna_eqif_new/data/data.dart';
 import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/reports_generated_screen.dart';
 
 class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -25,58 +26,163 @@ class ReportsScreen extends StatelessWidget {
                       width: 175,
                       height: 110,
                       decoration: BoxDecoration(
-                        color: Colors.lightBlueAccent.shade100,
-                        borderRadius: BorderRadius.circular(16)
-                      ),
+                          color: Colors.lightBlueAccent.shade100,
+                          borderRadius: BorderRadius.circular(16)),
                       child: const Padding(
                         padding: EdgeInsets.only(left: 25.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Income', style: TextStyle(fontSize: 16, fontWeight:FontWeight.w500),),
+                            Text(
+                              'Income',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
                             SizedBox(height: 8),
-                            Text('\$ 45,520', style: TextStyle(fontSize: 20, fontWeight:FontWeight.bold,))
+                            Text('\$ 45,520',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ))
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     Container(
                       width: 175,
                       height: 110,
                       decoration: BoxDecoration(
                           color: Colors.pink.shade100,
-                          borderRadius: BorderRadius.circular(16)
-                      ),
+                          borderRadius: BorderRadius.circular(16)),
                       child: const Padding(
                         padding: EdgeInsets.only(left: 25.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Expense', style: TextStyle(fontSize: 16, fontWeight:FontWeight.w500),),
+                            Text(
+                              'Expense',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
                             SizedBox(height: 8),
-                            Text('\$ 44,520', style: TextStyle(fontSize: 20, fontWeight:FontWeight.bold,))
+                            Text('\$ 44,520',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ))
                           ],
                         ),
                       ),
-
                     )
                   ],
                 ),
               ),
               SizedBox(height: 16),
-              Container(
-                height: 50,
-                width: 375,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(16)
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsGeneratedScreen()));
+                },
+                child: Container(
+                  height: 50,
+                  width: 375,
+                  decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(16)),
+                  child: const Center(
+                      child: Text(
+                    'View report >',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
+                  )),
                 ),
-                child: const Center(child: Text('View report >', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),)),
               ),
-              SizedBox(height: 26),
+              const SizedBox(height: 16),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white, // White background for each transaction
+                  borderRadius: BorderRadius.circular(16), // Rounded corners
+                  boxShadow: [
+                    // Bottom shadow for elevation
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15), // Subtle shadow
+                      blurRadius: 3,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2), // Bottom shadow
+                    ),
+                    // Light top shadow for visibility
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 3,
+                      spreadRadius: -1,
+                      offset: const Offset(0, -2), // Top shadow
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 48, // Size of the progress bar
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          value: 0.7, // Progress value (70% in this example)
+                          strokeWidth: 4,
+                          color: Colors.green,
+                          backgroundColor: Colors.green.withOpacity(0.2),
+                        ),
+                      ),
+                      const CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.monetization_on, color: Colors.green, size: 30,),
+                      ),
+                    ],
+                  ),
+                  title: const Text(
+                    'Monthly Budget',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text(
+                    '\$140/Day',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  trailing: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        '\$1,675 Exp',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Of \$4,000',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 26),
               SectionWithHeader(
                 title: 'Recent Transaction',
                 viewAllCallback: () {},
@@ -91,13 +197,12 @@ class ReportsScreen extends StatelessWidget {
 }
 
 class ProfileBalance extends StatelessWidget {
-
   const ProfileBalance({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left:  16.0, right: 12.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -115,28 +220,14 @@ class ProfileBalance extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Balance',
-                    style: Theme.of(context).textTheme.bodyMedium
-                  ),
-                  const Text(
-                    '\$50,000',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
-                  ),
+                  Text('Balance',
+                      style: Theme.of(context).textTheme.bodyMedium),
+                  const Text('\$50,000',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ],
               )
             ],
-          ),
-          FloatingActionButton.small(
-            onPressed: () {},
-            elevation: 0,
-            backgroundColor: Colors.blue,
-            shape: const CircleBorder(),
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 18, // Optional: Adjust the icon size
-            ),
           ),
         ],
       ),
@@ -145,7 +236,7 @@ class ProfileBalance extends StatelessWidget {
 }
 
 class TimePeriodToggle extends StatefulWidget {
-  const TimePeriodToggle({Key? key}) : super(key: key);
+  const TimePeriodToggle({super.key});
 
   @override
   _TimePeriodToggleState createState() => _TimePeriodToggleState();
@@ -169,7 +260,8 @@ class _TimePeriodToggleState extends State<TimePeriodToggle> {
       child: Row(
         children: List.generate(labels.length, (index) {
           final isSelected = index == selectedIndex;
-          return Expanded( // Ensures buttons are evenly spaced
+          return Expanded(
+            // Ensures buttons are evenly spaced
             child: GestureDetector(
               onTap: () {
                 setState(() {
@@ -178,7 +270,8 @@ class _TimePeriodToggleState extends State<TimePeriodToggle> {
               },
               child: Container(
                 height: 42,
-                padding: const EdgeInsets.symmetric(horizontal: 8), // Reduced padding
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8), // Reduced padding
                 decoration: BoxDecoration(
                   color: isSelected ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
@@ -226,7 +319,7 @@ class RecentTransaction extends StatelessWidget {
                   // Bottom shadow for elevation
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15), // Subtle shadow
-                    blurRadius: 10,
+                    blurRadius: 5,
                     spreadRadius: 1,
                     offset: const Offset(0, 4), // Bottom shadow
                   ),
@@ -271,5 +364,3 @@ class RecentTransaction extends StatelessWidget {
     );
   }
 }
-
-

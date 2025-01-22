@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 List<Map<String, dynamic>> myTransactionalData = [
   {
     'icon': const FaIcon(
-      FontAwesomeIcons.chartPie,
+      FontAwesomeIcons.burger,
       color: Colors.white,
     ),
     'color': Colors.yellow[700],
@@ -181,4 +182,169 @@ final List<Map<String, dynamic>> totalBalanceData = [
     'color': Colors.purple,
   },
 ];
+
+
+
+final List<BarChartGroupData> weeklyBarData = List.generate(7, (index) {
+  // Dummy data for income and expense
+  final income = [10000, 12000, 15000, 8000, 11000, 9000, 7000][index];
+  final expense = [5000, 6000, 8000, 4000, 5000, 6000, 3000][index];
+  return BarChartGroupData(
+    x: index,
+    barRods: [
+      BarChartRodData(toY: income.toDouble(), color: Colors.green, width: 8),
+      BarChartRodData(toY: expense.toDouble(), color: Colors.red, width: 8),
+    ],
+  );
+});
+
+
+// Pie chart data
+final List<Map<String, dynamic>> incomeCategoryData = [
+  {
+    'name': 'Salary',
+    'color': Colors.green,
+    'icon': Icons.work,
+    'amount': 35000,
+    'percent': 75,
+    'value': 75,
+    'isHovered': false,
+  },
+  {
+    'name': 'Freelance',
+    'color': Colors.blue,
+    'icon': Icons.computer,
+    'amount': 5000,
+    'percent': 10,
+    'value': 10,
+    'isHovered': false,
+  },
+  {
+    'name': 'Investment',
+    'color': Colors.orange,
+    'icon': Icons.pie_chart,
+    'amount': 3000,
+    'percent': 6,
+    'value': 6,
+    'isHovered': false,
+  },
+  {
+    'name': 'Others',
+    'color': Colors.purple,
+    'icon': Icons.account_balance_wallet,
+    'amount': 2500,
+    'percent': 5,
+    'value': 5,
+    'isHovered': false,
+  },
+  {
+    'name': 'Bonus',
+    'color': Colors.red,
+    'icon': Icons.monetization_on,
+    'amount': 1000,
+    'percent': 4,
+    'value': 4,
+    'isHovered': false,
+  },
+];
+
+
+// Categories list data
+final List<Map<String, dynamic>> categoryData = [
+  {
+    'icon': Icons.shopping_bag,
+    'name': 'Shopping',
+    'color': Colors.blue,
+    'amount': 12000,
+    'percent': 40,
+  },
+  {
+    'icon': Icons.restaurant,
+    'name': 'Food',
+    'color': Colors.green,
+    'amount': 9000,
+    'percent': 30,
+  },
+  {
+    'icon': Icons.home,
+    'name': 'House',
+    'color': Colors.red,
+    'amount': 6000,
+    'percent': 20,
+  },
+  {
+    'icon': Icons.car_rental,
+    'name': 'Travel',
+    'color': Colors.orange,
+    'amount': 3000,
+    'percent': 10,
+  },
+];
+
+final List<Map<String, dynamic>> expenseCategoryData = [
+  {
+    'name': 'Rent',
+    'color': Colors.blue,
+    'icon': Icons.home,
+    'amount': 1200,
+    'percent': 30,
+    'value': 30,
+    'isHovered': false,
+  },
+  {
+    'name': 'Groceries',
+    'color': Colors.green,
+    'icon': Icons.local_grocery_store,
+    'amount': 800,
+    'percent': 20,
+    'value': 20,
+    'isHovered': false,
+  },
+  {
+    'name': 'Utilities',
+    'color': Colors.orange,
+    'icon': Icons.bolt,
+    'amount': 400,
+    'percent': 10,
+    'value': 10,
+    'isHovered': false,
+  },
+  {
+    'name': 'Transportation',
+    'color': Colors.red,
+    'icon': Icons.directions_car,
+    'amount': 500,
+    'percent': 12,
+    'value': 12,
+    'isHovered': false,
+  },
+  {
+    'name': 'Entertainment',
+    'color': Colors.purple,
+    'icon': Icons.movie,
+    'amount': 300,
+    'percent': 8,
+    'value': 8,
+    'isHovered': false,
+  },
+  {
+    'name': 'Dining',
+    'color': Colors.yellow,
+    'icon': Icons.restaurant,
+    'amount': 200,
+    'percent': 5,
+    'value': 5,
+    'isHovered': false,
+  },
+  {
+    'name': 'Miscellaneous',
+    'color': Colors.grey,
+    'icon': Icons.category,
+    'amount': 100,
+    'percent': 5,
+    'value': 5,
+    'isHovered': false,
+  },
+];
+
 
