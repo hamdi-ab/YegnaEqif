@@ -80,6 +80,22 @@ final List<Map<String, dynamic>> myTransactionalDataTwo = [
     'total': 2000,
     'progress': 0.7,
   },
+  {
+    'icon': Icons.shopping_bag,
+    'label': 'Shopping',
+    'color': Colors.blue, // Main color for the icon
+    'backgroundColor': Colors.blue.shade100, // Lighter version for the background
+    'total': 8000, // Total value
+    'progress': 0.2, // Progress as a decimal (e.g., 20% progress)
+  },
+  {
+    'icon': Icons.restaurant,
+    'label': 'Food',
+    'color': Colors.orange,
+    'backgroundColor': Colors.orange.shade100,
+    'total': 5000,
+    'progress': 0.9,
+  }
 ];
 
 List<Map<String, dynamic>> peopleYouOweData = [
@@ -123,6 +139,7 @@ List<Map<String, dynamic>> peopleYouOweData = [
     'label': 'David',
     'moneyOwed': 450,
   },
+
 ];
 
 final List<Map<String, dynamic>> peopleWhoOweYou = [

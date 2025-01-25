@@ -12,174 +12,47 @@ class ReportsScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start
             children: [
-              SizedBox(height: 30),
-              ProfileBalance(),
-              SizedBox(height: 30),
-              TimePeriodToggle(),
-              SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: Row(
+              const SizedBox(height: 30),
+              const ProfileBalance(),
+              const SizedBox(height: 30),
+              const TimePeriodToggle(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
                   children: [
-                    Container(
-                      width: 175,
-                      height: 110,
-                      decoration: BoxDecoration(
-                          color: Colors.lightBlueAccent.shade100,
-                          borderRadius: BorderRadius.circular(16)),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 25.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Income',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(height: 8),
-                            Text('\$ 45,520',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ))
-                          ],
+                    SizedBox(height: 30),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SummaryCard(
+                            title: 'Income',
+                            amount: '\$ 45,520',
+                            color: Color(0xFFE1F5FE), // Light Blue Accent
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Container(
-                      width: 175,
-                      height: 110,
-                      decoration: BoxDecoration(
-                          color: Colors.pink.shade100,
-                          borderRadius: BorderRadius.circular(16)),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 25.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Expense',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(height: 8),
-                            Text('\$ 44,520',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ))
-                          ],
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: SummaryCard(
+                            title: 'Expense',
+                            amount: '\$ 44,520',
+                            color: Color(0xFFF8BBD0), // Pink Accent
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
-              GestureDetector(
-                onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportsGeneratedScreen()));
-                },
-                child: Container(
-                  height: 50,
-                  width: 375,
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(16)),
-                  child: const Center(
-                      child: Text(
-                    'View report >',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white),
-                  )),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white, // White background for each transaction
-                  borderRadius: BorderRadius.circular(16), // Rounded corners
-                  boxShadow: [
-                    // Bottom shadow for elevation
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15), // Subtle shadow
-                      blurRadius: 3,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 2), // Bottom shadow
+                      ],
                     ),
-                    // Light top shadow for visibility
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 3,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2), // Top shadow
+                    SizedBox(height: 16),
+                    ReportsButton(),
+                    SizedBox(height: 16),
+                    MonthlyBudgetCard(
+                      title: 'Monthly Budget',
+                      dailyAmount: '\$140/Day',
+                      totalExpense: '\$1,675 Exp',
+                      totalBudget: '\$4,000',
+                      progress: 0.7,
                     ),
                   ],
-                ),
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 48, // Size of the progress bar
-                        height: 48,
-                        child: CircularProgressIndicator(
-                          value: 0.7, // Progress value (70% in this example)
-                          strokeWidth: 4,
-                          color: Colors.green,
-                          backgroundColor: Colors.green.withOpacity(0.2),
-                        ),
-                      ),
-                      const CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.monetization_on, color: Colors.green, size: 30,),
-                      ),
-                    ],
-                  ),
-                  title: const Text(
-                    'Monthly Budget',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text(
-                    '\$140/Day',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  trailing: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        '\$1,675 Exp',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Of \$4,000',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 26),
@@ -195,6 +68,7 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 }
+
 
 class ProfileBalance extends StatelessWidget {
   const ProfileBalance({super.key});
@@ -252,7 +126,7 @@ class _TimePeriodToggleState extends State<TimePeriodToggle> {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
-      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
         color: Colors.grey.shade300,
         borderRadius: BorderRadius.circular(16),
@@ -361,6 +235,184 @@ class RecentTransaction extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class SummaryCard extends StatelessWidget {
+  final String title;
+  final String amount;
+  final Color color;
+
+  const SummaryCard({
+    Key? key,
+    required this.title,
+    required this.amount,
+    required this.color,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 175,
+      height: 110,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 25.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              amount,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class ReportsButton extends StatelessWidget {
+  const ReportsButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ReportsGeneratedScreen(),
+            ),
+          );
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.blue,
+          padding: EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'View report',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(width: 10),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class MonthlyBudgetCard extends StatelessWidget {
+  final String title;
+  final String dailyAmount;
+  final String totalExpense;
+  final String totalBudget;
+  final double progress;
+
+  const MonthlyBudgetCard({
+    required this.title,
+    required this.dailyAmount,
+    required this.totalExpense,
+    required this.totalBudget,
+    required this.progress,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(
+                value: progress,
+                strokeWidth: 4,
+                color: Colors.green,
+                backgroundColor: Colors.green.withOpacity(0.2),
+              ),
+            ),
+            const CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.monetization_on, color: Colors.green),
+            ),
+          ],
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          dailyAmount,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              totalExpense,
+              style: const TextStyle(
+                  color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Of $totalBudget',
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

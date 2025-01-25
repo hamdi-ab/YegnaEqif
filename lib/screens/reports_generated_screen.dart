@@ -49,9 +49,9 @@ class ReportsGeneratedScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Column(
+                child: const Column(
                   children: [
-                    const ListTile(
+                    ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54),),
                       subtitle: Text('\$50,000', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),),
@@ -60,66 +60,26 @@ class ReportsGeneratedScreen extends StatelessWidget {
                         child: Icon(Icons.wallet),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Row(
                       children: [
-                        Container(
-                          width: 165,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              color: Colors.lightBlueAccent.shade100,
-                              borderRadius: BorderRadius.circular(16)),
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 25.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Income',
-                                  style: TextStyle(
-                                      fontSize: 16, fontWeight: FontWeight.w500),
-                                ),
-                                SizedBox(height: 8),
-                                Text('\$ 45,520',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ))
-                              ],
-                            ),
+                        Expanded(
+                          child: SummaryCard(
+                            title: 'Income',
+                            amount: '\$ 45,520',
+                            color: Color(0xFFE1F5FE), // Light Blue Accent
                           ),
                         ),
-                        const SizedBox(width: 15),
-                        Container(
-                          width: 165,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              color: Colors.pink.shade100,
-                              borderRadius: BorderRadius.circular(16)),
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 25.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Expense',
-                                  style: TextStyle(
-                                      fontSize: 16, fontWeight: FontWeight.w500),
-                                ),
-                                SizedBox(height: 8),
-                                Text('\$ 44,520',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ))
-                              ],
-                            ),
+                        SizedBox(width: 20),
+                        Expanded(
+                          child: SummaryCard(
+                            title: 'Expense',
+                            amount: '\$ 44,520',
+                            color: Color(0xFFF8BBD0), // Pink Accent
                           ),
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

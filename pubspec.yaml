@@ -18,6 +18,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   font_awesome_flutter: ^10.8.0
   fl_chart: ^0.69.2
+  intl: ^0.20.2
+  flutter_speed_dial: ^7.0.0
+  flutter_colorpicker: ^1.1.0
+  flutter_iconpicker: ^3.3.3
 
 dev_dependencies:
   flutter_test:
