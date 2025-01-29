@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yegna_eqif_new/models/category.dart';
 
-class AddCategoryPage extends StatefulWidget {
+import '../providers/category_provider.dart';
+
+class AddCategoryPage extends ConsumerStatefulWidget {
   @override
   _AddCategoryPageState createState() => _AddCategoryPageState();
 }
 
-class _AddCategoryPageState extends State<AddCategoryPage> {
+class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
   final TextEditingController _categoryNameController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   IconData? _selectedIcon;
   Color _selectedColor = Colors.blue;
-  IconPack _selectedIconPack = IconPack.material; // Default icon pack
-  List<Map<String, dynamic>> categories = []; // List to store categories
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  IconPack _selectedIconPack = IconPack.material;
+  final List<Map<String, dynamic>> _categories = [];
+  final String userId = 'user123';  // Mock user ID, replace with Firebase Auth user ID later
 
   void _selectIcon(BuildContext context) async {
     IconData? icon = await showIconPicker(
       context,
-      iconPackModes: [_selectedIconPack],
+      iconPackModes: [IconPack.material],
       adaptiveDialog: true,
     );
     if (icon != null) {
@@ -35,28 +39,37 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
     });
   }
 
-  void _saveCategory() {
+  Future<void> _saveCategory() async {
     if (_formKey.currentState?.validate() ?? false) {
       String categoryName = _categoryNameController.text;
       IconData categoryIcon = _selectedIcon ?? Icons.category;
       Color categoryColor = _selectedColor;
 
-      // Add the category to the list
-      categories.add({
-        'name': categoryName,
-        'icon': categoryIcon,
-        'color': categoryColor,
-      });
-      // Clear the input fields
-      _categoryNameController.clear();
+      // Add to local list immediately
       setState(() {
-        _selectedIcon = null;
-        _selectedColor = Colors.blue;
+        _categories.add({
+          'name': categoryName,
+          'icon': categoryIcon,
+          'color': categoryColor,
+        });
       });
-      print('Category Saved: $categoryName, $categoryIcon, $categoryColor');
-    } else {
-      // Handle invalid form state
-      print('Please enter a category name.');
+
+      // Add a new category and update the state
+      await ref.read(categoryProvider.notifier).addCategory(
+        Category(
+          id: DateTime.now().toString(), // Generate a unique ID
+          name: categoryName,
+          icon: categoryIcon,
+          color: categoryColor,
+        ),
+      );
+
+      // Clear input fields after saving
+      _categoryNameController.clear();
+      _selectedIcon = null;
+      _selectedColor = Colors.blue;
+          // Optionally, show feedback
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Category saved successfully')));
     }
   }
 
@@ -278,11 +291,11 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: categories.length,
+                itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    leading: Icon(categories[index]['icon'], color: categories[index]['color']),
-                    title: Text(categories[index]['name']),
+                    leading: Icon(_categories[index]['icon'], color: _categories[index]['color']),
+                    title: Text(_categories[index]['name']),
                   );
                 },
               ),

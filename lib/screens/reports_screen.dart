@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:yegna_eqif_new/data/data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yegna_eqif_new/providers/budget_provider.dart';
 import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/reports_generated_screen.dart';
 
@@ -46,11 +46,6 @@ class ReportsScreen extends StatelessWidget {
                     ReportsButton(),
                     SizedBox(height: 16),
                     MonthlyBudgetCard(
-                      title: 'Monthly Budget',
-                      dailyAmount: '\$140/Day',
-                      totalExpense: '\$1,675 Exp',
-                      totalBudget: '\$4,000',
-                      progress: 0.7,
                     ),
                   ],
                 ),
@@ -58,6 +53,7 @@ class ReportsScreen extends StatelessWidget {
               const SizedBox(height: 26),
               SectionWithHeader(
                 title: 'Recent Transaction',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child: const RecentTransaction(),
               ),
@@ -168,77 +164,6 @@ class _TimePeriodToggleState extends State<TimePeriodToggle> {
   }
 }
 
-class RecentTransaction extends StatelessWidget {
-  const RecentTransaction({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: myTransactionalData.length,
-          itemBuilder: (context, index) {
-            final transaction = myTransactionalData[index];
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              decoration: BoxDecoration(
-                color: Colors.white, // White background for each transaction
-                borderRadius: BorderRadius.circular(16), // Rounded corners
-                boxShadow: [
-                  // Bottom shadow for elevation
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15), // Subtle shadow
-                    blurRadius: 5,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 4), // Bottom shadow
-                  ),
-                  // Light top shadow for visibility
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    spreadRadius: -1,
-                    offset: const Offset(0, -2), // Top shadow
-                  ),
-                ],
-              ),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  backgroundColor: transaction['color'],
-                  child: transaction['icon'],
-                ),
-                title: Text(transaction['name']),
-                trailing: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      transaction['totalAmount'],
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      transaction['date'],
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class SummaryCard extends StatelessWidget {
   final String title;
   final String amount;
@@ -330,24 +255,42 @@ class ReportsButton extends StatelessWidget {
 }
 
 
-class MonthlyBudgetCard extends StatelessWidget {
-  final String title;
-  final String dailyAmount;
-  final String totalExpense;
-  final String totalBudget;
-  final double progress;
-
-  const MonthlyBudgetCard({
-    required this.title,
-    required this.dailyAmount,
-    required this.totalExpense,
-    required this.totalBudget,
-    required this.progress,
-    super.key,
-  });
+class MonthlyBudgetCard extends ConsumerWidget {
+  const MonthlyBudgetCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final budgets = ref.watch(budgetProvider);
+
+    // Calculate total allocated amount and total spent amount
+    final double totalAllocatedAmount = budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount = budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+
+    // Calculate progress
+    final double progress = totalSpentAmount / totalAllocatedAmount;
+
+    // Get the current date
+    final DateTime now = DateTime.now();
+    // Get the number of days in the current month
+    final int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+
+    // Calculate daily budget
+    final double dailyBudget = totalAllocatedAmount / daysInMonth;
+
+    // Example data (replace with dynamic data from your budget and categories state)
+    final String title = "Monthly Budget";
+    final String totalExpense = totalSpentAmount.toStringAsFixed(2);
+    final String totalBudget = totalAllocatedAmount.toStringAsFixed(2);
+
+    Color progressColor;
+    if (progress <= 0.5) {
+      progressColor = Colors.red; // Red for less than 50%
+    } else if (progress <= 0.8) {
+      progressColor = Colors.yellow; // Yellow for 50-80%
+    } else {
+      progressColor = Colors.green; // Green for 80% and above
+    }
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -370,9 +313,9 @@ class MonthlyBudgetCard extends StatelessWidget {
               width: 48,
               height: 48,
               child: CircularProgressIndicator(
-                value: progress,
+                value: progress.clamp(0.0, 1.0),
                 strokeWidth: 4,
-                color: Colors.green,
+                color: progressColor,
                 backgroundColor: Colors.green.withOpacity(0.2),
               ),
             ),
@@ -387,7 +330,7 @@ class MonthlyBudgetCard extends StatelessWidget {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          dailyAmount,
+          '\$${dailyBudget.toStringAsFixed(2)}/Day',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -399,12 +342,12 @@ class MonthlyBudgetCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              totalExpense,
+              '\$${totalExpense} Exp',
               style: const TextStyle(
                   color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Of $totalBudget',
+              'Of \$${totalBudget}',
               style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -416,3 +359,4 @@ class MonthlyBudgetCard extends StatelessWidget {
     );
   }
 }
+

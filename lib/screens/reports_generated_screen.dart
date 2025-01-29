@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:yegna_eqif_new/data/data.dart';
 import 'package:yegna_eqif_new/screens/reports_screen.dart';
@@ -15,7 +14,9 @@ class ReportsGeneratedScreen extends StatelessWidget {
         title: const Text('Report', style: TextStyle(fontWeight: FontWeight.w500),),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: (){}, icon: const Icon(Icons.calendar_month))
+          IconButton(onPressed: (){
+
+          }, icon: const Icon(Icons.calendar_month))
         ],
       ),
       body:  SafeArea(
@@ -57,7 +58,7 @@ class ReportsGeneratedScreen extends StatelessWidget {
                       subtitle: Text('\$50,000', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),),
                       trailing: CircleAvatar(
                         backgroundColor: Colors.blue,
-                        child: Icon(Icons.wallet),
+                        child: Icon(Icons.wallet, color: Colors.white,),
                       ),
                     ),
                     SizedBox(height: 16),

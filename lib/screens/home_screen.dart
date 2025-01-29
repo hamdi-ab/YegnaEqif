@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DashboardScreen(),
     ReportsScreen(),
     BudgetScreen(),
-    OwsMoneyScreen(),
+    DebtTrackerPage(),
   ];
 
   void _onItemTapped(int index) {

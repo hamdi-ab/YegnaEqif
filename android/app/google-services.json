@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "86907972753",
+    "project_id": "yegna-eqif",
+    "storage_bucket": "yegna-eqif.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86907972753:android:9c15e819292d5dc0c76330",
+        "android_client_info": {
+          "package_name": "com.yegnaeqif.yegna_eqif_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs7NV8bPVSoznwFhXdWwCkL5gU5KkKHnY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

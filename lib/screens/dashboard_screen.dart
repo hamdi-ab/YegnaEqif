@@ -2,7 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/data/data.dart';
+import 'package:yegna_eqif_new/providers/category_provider.dart';
+import 'package:yegna_eqif_new/providers/transaction_provider.dart';
+
+import '../models/transaction.dart';
 
 class DashboardScreen extends StatelessWidget {
   @override
@@ -20,26 +25,31 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 20),
               SectionWithHeader(
                 title: 'Top Spending',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child: const TopSpending(),
               ),
               SectionWithHeader(
                 title: 'Monthly Budget',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child:  MonthlyBudget(),
               ),
               SectionWithHeader(
                 title: 'People You Owe',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child: PeopleList(data: peopleYouOweData, isOwed: false),
               ),
               SectionWithHeader(
                 title: 'People Who Owe You',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child: PeopleList(data: peopleWhoOweYou, isOwed: true),
               ),
               SectionWithHeader(
                 title: 'Recent Transaction',
+                leftText: 'View All',
                 viewAllCallback: () {},
                 child: const RecentTransaction(),
               ),
@@ -150,13 +160,14 @@ class ProgressBar extends StatelessWidget {
 
 class SectionWithHeader extends StatelessWidget {
   final String title;
+  final String leftText;
   final VoidCallback viewAllCallback;
   final Widget child;
 
   const SectionWithHeader({super.key,
     required this.title,
     required this.viewAllCallback,
-    required this.child,
+    required this.child, required this.leftText,
   });
 
   @override
@@ -171,15 +182,13 @@ class SectionWithHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
               GestureDetector(
                 onTap: viewAllCallback,
                 child: Text(
-                  'View All',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  leftText,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.blue,
                     fontWeight: FontWeight.bold,
                   ),
@@ -615,11 +624,15 @@ class MonthlyBudget extends StatelessWidget {
 }
 
 
-class RecentTransaction extends StatelessWidget {
+class RecentTransaction extends ConsumerWidget {
   const RecentTransaction({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactionsWithCategoryDetails = ref.watch(transactionProvider);
+
+    print('Rendering transactions: $transactionsWithCategoryDetails');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -627,52 +640,56 @@ class RecentTransaction extends StatelessWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: myTransactionalData.length,
+          itemCount: transactionsWithCategoryDetails.length,
           itemBuilder: (context, index) {
-            final transaction = myTransactionalData[index];
+            final transactionData = transactionsWithCategoryDetails[index];
+            final transaction = transactionData['transaction'] as Transaction;
+            final categoryIcon = transactionData['icon'] as IconData;
+            final categoryColor = transactionData['color'] as Color;
+            final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
+
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 8),
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               decoration: BoxDecoration(
-                color: Colors.white, // White background for each transaction
-                borderRadius: BorderRadius.circular(16), // Rounded corners
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  // Bottom shadow for elevation
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15), // Subtle shadow
+                    color: Colors.black.withOpacity(0.15),
                     blurRadius: 10,
                     spreadRadius: 1,
-                    offset: const Offset(0, 4), // Bottom shadow
+                    offset: const Offset(0, 4),
                   ),
-                  // Light top shadow for visibility
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     spreadRadius: -1,
-                    offset: const Offset(0, -2), // Top shadow
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
-                  backgroundColor: transaction['color'],
-                  child: transaction['icon'],
+                  backgroundColor: categoryColor,
+                  child: Icon(categoryIcon, color: Colors.white,),
                 ),
-                title: Text(transaction['name']),
+                title: Text(transaction.category),
+                subtitle: Text(transaction.bankType),
                 trailing: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      transaction['totalAmount'],
-                      style: const TextStyle(
-                        color: Colors.red,
+                      '\$${transaction.amount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: amountColor,
                         fontSize: 14,
                       ),
                     ),
                     Text(
-                      transaction['date'],
+                      '${transaction.date.year}-${transaction.date.month}-${transaction.date.day}',
                       style: const TextStyle(fontSize: 14),
                     ),
                   ],
@@ -685,5 +702,11 @@ class RecentTransaction extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
 
 

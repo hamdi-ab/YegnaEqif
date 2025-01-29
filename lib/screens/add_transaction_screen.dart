@@ -1,98 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:yegna_eqif_new/screens/add_category_screen.dart';
+
+import '../models/category.dart';
+import '../providers/category_provider.dart';
+import '../services/firestore_service.dart';
+
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
-
   @override
-  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final _formKey = GlobalKey<FormState>();
   Map<String, dynamic> selectedCategory = {
     "label": "Select Category",
     "icon": Icons.category,
     "backgroundColor": Colors.grey.shade300
   };
   final TextEditingController noteController = TextEditingController();
+  String _enteredAmount = "";
+  String _selectedBank = "CBE";
+  String _incomeExpense = "Income"; // Default toggle value
+  DateTime? _selectedDate;
+  bool isCategorySelected = false;
+
+  void _saveTransaction() {
+    if (_formKey.currentState!.validate() && isCategorySelected) {
+      final transactionData = {
+        "type": _incomeExpense,
+        "category": selectedCategory['label'],
+        "bank": _selectedBank,
+        "date": _selectedDate != null
+            ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+            : "No Date Selected",
+        "amount": _enteredAmount,
+        "note": noteController.text.isNotEmpty ? noteController.text : null,
+      };
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Transaction Saved: $transactionData')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter all required fields.')),
+      );
+    }
+  }
+
+  void _updateAmount(String amount) {
+    setState(() {
+      _enteredAmount = amount;
+    });
+  }
+
+  void _updateCategory(category) {
+    setState(() {
+      selectedCategory = category;
+      isCategorySelected = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transactions'),
+        title: const Text('Add Transactions'),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 20),
-              IncomeExpenseToggle(),
-              SizedBox(height: 20),
-              BankCardDropdown(),
-              SizedBox(height: 16),
-              EnterAmountTile(),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigate to the category selection page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CategoryListPage(
-                          onCategorySelected: (category) {
-                            setState(() {
-                              selectedCategory = category;
-                            });
-                          },
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                IncomeExpenseToggle(),
+                SizedBox(height: 20),
+                BankCardDropdown(),
+                SizedBox(height: 16),
+                // EnterAmountTile calls _updateAmount when an amount is entered
+                EnterAmountTile(onAmountSaved: _updateAmount),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        spreadRadius: -1,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CategoryListPage(
+                            onCategorySelected: _updateCategory,
+                            userId: 'user123',
+                          ),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: selectedCategory['backgroundColor'],
+                        child: Icon(
+                          selectedCategory['icon'],
+                          color: selectedCategory['color'],
                         ),
                       ),
-                    );
-                  },
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: selectedCategory['backgroundColor'],
-                      child: Icon(
-                        selectedCategory['icon'],
-                        color: selectedCategory['color'],
+                      title: Text(
+                        selectedCategory['label'],
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
                       ),
-                    ),
-                    title: Text(
-                      selectedCategory['label'],
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
                     ),
                   ),
                 ),
-              ),
-              Container(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -137,17 +179,57 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         ),
                       ),
                     ],
-                  )),
-              SelectDateWidget(),
-              SizedBox(height: 20),
-              SaveButton(),
-            ],
+                  ),
+                ),
+                SelectDateWidget(),
+                SizedBox(height: 20),
+                // SaveButton validates if all inputs are provided
+                SaveButton(
+                  isValid: _formKey.currentState?.validate() ?? false && isCategorySelected && _enteredAmount.isNotEmpty,
+                  onSave: _saveTransaction,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+class SaveButton extends StatelessWidget {
+  final bool isValid;
+  final VoidCallback onSave;
+
+  SaveButton({required this.isValid, required this.onSave});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: TextButton(
+        onPressed: isValid ? onSave : null, // Disable button if not valid
+        style: TextButton.styleFrom(
+          backgroundColor: isValid ? Colors.blue : Colors.grey, // Change color based on validation
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          minimumSize: Size(double.infinity, 50), // Make the button cover the full width
+        ),
+        child: const Text(
+          'Save',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class IncomeExpenseToggle extends StatefulWidget {
   const IncomeExpenseToggle({super.key});
@@ -212,7 +294,12 @@ class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
   }
 }
 
+
 class EnterAmountTile extends StatefulWidget {
+  final Function(String) onAmountSaved;
+
+  EnterAmountTile({required this.onAmountSaved});
+
   @override
   _EnterAmountTileState createState() => _EnterAmountTileState();
 }
@@ -233,6 +320,7 @@ class _EnterAmountTileState extends State<EnterAmountTile> {
           setState(() {
             _enteredAmount = result;
           });
+          widget.onAmountSaved(_enteredAmount); // Call the callback
         }
       },
       child: Container(
@@ -275,7 +363,6 @@ class _EnterAmountTileState extends State<EnterAmountTile> {
 }
 
 
-
 class AddPage extends StatefulWidget {
   final String initialAmount;
 
@@ -288,6 +375,7 @@ class AddPage extends StatefulWidget {
 class _AddPageState extends State<AddPage> {
   late TextEditingController _amountController;
   final FocusNode _focusNode = FocusNode();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -298,6 +386,12 @@ class _AddPageState extends State<AddPage> {
     });
   }
 
+  void _saveAmount() {
+    if (_formKey.currentState?.validate() ?? false) {
+      Navigator.pop(context, _amountController.text);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -306,74 +400,81 @@ class _AddPageState extends State<AddPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Enter Amount',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 200, // Adjust the width as needed
-                      child: TextFormField(
-                        focusNode: _focusNode,
-                        controller: _amountController,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true), // For decimal input
-                        textInputAction: TextInputAction.none, // Remove "check" button
-                        decoration: InputDecoration(
-                          hintText: "\$00.00",
-                          hintStyle: TextStyle(fontSize: 48, color: Colors.grey.shade500),
-                          filled: true,
-                          fillColor: Colors.transparent, // Transparent background
-                          border: InputBorder.none,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Enter Amount',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Expanded(
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 200, // Adjust the width as needed
+                        child: TextFormField(
+                          focusNode: _focusNode,
+                          controller: _amountController,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true), // For decimal input
+                          textInputAction: TextInputAction.none, // Remove "check" button
+                          decoration: InputDecoration(
+                            hintText: "\$00.00",
+                            hintStyle: TextStyle(fontSize: 48, color: Colors.grey.shade500),
+                            filled: true,
+                            fillColor: Colors.transparent, // Transparent background
+                            border: InputBorder.none,
+                          ),
+                          style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter an amount';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Please enter a valid number';
+                            }
+                            return null;
+                          },
                         ),
-                        style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        onChanged: (value) {
-                          setState(() {
-                            // Update as user types
-                          });
-                        },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 16),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, _amountController.text);
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              SizedBox(height: 16),
+              TextButton(
+                onPressed: _saveAmount,
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  minimumSize: Size(double.infinity, 50), // Make the button cover the full width
                 ),
-                minimumSize: Size(double.infinity, 50), // Make the button cover the full width
-              ),
-              child: Text(
-                'Add Amount',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                child: Text(
+                  'Add Amount',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 
 class BankCardDropdown extends StatefulWidget {
@@ -524,76 +625,30 @@ class AddBankOrWalletPage extends StatelessWidget {
   }
 }
 
-class CategoryListPage extends StatelessWidget {
-  final Function(Map<String, dynamic>) onCategorySelected;
+// Ensure FirestoreService is properly initialized
 
-  CategoryListPage({required this.onCategorySelected, super.key});
+class CategoryListPage extends ConsumerStatefulWidget {
+  final Function(Category) onCategorySelected;
+  final String userId;
 
-  final List<Map<String, dynamic>> myTransactionalDataTwo = [
-    {
-      'icon': Icons.shopping_cart,
-      'label': 'Shopping',
-      'backgroundColor': Colors.blue,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.fastfood,
-      'label': 'Food',
-      'backgroundColor': Colors.green,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.car_rental,
-      'label': 'Transport',
-      'backgroundColor': Colors.orange,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.home,
-      'label': 'Home',
-      'backgroundColor': Colors.red,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.school,
-      'label': 'Education',
-      'backgroundColor': Colors.purple,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.local_hospital,
-      'label': 'Health',
-      'backgroundColor': Colors.teal,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.sports,
-      'label': 'Sports',
-      'backgroundColor': Colors.indigo,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.movie,
-      'label': 'Entertainment',
-      'backgroundColor': Colors.pink,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.travel_explore,
-      'label': 'Travel',
-      'backgroundColor': Colors.cyan,
-      'color': Colors.white
-    },
-    {
-      'icon': Icons.add,
-      'label': 'Add',
-      'backgroundColor': Colors.grey,
-      'color': Colors.white
-    },
-  ];
+  CategoryListPage({required this.userId, required this.onCategorySelected, Key? key}) : super(key: key);
+
+  @override
+  _CategoryListPageState createState() => _CategoryListPageState();
+}
+
+class _CategoryListPageState extends ConsumerState<CategoryListPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch categories when the widget is built
+    Future.microtask(() => ref.read(categoryProvider.notifier).fetchCategories());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final categories = ref.watch(categoryProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Category'),
@@ -613,7 +668,9 @@ class CategoryListPage extends StatelessWidget {
             ),
           ],
         ),
-        child: GridView.builder(
+        child: categories.isEmpty
+            ? const Center(child: CircularProgressIndicator()) // Loading State
+            : GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -622,51 +679,59 @@ class CategoryListPage extends StatelessWidget {
             mainAxisSpacing: 16,
             childAspectRatio: 0.8, // Adjust aspect ratio for proper layout
           ),
-          itemCount: myTransactionalDataTwo.length,
+          itemCount: categories.length + 1, // Add one for the "Add" option
           itemBuilder: (context, index) {
-            final data = myTransactionalDataTwo[index];
+            if (index == categories.length) {
+              // Render the "Add" category option
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>  AddCategoryPage()),
+                  );
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.grey.withOpacity(0.2),
+                      child: const Icon(Icons.add, color: Colors.black, size: 20),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Add',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final category = categories[index];
 
             return GestureDetector(
               onTap: () {
-                if (data['label'] == 'Add') {
-                  // Handle the "Add" category
-                  // For example: Open a dialog or another screen to add a new category
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Add Category'),
-                      content:
-                          const Text('Functionality to add category here.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Pass the selected category back to the previous screen
-                  onCategorySelected(data);
-                  Navigator.pop(context);
-                }
+                // Pass the selected category back to the previous screen
+                widget.onCategorySelected(category);
+                Navigator.pop(context);
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 24, // Adjust radius as needed
-                    backgroundColor: data['backgroundColor'],
+                    backgroundColor: category.color.withOpacity(0.2),
                     child: Icon(
-                      data['icon'],
-                      color: data['color'],
+                      category.icon,
+                      color: category.color,
                       size: 20, // Adjust size to fit within the circle
                     ),
                   ),
-                  const SizedBox(
-                      height: 4), // Space between the icon and the text
+                  const SizedBox(height: 4), // Space between the icon and the text
                   Text(
-                    data['label'],
+                    category.name,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 12), // Adjust font size
                     maxLines: 1,
@@ -681,6 +746,11 @@ class CategoryListPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
 
 class SelectDateWidget extends StatefulWidget {
   @override
@@ -779,13 +849,6 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
                             setState(() {
                               selectedDate = dateToSet;
                             }); // Close the bottom sheet
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                    'Date has been set successfully!'),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
                           },
                           child: const Text('Set Date',
                               style: TextStyle(color: Colors.white)),
@@ -830,33 +893,33 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
     );
   }
 }
-
-class SaveButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: TextButton(
-        onPressed: () {
-        },
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.blue,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          minimumSize: Size(double.infinity, 50), // Make the button cover the full width
-        ),
-        child: const Text(
-          'Save',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-}
+//
+// class SaveButton extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//       child: TextButton(
+//         onPressed: () {
+//         },
+//         style: TextButton.styleFrom(
+//           backgroundColor: Colors.blue,
+//           padding: const EdgeInsets.symmetric(vertical: 10),
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(16),
+//           ),
+//           minimumSize: Size(double.infinity, 50), // Make the button cover the full width
+//         ),
+//         child: const Text(
+//           'Save',
+//           style: TextStyle(
+//             fontSize: 20,
+//             fontWeight: FontWeight.w500,
+//             color: Colors.white,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
