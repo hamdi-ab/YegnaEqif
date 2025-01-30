@@ -25,7 +25,7 @@ class ReportsGeneratedScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              const TimePeriodToggle(),
+              TimePeriodToggle(),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),

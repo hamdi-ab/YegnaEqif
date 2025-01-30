@@ -7,21 +7,21 @@ class LocalBudgetRepository {
       categoryId: '1',
       allocatedAmount: 200.00,
       spentAmount: 150.00,
-      date: DateTime(2023, 1, 1),
+      date: DateTime(2024, 5, 8),
     ),
     Budget(
       id: '2',
       categoryId: '2',
       allocatedAmount: 1500.00,
       spentAmount: 1200.00,
-      date: DateTime(2023, 2, 1),
+      date: DateTime(2025, 25, 1),
     ),
     Budget(
       id: '3',
       categoryId: '3',
       allocatedAmount: 300.00,
       spentAmount: 250.00,
-      date: DateTime(2023, 3, 1),
+      date: DateTime(2025, 1, 1),
     ),
   ];
 

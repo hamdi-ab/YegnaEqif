@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
+import 'package:yegna_eqif_new/providers/time_period_provider.dart';
+import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/reports_generated_screen.dart';
+import 'package:yegna_eqif_new/models/transaction.dart';
 
 class ReportsScreen extends StatelessWidget {
   @override
@@ -12,41 +15,23 @@ class ReportsScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align content to the start
             children: [
               const SizedBox(height: 30),
               const ProfileBalance(),
               const SizedBox(height: 30),
-              const TimePeriodToggle(),
+              TimePeriodToggle(),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   children: [
                     SizedBox(height: 30),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SummaryCard(
-                            title: 'Income',
-                            amount: '\$ 45,520',
-                            color: Color(0xFFE1F5FE), // Light Blue Accent
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: SummaryCard(
-                            title: 'Expense',
-                            amount: '\$ 44,520',
-                            color: Color(0xFFF8BBD0), // Pink Accent
-                          ),
-                        ),
-                      ],
-                    ),
+                    SummaryCardContainer(),
                     SizedBox(height: 16),
                     ReportsButton(),
                     SizedBox(height: 16),
-                    MonthlyBudgetCard(
-                    ),
+                    MonthlyBudgetCard(),
                   ],
                 ),
               ),
@@ -64,7 +49,6 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 }
-
 
 class ProfileBalance extends StatelessWidget {
   const ProfileBalance({super.key});
@@ -105,20 +89,19 @@ class ProfileBalance extends StatelessWidget {
   }
 }
 
-class TimePeriodToggle extends StatefulWidget {
-  const TimePeriodToggle({super.key});
-
+class TimePeriodToggle extends ConsumerWidget {
   @override
-  _TimePeriodToggleState createState() => _TimePeriodToggleState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
 
-class _TimePeriodToggleState extends State<TimePeriodToggle> {
-  int selectedIndex = 0;
+    final List<TimePeriod> periods = [
+      TimePeriod.week,
+      TimePeriod.month,
+      TimePeriod.year
+    ];
+    final List<String> labels = ["This Week", "This Month", "This Year"];
+    final int selectedIndex = periods.indexOf(selectedTimePeriod);
 
-  final List<String> labels = ["This Week", "This Month", "This Year"];
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
@@ -134,9 +117,7 @@ class _TimePeriodToggleState extends State<TimePeriodToggle> {
             // Ensures buttons are evenly spaced
             child: GestureDetector(
               onTap: () {
-                setState(() {
-                  selectedIndex = index;
-                });
+                ref.read(timePeriodProvider.notifier).state = periods[index];
               },
               child: Container(
                 height: 42,
@@ -207,6 +188,61 @@ class SummaryCard extends StatelessWidget {
   }
 }
 
+class SummaryCardContainer extends ConsumerWidget {
+  const SummaryCardContainer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactionsWithCategoryDetails = ref.watch(transactionProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+
+    // Filter the transactions based on the selected time period
+    final filteredTransactions = transactionsWithCategoryDetails.where((transactionData) {
+      final transaction = transactionData['transaction'] as Transaction;
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).map((transactionData) => transactionData['transaction'] as Transaction).toList();
+
+    // Calculate total income and expenses
+    final double totalIncome = filteredTransactions
+        .where((transaction) => transaction.type == 'Income')
+        .fold(0, (sum, transaction) => sum + transaction.amount);
+
+    final double totalExpenses = filteredTransactions
+        .where((transaction) => transaction.type == 'Expense')
+        .fold(0, (sum, transaction) => sum + transaction.amount);
+
+    return Row(
+      children: [
+        Expanded(
+          child: SummaryCard(
+            title: 'Income',
+            amount: '\$${totalIncome.toStringAsFixed(2)}',
+            color: const Color(0xFFE1F5FE), // Light Blue Accent
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: SummaryCard(
+            title: 'Expense',
+            amount: '\$${totalExpenses.toStringAsFixed(2)}',
+            color: const Color(0xFFF8BBD0), // Pink Accent
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 
 class ReportsButton extends StatelessWidget {
   const ReportsButton({super.key});
@@ -254,7 +290,6 @@ class ReportsButton extends StatelessWidget {
   }
 }
 
-
 class MonthlyBudgetCard extends ConsumerWidget {
   const MonthlyBudgetCard({super.key});
 
@@ -263,8 +298,10 @@ class MonthlyBudgetCard extends ConsumerWidget {
     final budgets = ref.watch(budgetProvider);
 
     // Calculate total allocated amount and total spent amount
-    final double totalAllocatedAmount = budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double totalAllocatedAmount =
+        budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount =
+        budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
 
     // Calculate progress
     final double progress = totalSpentAmount / totalAllocatedAmount;
@@ -286,7 +323,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
     if (progress <= 0.5) {
       progressColor = Colors.red; // Red for less than 50%
     } else if (progress <= 0.8) {
-      progressColor = Colors.yellow; // Yellow for 50-80%
+      progressColor = Colors.blue; // Yellow for 50-80%
     } else {
       progressColor = Colors.green; // Green for 80% and above
     }
@@ -359,4 +396,3 @@ class MonthlyBudgetCard extends ConsumerWidget {
     );
   }
 }
-

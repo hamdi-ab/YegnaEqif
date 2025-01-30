@@ -8,7 +8,7 @@ class LocalTransactionRepository {
       bankType: 'Credit Card',
       category: 'Groceries',
       amount: 50.00,
-      date: DateTime(2023, 4, 1),
+      date: DateTime(2024, 6, 1),
     ),
     Transaction(
       id: '2',
@@ -16,7 +16,7 @@ class LocalTransactionRepository {
       bankType: 'Bank Transfer',
       category: 'Salary',
       amount: 2000.00,
-      date: DateTime(2023, 4, 1),
+      date: DateTime(2025, 1, 24),
     ),
     Transaction(
       id: '3',
@@ -24,7 +24,7 @@ class LocalTransactionRepository {
       bankType: 'Debit Card',
       category: 'Utilities',
       amount: 75.00,
-      date: DateTime(2023, 4, 2),
+      date: DateTime(2025, 1, 4),
     ),
     // Add more transactions as needed
   ];

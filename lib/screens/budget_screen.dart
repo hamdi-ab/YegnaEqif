@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
+import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/screens/add_category_screen.dart';
 import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/manage_budget_page.dart';
@@ -162,10 +163,26 @@ class CircularProgressBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+
+    // Filter the budgets based on the selected time period
+    final filteredBudgets = budgets.where((budget) {
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return budget.date.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return budget.date.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return budget.date.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).toList();
 
     // Calculate total allocated amount and total spent amount
-    final double totalAllocatedAmount = budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
 
     // Calculate progress
     final double progress = totalSpentAmount / totalAllocatedAmount;
@@ -225,6 +242,7 @@ class CircularProgressBar extends ConsumerWidget {
     );
   }
 }
+
 
 
 
@@ -406,14 +424,30 @@ class BudgetOverview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+
+    // Filter the budgets based on the selected time period
+    final filteredBudgets = budgets.where((budget) {
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return budget.date.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return budget.date.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return budget.date.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).toList();
 
     // Calculate total allocated amount and total spent amount
-    final double totalAllocatedAmount = budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
 
     // Calculate remaining budget and savings percentage
     final double remainingBudget = totalAllocatedAmount - totalSpentAmount;
-    final double savingPercentage = (remainingBudget / totalAllocatedAmount) * 100;
+    final double savingPercentage = totalAllocatedAmount != 0 ? (remainingBudget / totalAllocatedAmount) * 100 : 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -502,6 +536,7 @@ class BudgetOverview extends ConsumerWidget {
     );
   }
 }
+
 
 
 

@@ -1,78 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yegna_eqif_new/providers/category_provider.dart';
+import '../models/budget.dart';
+import '../models/category.dart';
+import '../providers/budget_provider.dart';
 
-class BudgetCategory {
-  final String name;
-  double limit;
-  double spent;
-
-  BudgetCategory({
-    required this.name,
-    required this.limit,
-    this.spent = 0,
-  });
-}
-
-class ManageBudgetPage extends StatefulWidget {
-  @override
-  _ManageBudgetPageState createState() => _ManageBudgetPageState();
-}
-
-class _ManageBudgetPageState extends State<ManageBudgetPage> {
-  final List<BudgetCategory> _budgetCategories = [
-    BudgetCategory(name: 'Groceries', limit: 500),
-    BudgetCategory(name: 'Transport', limit: 200),
-    BudgetCategory(name: 'Entertainment', limit: 300),
-  ];
-
-  void _addNewCategory() {
-    showDialog(
-      context: context,
-      builder: (context) => _BudgetCategoryDialog(
-        onSave: (name, limit) {
-          setState(() {
-            _budgetCategories.add(
-              BudgetCategory(name: name, limit: limit),
-            );
-          });
-        },
-      ),
-    );
-  }
-
-  void _editCategory(int index) {
-    final category = _budgetCategories[index];
-    showDialog(
-      context: context,
-      builder: (context) => _BudgetCategoryDialog(
-        initialName: category.name,
-        initialLimit: category.limit.toString(),
-        onSave: (name, limit) {
-          setState(() {
-            _budgetCategories[index] = BudgetCategory(
-              name: name,
-              limit: limit,
-              spent: category.spent,
-            );
-          });
-        },
-      ),
-    );
-  }
-
-  void _deleteCategory(int index) {
-    setState(() {
-      _budgetCategories.removeAt(index);
-    });
-  }
+class ManageBudgetPage extends ConsumerWidget {
+  const ManageBudgetPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final budgets = ref.watch(budgetProvider);
+    final categories = ref.watch(categoryProvider);
+
+    Category getCategoryDetails(String categoryId) {
+      return categories.firstWhere(
+            (cat) => cat.id == categoryId,
+        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
+      );
+    }
+
+    void _addNewBudget() {
+      showDialog(
+        context: context,
+        builder: (context) => _BudgetDialog(
+          onSave: (categoryId, allocatedAmount) {
+            ref.read(budgetProvider.notifier).addBudget(
+              Budget(
+                id: DateTime.now().toString(),
+                categoryId: categoryId,
+                allocatedAmount: allocatedAmount,
+                spentAmount: 0,
+                date: DateTime.now(),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    void _editBudget(Budget budget) {
+      showDialog(
+        context: context,
+        builder: (context) => _BudgetDialog(
+          initialCategoryId: budget.categoryId,
+          initialAllocatedAmount: budget.allocatedAmount.toString(),
+          onSave: (categoryId, allocatedAmount) {
+            ref.read(budgetProvider.notifier).updateBudget(
+              Budget(
+                id: budget.id,
+                categoryId: categoryId,
+                allocatedAmount: allocatedAmount,
+                spentAmount: budget.spentAmount,
+                date: budget.date,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    void _deleteBudget(String id) {
+      ref.read(budgetProvider.notifier).deleteBudget(id);
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Budget'),
+        title: const Text('Manage Budget'),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               // Add additional settings functionality
             },
@@ -80,75 +77,79 @@ class _ManageBudgetPageState extends State<ManageBudgetPage> {
         ],
       ),
       body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: _budgetCategories.length,
+        padding: const EdgeInsets.all(16),
+        itemCount: budgets.length,
         itemBuilder: (context, index) {
-          final category = _budgetCategories[index];
+          final budget = budgets[index];
+          final category = getCategoryDetails(budget.categoryId);
           return Dismissible(
-            key: Key(category.name),
+            key: Key(budget.id),
             background: Container(color: Colors.red),
             confirmDismiss: (direction) async {
               return await showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text('Delete Category'),
-                  content: Text('Are you sure you want to delete ${category.name}?'),
+                  title: const Text('Delete Budget'),
+                  content: Text('Are you sure you want to delete this budget for ${budget.categoryId}?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('Cancel'),
+                      child: const Text('Cancel'),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: Text('Delete', style: TextStyle(color: Colors.red)),
+                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
               );
             },
-            onDismissed: (direction) => _deleteCategory(index),
+            onDismissed: (direction) => _deleteBudget(budget.id),
             child: Card(
-              margin: EdgeInsets.symmetric(vertical: 8),
+              margin: const EdgeInsets.symmetric(vertical: 8),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 leading: CircleAvatar(
-                  backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.category, color: Colors.blue),
+                  radius: 20,
+                  backgroundColor: category.color,
+                  child: Icon(
+                    category.icon,color: Colors.white,
+                  ),
                 ),
                 title: Text(
                   category.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     LinearProgressIndicator(
-                      value: category.spent / category.limit,
+                      value: budget.spentAmount / budget.allocatedAmount,
                       backgroundColor: Colors.grey.shade200,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(category.spent / category.limit),
+                        _getProgressColor(budget.spentAmount / budget.allocatedAmount),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Spent: \$${category.spent.toStringAsFixed(2)}',
-                          style: TextStyle(fontSize: 12),
+                          'Spent: \$${budget.spentAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(fontSize: 12),
                         ),
                         Text(
-                          'Limit: \$${category.limit.toStringAsFixed(2)}',
-                          style: TextStyle(fontSize: 12),
+                          'Limit: \$${budget.allocatedAmount.toStringAsFixed(2)}',
+                          style: const TextStyle(fontSize: 12),
                         ),
                       ],
                     ),
                   ],
                 ),
                 trailing: IconButton(
-                  icon: Icon(Icons.edit, size: 20),
-                  onPressed: () => _editCategory(index),
+                  icon: const Icon(Icons.edit, size: 20),
+                  onPressed: () => _editBudget(budget),
                 ),
               ),
             ),
@@ -156,9 +157,9 @@ class _ManageBudgetPageState extends State<ManageBudgetPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: _addNewCategory,
-        tooltip: 'Add New Category',
+        child: const Icon(Icons.add),
+        onPressed: _addNewBudget,
+        tooltip: 'Add New Budget',
       ),
     );
   }
@@ -170,67 +171,67 @@ class _ManageBudgetPageState extends State<ManageBudgetPage> {
   }
 }
 
-class _BudgetCategoryDialog extends StatefulWidget {
-  final String? initialName;
-  final String? initialLimit;
+class _BudgetDialog extends StatefulWidget {
+  final String? initialCategoryId;
+  final String? initialAllocatedAmount;
   final Function(String, double) onSave;
 
-  const _BudgetCategoryDialog({
-    this.initialName,
-    this.initialLimit,
+  const _BudgetDialog({
+    this.initialCategoryId,
+    this.initialAllocatedAmount,
     required this.onSave,
   });
 
   @override
-  __BudgetCategoryDialogState createState() => __BudgetCategoryDialogState();
+  __BudgetDialogState createState() => __BudgetDialogState();
 }
 
-class __BudgetCategoryDialogState extends State<_BudgetCategoryDialog> {
+class __BudgetDialogState extends State<_BudgetDialog> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _limitController;
+  late TextEditingController _categoryIdController;
+  late TextEditingController _allocatedAmountController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.initialName);
-    _limitController = TextEditingController(text: widget.initialLimit);
+    _categoryIdController = TextEditingController(text: widget.initialCategoryId);
+    _allocatedAmountController = TextEditingController(text: widget.initialAllocatedAmount);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.initialName == null ? 'New Category' : 'Edit Category'),
+      title: Text(widget.initialCategoryId == null ? 'New Budget' : 'Edit Budget'),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Category Name',
+              controller: _categoryIdController,
+              decoration: const InputDecoration(
+                labelText: 'Category ID',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a category name';
+                  return 'Please enter a category ID';
                 }
                 return null;
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextFormField(
-              controller: _limitController,
-              decoration: InputDecoration(
-                labelText: 'Monthly Limit',
+              controller: _allocatedAmountController,
+              decoration: const InputDecoration(
+                labelText: 'Allocated Amount',
                 border: OutlineInputBorder(),
                 prefixText: '\$',
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a budget limit';
+                  return 'Please enter an allocated amount';
                 }
                 if (double.tryParse(value) == null) {
                   return 'Please enter a valid number';
@@ -244,11 +245,11 @@ class __BudgetCategoryDialogState extends State<_BudgetCategoryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _saveForm,
-          child: Text('Save'),
+          child: const Text('Save'),
         ),
       ],
     );
@@ -257,8 +258,8 @@ class __BudgetCategoryDialogState extends State<_BudgetCategoryDialog> {
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
       widget.onSave(
-        _nameController.text,
-        double.parse(_limitController.text),
+        _categoryIdController.text,
+        double.parse(_allocatedAmountController.text),
       );
       Navigator.pop(context);
     }
@@ -266,8 +267,8 @@ class __BudgetCategoryDialogState extends State<_BudgetCategoryDialog> {
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _limitController.dispose();
+    _categoryIdController.dispose();
+    _allocatedAmountController.dispose();
     super.dispose();
   }
 }

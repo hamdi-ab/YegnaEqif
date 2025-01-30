@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/data/data.dart';
-import 'package:yegna_eqif_new/providers/category_provider.dart';
+import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 
 import '../models/transaction.dart';
@@ -623,15 +623,31 @@ class MonthlyBudget extends StatelessWidget {
   }
 }
 
-
 class RecentTransaction extends ConsumerWidget {
   const RecentTransaction({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsWithCategoryDetails = ref.watch(transactionProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
 
-    print('Rendering transactions: $transactionsWithCategoryDetails');
+    // Filter the transactions based on the selected time period
+    final filteredTransactions = transactionsWithCategoryDetails.where((transactionData) {
+      final transaction = transactionData['transaction'] as Transaction;
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).toList();
+
+    print('Rendering transactions: $filteredTransactions');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -640,9 +656,9 @@ class RecentTransaction extends ConsumerWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: transactionsWithCategoryDetails.length,
+          itemCount: filteredTransactions.length,
           itemBuilder: (context, index) {
-            final transactionData = transactionsWithCategoryDetails[index];
+            final transactionData = filteredTransactions[index];
             final transaction = transactionData['transaction'] as Transaction;
             final categoryIcon = transactionData['icon'] as IconData;
             final categoryColor = transactionData['color'] as Color;
@@ -673,7 +689,7 @@ class RecentTransaction extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
                   backgroundColor: categoryColor,
-                  child: Icon(categoryIcon, color: Colors.white,),
+                  child: Icon(categoryIcon, color: Colors.white),
                 ),
                 title: Text(transaction.category),
                 subtitle: Text(transaction.bankType),
@@ -702,6 +718,7 @@ class RecentTransaction extends ConsumerWidget {
     );
   }
 }
+
 
 
 

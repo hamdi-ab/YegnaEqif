@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Budget {
   final String id;
   final String categoryId;
