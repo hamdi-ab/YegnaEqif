@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/data/data.dart';
+import 'package:yegna_eqif_new/providers/category_provider.dart';
 import 'package:yegna_eqif_new/screens/reports_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
+
+import '../models/transaction.dart';
+import '../providers/time_period_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class ReportsGeneratedScreen extends StatelessWidget {
   const ReportsGeneratedScreen({super.key});
@@ -27,63 +33,7 @@ class ReportsGeneratedScreen extends StatelessWidget {
               const SizedBox(height: 20),
               TimePeriodToggle(),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
-                margin:const EdgeInsets.symmetric(horizontal: 16.0) ,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.white,
-                  boxShadow: [
-                    // Bottom shadow for elevation
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15), // Subtle shadow
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4), // Bottom shadow
-                    ),
-                    // Light top shadow for visibility
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2), // Top shadow
-                    ),
-                  ],
-                ),
-                child: const Column(
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54),),
-                      subtitle: Text('\$50,000', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),),
-                      trailing: CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Icon(Icons.wallet, color: Colors.white,),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SummaryCard(
-                            title: 'Income',
-                            amount: '\$ 45,520',
-                            color: Color(0xFFE1F5FE), // Light Blue Accent
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: SummaryCard(
-                            title: 'Expense',
-                            amount: '\$ 44,520',
-                            color: Color(0xFFF8BBD0), // Pink Accent
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              TotalBalanceContainer(),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0),
@@ -91,11 +41,70 @@ class ReportsGeneratedScreen extends StatelessWidget {
               ),
               WeeklyNetIncomeCard(),
               SizedBox(height: 20),
-              IncomeExpenseBreakdownCard(title: 'Income', totalValue: 45000.0,categoryData: incomeCategoryData),
-              IncomeExpenseBreakdownCard(title: 'Expense', totalValue: 39875.0, categoryData: expenseCategoryData)
+              IncomeExpenseBreakdownCard(title: 'Income'),
+              IncomeExpenseBreakdownCard(title: 'Expense')
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class TotalBalanceContainer extends ConsumerWidget {
+  const TotalBalanceContainer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionProvider);
+
+    // Calculate total balance
+    final double totalBalance = transactions.fold(0, (sum, transaction) {
+      if (transaction['transaction'].type == 'Income') {
+        return sum + transaction['transaction'].amount;
+      } else if (transaction['transaction'].type == 'Expense') {
+        return sum - transaction['transaction'].amount;
+      }
+      return sum;
+    });
+
+    return Container(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: [
+          // Bottom shadow for elevation
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15), // Subtle shadow
+            blurRadius: 5,
+            spreadRadius: 1,
+            offset: const Offset(0, 4), // Bottom shadow
+          ),
+          // Light top shadow for visibility
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            spreadRadius: -1,
+            offset: const Offset(0, -2), // Top shadow
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54)),
+            subtitle: Text('\$${totalBalance.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            trailing: const CircleAvatar(
+              backgroundColor: Colors.blue,
+              child: Icon(Icons.account_balance_wallet, color: Colors.white),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const SummaryCardContainer(),
+        ],
       ),
     );
   }
@@ -220,20 +229,58 @@ class WeeklyNetIncomeCard extends StatelessWidget {
 }
 
 
-class IncomeExpenseBreakdownCard extends StatelessWidget {
+class IncomeExpenseBreakdownCard extends ConsumerWidget {
   final String title; // "Income" or "Expense"
-  final double totalValue; // Total value like $45,500 or $12,300
-  final List<Map<String, dynamic>> categoryData;
 
   IncomeExpenseBreakdownCard({
     required this.title,
-    required this.totalValue,
-    required this.categoryData,
   });
 
   @override
-  Widget build(BuildContext context) {
-    bool isIncome = title == 'Income'; // Determines if it's income or expense
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+    final categories = ref.watch(categoryProvider);
+    final isIncome = title == 'Income';
+
+    // Filter the transactions based on the selected time period
+    final filteredTransactions = transactions.where((transactionData) {
+      final transaction = transactionData['transaction'] as Transaction;
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).map((transactionData) => transactionData['transaction'] as Transaction).toList();
+
+    // Filter transactions based on type (Income or Expense)
+    final filteredByType = filteredTransactions.where((transaction) => transaction.type == (isIncome ? 'Income' : 'Expense')).toList();
+
+    // Calculate total value
+    final double totalValue = filteredByType.fold(0, (sum, transaction) => sum + transaction.amount);
+
+    // Calculate category data
+    final categoryData = categories.map((category) {
+      final double categoryTotal = filteredByType
+          .where((transaction) => transaction.category == category.name)
+          .fold(0, (sum, transaction) => sum + transaction.amount);
+
+      final double percent = totalValue != 0 ? (categoryTotal / totalValue) * 100 : 0;
+
+      return {
+        'name': category.name,
+        'amount': categoryTotal,
+        'percent': percent,
+        'color': category.color,
+        'icon': category.icon,
+      };
+    }).where((data) => (data['amount'] as double) > 0).toList();
 
     return Container(
       margin: const EdgeInsets.all(16.0),
@@ -296,10 +343,10 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
               PieChartData(
                 sections: categoryData.map((data) {
                   return PieChartSectionData(
-                    color: data['color'],
-                    value: data['value'].toDouble(),
-                    title: '${data['percent']}%',
-                    radius: data['isHovered'] ? 60 : 50,
+                    color: data['color'] as Color,
+                    value: data['amount'] as double,
+                    title: '${(data['percent'] as double).toStringAsFixed(1)}%',
+                    radius: 50,
                     titleStyle: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -309,14 +356,6 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                 }).toList(),
                 sectionsSpace: 4,
                 centerSpaceRadius: 40,
-                pieTouchData: PieTouchData(
-                  touchCallback: (event, pieTouchResponse) {
-                    if (pieTouchResponse != null &&
-                        pieTouchResponse.touchedSection != null) {
-                      // Handle hover/interaction logic here.
-                    }
-                  },
-                ),
               ),
             ),
           ),
@@ -331,22 +370,22 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: category['color'],
-                      child: Icon(category['icon'], color: Colors.white),
+                      backgroundColor: category['color'] as Color,
+                      child: Icon(category['icon'] as IconData , color: Colors.white),
                     ),
                     title: Text(
-                      category['name'],
+                      category['name'] as String,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     trailing: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${category['amount']}',
+                          '\$${(category['amount'] as double) .toStringAsFixed(2)}',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${category['percent']}%',
+                          '${(category['percent'] as double).toStringAsFixed(1)}%',
                           style: const TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ],
@@ -360,16 +399,16 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                         height: 8,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: category['color'].withOpacity(0.2),
+                          color: (category['color'] as Color).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       // Filled progress bar
                       Container(
                         height: 8,
-                        width: MediaQuery.of(context).size.width * category['percent'] / 100,
+                        width: MediaQuery.of(context).size.width * (category['percent'] as double) / 100,
                         decoration: BoxDecoration(
-                          color: category['color'],
+                          color: category['color'] as Color,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -385,6 +424,7 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
     );
   }
 }
+
 
 
 

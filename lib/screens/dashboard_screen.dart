@@ -4,9 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/data/data.dart';
+import 'package:yegna_eqif_new/providers/budget_provider.dart';
+import 'package:yegna_eqif_new/providers/category_provider.dart';
 import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 
+import '../models/category.dart';
 import '../models/transaction.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -438,18 +441,48 @@ class CardWidget extends StatelessWidget {
   }
 }
 
-class TopSpending extends StatelessWidget {
+
+class TopSpending extends ConsumerWidget {
   const TopSpending({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionProvider);
+    final categories = ref.watch(categoryProvider);
+
+    // Calculate spending by category
+    final Map<String, double> spendingByCategory = {};
+
+    for (var transactionData in transactions) {
+      final transaction = transactionData['transaction'] as Transaction;
+      if (transaction.type == 'Expense') {
+        spendingByCategory.update(transaction.category, (value) => value + transaction.amount,
+            ifAbsent: () => transaction.amount);
+      }
+    }
+
+    // Sort categories by spending in descending order
+    final sortedCategories = spendingByCategory.entries
+        .map((entry) {
+      final category = categories.firstWhere((category) => category.name == entry.key);
+      return {
+        'category': category,
+        'amount': entry.value,
+      };
+    })
+        .toList()
+      ..sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
+
     return SizedBox(
       height: 160,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: myTransactionalData.length,
+        itemCount: sortedCategories.length,
         itemBuilder: (context, index) {
-          final item = myTransactionalDataTwo[index];
+          final item = sortedCategories[index];
+          final category = item['category'] as Category;
+          final amount = item['amount'] as double;
+
           return Container(
             width: 110,
             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -478,18 +511,23 @@ class TopSpending extends StatelessWidget {
                   width: 70,
                   height: 70,
                   decoration: BoxDecoration(
-                    color: item['backgroundColor'],
+                    color: category.color,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
-                    item['icon'],
-                    color: item['color'],
+                    category.icon,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  item['label'],
-                  style: Theme.of(context).textTheme.bodySmall,
+                  category.name,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${amount.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.red),
                 ),
               ],
             ),
@@ -501,18 +539,32 @@ class TopSpending extends StatelessWidget {
 }
 
 
-class MonthlyBudget extends StatelessWidget {
+
+class MonthlyBudget extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final budgets = ref.watch(budgetProvider);
+    final categories = ref.watch(categoryProvider);
+
+    // Helper function to get category details
+    Category getCategoryDetails(String categoryId) {
+      return categories.firstWhere(
+            (cat) => cat.id == categoryId,
+        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
+      );
+    }
+
     return SizedBox(
       height: 170,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: myTransactionalDataTwo.length,
+        itemCount: 3,
         itemBuilder: (context, index) {
-          final item = myTransactionalDataTwo[index];
-          final double progress = item['progress'];
-          final Color progressColor = item['color'];
+          final budget = budgets[index];
+          final category = getCategoryDetails(budget.categoryId);
+          final double progress = budget.spentAmount / budget.allocatedAmount;
+          final Color progressColor = category.color;
 
           return Container(
             width: 230,
@@ -544,9 +596,9 @@ class MonthlyBudget extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: item['backgroundColor'],
+                      backgroundColor: progressColor.withOpacity(0.1),
                       child: Icon(
-                        item['icon'],
+                        category.icon,
                         color: progressColor,
                       ),
                     ),
@@ -555,11 +607,11 @@ class MonthlyBudget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item['label'],
+                          category.name,
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '\$${item['total'].toStringAsFixed(0)} total',
+                          '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -590,7 +642,7 @@ class MonthlyBudget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 8),
                             child: Text(
-                              '\$${(progress * item['total']).toStringAsFixed(0)} ',
+                              '\$${(budget.spentAmount).toStringAsFixed(0)} ',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -601,7 +653,7 @@ class MonthlyBudget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: Text(
-                              '\$${item['total']}',
+                              '\$${budget.allocatedAmount}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
