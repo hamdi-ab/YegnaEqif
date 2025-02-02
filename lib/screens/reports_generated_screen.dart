@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/data/data.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
 import 'package:yegna_eqif_new/screens/reports_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -111,11 +110,19 @@ class TotalBalanceContainer extends ConsumerWidget {
 }
 
 
-class WeeklyNetIncomeCard extends StatelessWidget {
+class WeeklyNetIncomeCard extends ConsumerWidget {
+  const WeeklyNetIncomeCard({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+
+    final groupedData = _calculateGroupedData(transactions, selectedTimePeriod);
+    final netIncome = _calculateNetIncome(transactions, selectedTimePeriod);
+
     return Container(
-      height: 300, // Compact card height
+      height: 300,
       margin: const EdgeInsets.all(16.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -137,96 +144,223 @@ class WeeklyNetIncomeCard extends StatelessWidget {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '\$980.50',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
+          Text(
+            '\$${netIncome.toStringAsFixed(2)}',
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: BarChart(
-              BarChartData(
-                barGroups: weeklyBarData, // Use the extracted data
-                gridData: const FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  drawHorizontalLine: true, // Adjusted for better spacing
-                ),
-                borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(days[value.toInt()], style: const TextStyle(fontSize: 12)),
-                        );
-                      },
-                      reservedSize: 30,
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            '${(value / 1000).toInt()}k',
-                            style: const TextStyle(fontSize: 10),
-                          ),
-                        );
-                      },
-                      reservedSize: 30,
-                    ),
-                  ),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                maxY: 16000,
-              ),
-            ),
+            child: _buildChart(selectedTimePeriod, groupedData),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('Income'),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('Expense'),
-                ],
-              ),
-            ],
-          ),
+          _buildLegend(),
         ],
       ),
     );
   }
+
+  Widget _buildChart(TimePeriod period, List<BarChartGroupData> groupedData) {
+    if (period == TimePeriod.month) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: 600,
+          child: BarChart(_buildChartData(groupedData, period)), // Pass period here
+        ),
+      );
+    }
+    return BarChart(_buildChartData(groupedData, period)); // Pass period here
+  }
+
+
+  BarChartData _buildChartData(List<BarChartGroupData> groupedData, TimePeriod selectedTimePeriod) {
+    return BarChartData(
+      barGroups: groupedData,
+      gridData: const FlGridData(
+        show: true,
+        drawVerticalLine: false,
+        drawHorizontalLine: true,
+      ),
+      borderData: FlBorderData(show: false),// In the _buildChartData method, modify the titlesData section like this:
+      titlesData: FlTitlesData(
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, meta) {
+              // Changed: Remove meta.axis check and use selectedTimePeriod parameter
+              final period = selectedTimePeriod; // Use the period passed from parent
+              switch (period) {
+                case TimePeriod.week:
+                  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                        weekDays[value.toInt() % 7],
+                        style: const TextStyle(fontSize: 12)
+                    ),
+                  );
+                case TimePeriod.month:
+                  return Text(
+                      'Week ${value.toInt() + 1}',
+                      style: const TextStyle(fontSize: 12)
+                  );
+                case TimePeriod.year:
+                  final months = ['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return Text(
+                      months[value.toInt()],
+                      style: const TextStyle(fontSize: 12)
+                  );
+                default:
+                  return const SizedBox();
+              }
+            },
+            reservedSize: 30,
+          ),
+        ),
+        // ... rest of the titlesData configuration
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, meta) => Text(
+              '\$${value.toInt()}',
+              style: const TextStyle(fontSize: 10),
+            ),
+            reservedSize: 40,
+          ),
+        ),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      maxY: _calculateMaxY(groupedData),
+    );
+  }
+
+  double _calculateMaxY(List<BarChartGroupData> groups) {
+    double max = 0;
+    for (var group in groups) {
+      for (var rod in group.barRods) {
+        if (rod.toY > max) max = rod.toY;
+      }
+    }
+    return max * 1.2; // Add 20% padding
+  }
+
+  List<BarChartGroupData> _calculateGroupedData(List transactions, TimePeriod period) {
+    final incomeMap = <int, double>{};
+    final expenseMap = <int, double>{};
+
+    for (var transactionData in transactions) {
+      final transaction = transactionData['transaction'] as Transaction;
+      final date = transaction.date;
+      int groupKey;
+
+      switch (period) {
+        case TimePeriod.week:
+          groupKey = date.weekday - 1; // 0-6 (Monday-Sunday)
+          break;
+        case TimePeriod.month:
+        // Group by week of month (0-3), weeks starting on Monday
+          final firstDayOfMonth = DateTime(date.year, date.month, 1);
+          final firstMonday = firstDayOfMonth.weekday == DateTime.monday
+              ? firstDayOfMonth
+              : firstDayOfMonth.add(Duration(days: DateTime.monday - firstDayOfMonth.weekday));
+          groupKey = ((date.difference(firstMonday).inDays) ~/ 7).clamp(0, 3);
+          break;
+        case TimePeriod.year:
+          groupKey = date.month - 1; // 0-11 (Jan-Dec)
+          break;
+        default:
+          groupKey = 0;
+      }
+
+      if (transaction.type == 'Income') {
+        incomeMap[groupKey] = (incomeMap[groupKey] ?? 0) + transaction.amount;
+      } else {
+        expenseMap[groupKey] = (expenseMap[groupKey] ?? 0) + transaction.amount;
+      }
+    }
+
+    final maxGroups = period == TimePeriod.week ? 7
+        : period == TimePeriod.month ? 4
+        : 12;
+
+    return List.generate(maxGroups, (i) {
+      final income = incomeMap[i] ?? 0;
+      final expense = expenseMap[i] ?? 0;
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(toY: income, color: Colors.green),
+          BarChartRodData(toY: expense, color: Colors.red),
+        ],
+      );
+    });
+  }
+
+  Widget _buildLegend() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildLegendItem(Colors.green, 'Income'),
+        _buildLegendItem(Colors.red, 'Expense'),
+      ],
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String text) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(text),
+      ],
+    );
+  }
+
+  double _calculateNetIncome(List transactions, TimePeriod period) {
+    final now = DateTime.now();
+    final filteredTransactions = transactions.where((transactionData) {
+      final transaction = transactionData['transaction'] as Transaction;
+      final date = transaction.date;
+
+      switch (period) {
+        case TimePeriod.week:
+          return date.isAfter(now.subtract(const Duration(days: 7)));
+        case TimePeriod.month:
+          final firstDayOfMonth = DateTime(now.year, now.month, 1);
+          return date.isAfter(firstDayOfMonth);
+        case TimePeriod.year:
+          final firstDayOfYear = DateTime(now.year, 1, 1);
+          return date.isAfter(firstDayOfYear);
+        default:
+          return true;
+      }
+    }).toList();
+
+    double income = 0;
+    double expense = 0;
+
+    for (var transactionData in filteredTransactions) {
+      final transaction = transactionData['transaction'] as Transaction;
+      if (transaction.type == 'Income') {
+        income += transaction.amount;
+      } else {
+        expense += transaction.amount;
+      }
+    }
+
+    return income - expense;
+  }
 }
+
 
 
 class IncomeExpenseBreakdownCard extends ConsumerWidget {
@@ -273,13 +407,19 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
 
       final double percent = totalValue != 0 ? (categoryTotal / totalValue) * 100 : 0;
 
+      final int totalTransaction = filteredByType
+          .where((transaction) => transaction.category == category.name)
+          .length;
+
       return {
         'name': category.name,
         'amount': categoryTotal,
         'percent': percent,
         'color': category.color,
         'icon': category.icon,
+        'totalTransaction': totalTransaction,
       };
+
     }).where((data) => (data['amount'] as double) > 0).toList();
 
     return Container(
@@ -376,6 +516,10 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
                     title: Text(
                       category['name'] as String,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${(category['totalTransaction'] as int).toString()} Transactions ',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                     trailing: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,

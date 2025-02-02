@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,70 +8,97 @@ import 'package:yegna_eqif_new/providers/budget_provider.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
 import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
+import 'package:yegna_eqif_new/screens/profile_page.dart';
+import 'package:yegna_eqif_new/screens/setting_page.dart';
 
 import '../models/category.dart';
 import '../models/transaction.dart';
+import '../providers/card_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
+  final PageController _pageController = PageController(initialPage: 1);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              ProfileBalance(),
-              const SizedBox(height: 20),
-              TotalBalanceCard(data: totalBalanceData),
-              const SizedBox(height: 20),
-              SectionWithHeader(
-                title: 'Top Spending',
-                leftText: 'View All',
-                viewAllCallback: () {},
-                child: const TopSpending(),
+        child: PageView(
+          controller: _pageController,
+          children: [
+            ProfilePage(),
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  ProfileBalance(),
+                  const SizedBox(height: 20),
+                  TotalBalanceCard(),
+                  const SizedBox(height: 20),
+                  SectionWithHeader(
+                    title: 'Top Spending',
+                    leftText: 'View All',
+                    viewAllCallback: () {},
+                    child: const TopSpending(),
+                  ),
+                  SectionWithHeader(
+                    title: 'Monthly Budget',
+                    leftText: 'View All',
+                    viewAllCallback: () {},
+                    child:  MonthlyBudget(),
+                  ),
+                  SectionWithHeader(
+                    title: 'People You Owe',
+                    leftText: 'View All',
+                    viewAllCallback: () {},
+                    child: PeopleList(data: peopleYouOweData, isOwed: false),
+                  ),
+                  SectionWithHeader(
+                    title: 'People Who Owe You',
+                    leftText: 'View All',
+                    viewAllCallback: () {},
+                    child: PeopleList(data: peopleWhoOweYou, isOwed: true),
+                  ),
+                  SectionWithHeader(
+                    title: 'Recent Transaction',
+                    leftText: 'View All',
+                    viewAllCallback: () {},
+                    child: const RecentTransaction(),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-              SectionWithHeader(
-                title: 'Monthly Budget',
-                leftText: 'View All',
-                viewAllCallback: () {},
-                child:  MonthlyBudget(),
-              ),
-              SectionWithHeader(
-                title: 'People You Owe',
-                leftText: 'View All',
-                viewAllCallback: () {},
-                child: PeopleList(data: peopleYouOweData, isOwed: false),
-              ),
-              SectionWithHeader(
-                title: 'People Who Owe You',
-                leftText: 'View All',
-                viewAllCallback: () {},
-                child: PeopleList(data: peopleWhoOweYou, isOwed: true),
-              ),
-              SectionWithHeader(
-                title: 'Recent Transaction',
-                leftText: 'View All',
-                viewAllCallback: () {},
-                child: const RecentTransaction(),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class ProfileBalance extends StatelessWidget {
-  final double health = 75.0;
 
+class ProfileBalance extends ConsumerWidget {
   const ProfileBalance({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionProvider);
+
+    // Calculate total balance
+    final double totalBalance = transactions.fold(0, (sum, transaction) {
+      if (transaction['transaction'].type == 'Income') {
+        return sum + transaction['transaction'].amount;
+      } else if (transaction['transaction'].type == 'Expense') {
+        return sum - transaction['transaction'].amount;
+      }
+      return sum;
+    });
+    final totalExpenses = ref.watch(transactionProvider)
+        .map((transactionData) => transactionData['transaction'] as Transaction)
+        .where((transaction) => transaction.type == 'Expense')
+        .fold(0.0, (sum, transaction) => sum + transaction.amount);
+
+    final progress = totalExpenses / (totalBalance + totalExpenses) * 100;
+
     return Padding(
       padding: const EdgeInsets.only(left: 16.0),
       child: Row(
@@ -82,9 +109,12 @@ class ProfileBalance extends StatelessWidget {
               CircleAvatar(
                 radius: 25,
                 backgroundColor: Colors.yellow[700],
-                child: Icon(
-                  CupertinoIcons.person_fill,
+                child: IconButton(
                   color: Colors.yellow[900],
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                  },
+                  icon: Icon(CupertinoIcons.person_fill),
                 ),
               ),
               const SizedBox(width: 8),
@@ -100,16 +130,18 @@ class ProfileBalance extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: ProgressBar(
-                      value: health,
+                      value: progress,
                       maxValue: 100,
-                      label: "${health.toStringAsFixed(0)}/100",
+                      label: "${progress.toStringAsFixed(0)}/100",
                     ),
                   ),
                 ],
               )
             ],
           ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+          IconButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+          }, icon: const Icon(Icons.settings)),
         ],
       ),
     );
@@ -160,6 +192,7 @@ class ProgressBar extends StatelessWidget {
     );
   }
 }
+
 
 class SectionWithHeader extends StatelessWidget {
   final String title;
@@ -280,40 +313,61 @@ class PeopleList extends StatelessWidget {
   }
 }
 
-class TotalBalanceCard extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
+class TotalBalanceCard extends ConsumerWidget {
 
-  const TotalBalanceCard({super.key, required this.data});
+  const TotalBalanceCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 230,
-      child: PageView.builder(
-        controller: PageController(viewportFraction: 0.9, initialPage: 1),
-        itemCount: data.length,
-        itemBuilder: (context, index) {
-          final item = data[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
-            child: CardWidget(
-              totalBalance: item['totalBalance'],
-              income: item['income'],
-              expense: item['expense'],
-              cardColor: item['color'],
-            ),
-          );
-        },
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final PageController pageController = PageController(viewportFraction: 0.9, initialPage: 1);
+    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 230,
+          child: PageView.builder(
+            controller: pageController,
+            itemCount: 2 + bankAccountCards.length, // Cash and Total Balance + bank accounts
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0), // Adjust the padding values as needed
+                child: index == 0
+                    ? CashCardWidget()
+                    : index == 1
+                    ? TotalBalanceCardWidget()
+                    : BankAccountCardWidget(index: index - 2),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 16), // Add some space between the cards and the indicator
+        SmoothPageIndicator(
+          controller: pageController,
+          count: 2 + bankAccountCards.length,
+          effect: WormEffect(
+            dotHeight: 12,
+            dotWidth: 12,
+            type: WormType.thin,
+            activeDotColor: Colors.blue,
+            dotColor: Colors.grey.shade300,
+          ),
+        ),
+      ],
     );
   }
 }
+
+
+
+
 
 class CardWidget extends StatelessWidget {
   final double totalBalance;
   final double income;
   final double expense;
   final Color cardColor;
+  final int cardIndex;
 
   const CardWidget({
     Key? key,
@@ -321,10 +375,17 @@ class CardWidget extends StatelessWidget {
     required this.income,
     required this.expense,
     required this.cardColor,
+    required this.cardIndex,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return cardIndex == 0 || cardIndex == 1
+        ? _buildCardWithOriginalDesign(context)
+        : _buildCardWithDifferentDesign(context);
+  }
+
+  Widget _buildCardWithOriginalDesign(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.width / 2,
@@ -391,6 +452,35 @@ class CardWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildCardWithDifferentDesign(BuildContext context) {
+    // Placeholder for different card design
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        color: Colors.grey.shade200,
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.grey.shade300,
+            offset: const Offset(5, 5),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          "Different Design Card ${cardIndex + 1}",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoRow({
     required IconData icon,
     required String label,
@@ -440,6 +530,7 @@ class CardWidget extends StatelessWidget {
     );
   }
 }
+
 
 
 class TopSpending extends ConsumerWidget {
@@ -743,7 +834,7 @@ class RecentTransaction extends ConsumerWidget {
                   backgroundColor: categoryColor,
                   child: Icon(categoryIcon, color: Colors.white),
                 ),
-                title: Text(transaction.category),
+                title: Text(transaction.category, style: TextStyle(fontWeight: FontWeight.bold),),
                 subtitle: Text(transaction.bankType),
                 trailing: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -770,6 +861,264 @@ class RecentTransaction extends ConsumerWidget {
     );
   }
 }
+
+
+
+class TotalBalanceCardWidget extends ConsumerWidget {
+  const TotalBalanceCardWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalBalanceCard = ref.watch(totalBalanceCardProvider);
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: LinearGradient(
+          colors: [
+            totalBalanceCard.cardColor.withOpacity(0.9),
+            totalBalanceCard.cardColor.withOpacity(0.7),
+            totalBalanceCard.cardColor,
+          ],
+          transform: const GradientRotation(pi / 4),
+        ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.grey.shade300,
+            offset: const Offset(5, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Total Balance',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "\$${totalBalanceCard.totalBalance.toStringAsFixed(2)}",
+            style: const TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoRow(
+                  icon: CupertinoIcons.arrow_down,
+                  label: 'Income',
+                  value: totalBalanceCard.income,
+                  iconColor: Colors.green,
+                ),
+                _buildInfoRow(
+                  icon: CupertinoIcons.arrow_up,
+                  label: 'Expense',
+                  value: totalBalanceCard.expense,
+                  iconColor: Colors.red,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required double value,
+    required Color iconColor,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 25,
+          height: 25,
+          decoration: const BoxDecoration(
+            color: Colors.white30,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              size: 12,
+              color: iconColor,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            Text(
+              "\$${value.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+
+class CashCardWidget extends ConsumerWidget {
+  const CashCardWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cashCard = ref.watch(cashCardProvider);
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: LinearGradient(
+          colors: [
+            cashCard.cardColor.withOpacity(0.9),
+            cashCard.cardColor.withOpacity(0.7),
+            cashCard.cardColor,
+          ],
+          transform: const GradientRotation(pi / 4),
+        ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.grey.shade300,
+            offset: const Offset(5, 5),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Cash Amount',
+              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Colors.white),
+
+            ),
+            Text(
+              "\$${cashCard.balance.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+class BankAccountCardWidget extends ConsumerWidget {
+  final int index;
+
+  const BankAccountCardWidget({Key? key, required this.index}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+    final bankCard = bankAccountCards[index];
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: LinearGradient(
+          colors: [
+            bankCard.cardColor.withOpacity(0.9),
+            bankCard.cardColor.withOpacity(0.7),
+            bankCard.cardColor,
+          ],
+          transform: const GradientRotation(pi / 4),
+        ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            color: Colors.grey.shade300,
+            offset: const Offset(5, 5),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 20,
+            left: 18,
+            child: Text(
+              bankCard.accountName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Account No: ${bankCard.accountNumber}",
+                  style: const TextStyle(
+                    fontSize: 17,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "\$${bankCard.balance.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
 
 
 

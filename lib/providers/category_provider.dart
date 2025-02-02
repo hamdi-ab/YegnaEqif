@@ -26,8 +26,10 @@ class CategoryNotifier extends StateNotifier<List<Category>> {
   }
 
   Future<void> addCategory(Category category) async {
-    await repository.addCategory(category);
-    state = [...state, category];
+    if (!state.any((c) => c.id == category.id)) {
+      await repository.addCategory(category);
+      state = [...state, category];
+    }
     print('Added category: $category');
   }
 }

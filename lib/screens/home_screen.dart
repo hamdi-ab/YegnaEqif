@@ -8,6 +8,8 @@ import 'package:yegna_eqif_new/screens/ows_money_screen.dart';
 import 'package:yegna_eqif_new/screens/reports_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
+import 'add_bank_card_page.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -105,9 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Add card or wallet',
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () {
-              // Navigate to another screen or perform any action
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategoryPage()));
-              print('Option 2 Tapped');
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AddBankCardPage()));
             },
           ),
           SpeedDialChild(
@@ -116,8 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Add Category',
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () {
-              // Navigate to another screen or perform any action
-              print('Option 3 Tapped');
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AddCategoryPage()));
             },
           ),
         ],

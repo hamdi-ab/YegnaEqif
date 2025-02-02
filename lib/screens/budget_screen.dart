@@ -122,7 +122,7 @@ class CategoriesGrid extends ConsumerWidget {
                   ),
                 ],
               ),
-            );;
+            );
           }
 
           final category = categories[index];
@@ -170,11 +170,11 @@ class CircularProgressBar extends ConsumerWidget {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return budget.date.isAfter(now.subtract(Duration(days: 7)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 7)));
         case TimePeriod.month:
-          return budget.date.isAfter(now.subtract(Duration(days: 30)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 30)));
         case TimePeriod.year:
-          return budget.date.isAfter(now.subtract(Duration(days: 365)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 365)));
         default:
           return true;
       }
@@ -256,7 +256,7 @@ class MonthlyBudget extends ConsumerWidget {
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
             (cat) => cat.id == categoryId,
-        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
+        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.question_mark, color: Colors.grey),
       );
     }
 
@@ -268,6 +268,7 @@ class MonthlyBudget extends ConsumerWidget {
         itemCount: budgets.length,
         itemBuilder: (context, index) {
           final budget = budgets[index];
+          final double dailyBudget = budget.allocatedAmount / 7;
           final category = getCategoryDetails(budget.categoryId);
           final double progress = budget.spentAmount / budget.allocatedAmount;
           final Color progressColor = category.color;
@@ -337,8 +338,12 @@ class MonthlyBudget extends ConsumerWidget {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
-                          style: Theme.of(context).textTheme.bodySmall,
+                          '\$${dailyBudget.toStringAsFixed(2)}/Day',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
                         ),
                       ],
                     ),
@@ -431,11 +436,11 @@ class BudgetOverview extends ConsumerWidget {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return budget.date.isAfter(now.subtract(Duration(days: 7)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 7)));
         case TimePeriod.month:
-          return budget.date.isAfter(now.subtract(Duration(days: 30)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 30)));
         case TimePeriod.year:
-          return budget.date.isAfter(now.subtract(Duration(days: 365)));
+          return budget.startDate.isAfter(now.subtract(Duration(days: 365)));
         default:
           return true;
       }

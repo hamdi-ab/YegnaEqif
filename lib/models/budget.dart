@@ -1,25 +1,30 @@
 class Budget {
-  final String id;
-  final String categoryId;
-  final double allocatedAmount;
-  final double spentAmount;
-  final DateTime date;
+  final String id; // Unique ID for the budget
+  final String categoryId; // Unique ID for the category
+  final double allocatedAmount; // Planned budget amount
+  final double spentAmount; // Total spent from this budget
+  final DateTime startDate; // Budget start date
+  final DateTime endDate; // Budget end date
 
   Budget({
     required this.id,
-    required this.categoryId,
+    required this.categoryId, // Changed to categoryId
     required this.allocatedAmount,
-    required this.spentAmount,
-    required this.date,
+    this.spentAmount = 0.0,
+    required this.startDate,
+    required this.endDate,
   });
 
-  factory Budget.fromMap(Map<String, dynamic> data) {
+
+
+factory Budget.fromMap(Map<String, dynamic> data) {
     return Budget(
       id: data['id'],
       categoryId: data['categoryId'],
       allocatedAmount: data['allocatedAmount'],
       spentAmount: data['spentAmount'],
-      date: DateTime.parse(data['date']),
+      startDate: DateTime.parse(data['startDate']),
+      endDate: DateTime.parse(data['endDate'])
     );
   }
 
@@ -29,7 +34,8 @@ class Budget {
       'categoryId': categoryId,
       'allocatedAmount': allocatedAmount,
       'spentAmount': spentAmount,
-      'date': date.toIso8601String(),
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String()
     };
   }
 }

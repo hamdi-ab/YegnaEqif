@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:yegna_eqif_new/screens/add_bank_card_page.dart';
 import 'package:yegna_eqif_new/screens/add_category_screen.dart';
 
 import '../models/category.dart';
+import '../providers/card_provider.dart';
 import '../providers/category_provider.dart';
 import '../services/firestore_service.dart';
 
@@ -476,33 +478,32 @@ class _AddPageState extends State<AddPage> {
 
 
 
-
-class BankCardDropdown extends StatefulWidget {
+class BankCardDropdown extends ConsumerStatefulWidget {
   const BankCardDropdown({super.key});
 
   @override
   _BankCardDropdownState createState() => _BankCardDropdownState();
 }
 
-class _BankCardDropdownState extends State<BankCardDropdown> {
-  final List<String> banks = [
-    "CBE",
-    "Awash Bank",
-    "Dashen Bank",
-    "Add Bank or Wallet"
-  ]; // Dropdown items
-  late String selectedBank; // Declare selectedBank
+class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
+  late String selectedCardName; // Declare selectedCardName
+  late double selectedCardBalance; // Declare selectedCardBalance
   bool _isExpanded = false; // Expansion state
 
   @override
   void initState() {
     super.initState();
-    selectedBank = banks[
-        0]; // Ensure selectedBank matches the first item in the banks list
+    // Initialize with the first card (cash card)
+    final cashCard = ref.read(cashCardProvider);
+    selectedCardName = 'Cash';
+    selectedCardBalance = cashCard.balance;
   }
 
   @override
   Widget build(BuildContext context) {
+    final cashCard = ref.watch(cashCardProvider);
+    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
       padding: const EdgeInsets.all(16.0),
@@ -543,16 +544,16 @@ class _BankCardDropdownState extends State<BankCardDropdown> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedBank, // Dynamic bank title
+                        selectedCardName, // Dynamic card name
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        '\$50,000',
-                        style: TextStyle(
+                      Text(
+                        '\$${selectedCardBalance.toStringAsFixed(2)}',
+                        style: const TextStyle(
                           color: Colors.red,
                           fontSize: 14,
                         ),
@@ -572,38 +573,52 @@ class _BankCardDropdownState extends State<BankCardDropdown> {
           ),
           if (_isExpanded)
             Column(
-              children: banks.map((String bank) {
-                if (bank == "Add Bank or Wallet") {
-                  return ListTile(
-                    leading: Icon(Icons.add, color: Colors.blue),
-                    title: Text(bank),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AddBankOrWalletPage()),
-                      );
-                    },
+              children: [
+                ListTile(
+                  title: Text('Cash'),
+                  onTap: () {
+                    setState(() {
+                      selectedCardName = 'Cash';
+                      selectedCardBalance = cashCard.balance;
+                      _isExpanded = false;
+                    });
+                  },
+                ),
+                Divider(
+                  height: 1,
+                  color: Colors.grey.shade300,
+                ),
+                ...bankAccountCards.map((card) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        title: Text(card.accountName),
+                        onTap: () {
+                          setState(() {
+                            selectedCardName = card.accountName;
+                            selectedCardBalance = card.balance;
+                            _isExpanded = false;
+                          });
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        color: Colors.grey.shade300,
+                      ),
+                    ],
                   );
-                }
-                return Column(
-                  children: [
-                    ListTile(
-                      title: Text(bank),
-                      onTap: () {
-                        setState(() {
-                          selectedBank = bank;
-                          _isExpanded = false;
-                        });
-                      },
-                    ),
-                    Divider(
-                      height: 1,
-                      color: Colors.grey.shade300,
-                    ),
-                  ],
-                );
-              }).toList(),
+                }).toList(),
+                ListTile(
+                  leading: Icon(Icons.add, color: Colors.blue),
+                  title: Text("Add Bank or Wallet"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddBankCardPage()),
+                    );
+                  },
+                ),
+              ],
             ),
         ],
       ),
@@ -611,21 +626,7 @@ class _BankCardDropdownState extends State<BankCardDropdown> {
   }
 }
 
-class AddBankOrWalletPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Bank or Wallet'),
-      ),
-      body: Center(
-        child: Text('Add Bank or Wallet Page'),
-      ),
-    );
-  }
-}
 
-// Ensure FirestoreService is properly initialized
 
 class CategoryListPage extends ConsumerStatefulWidget {
   final Function(Category) onCategorySelected;

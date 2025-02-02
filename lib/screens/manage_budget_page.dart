@@ -31,7 +31,8 @@ class ManageBudgetPage extends ConsumerWidget {
                 categoryId: categoryId,
                 allocatedAmount: allocatedAmount,
                 spentAmount: 0,
-                date: DateTime.now(),
+                startDate: DateTime.now(),
+                endDate: DateTime.timestamp()
               ),
             );
           },
@@ -52,7 +53,8 @@ class ManageBudgetPage extends ConsumerWidget {
                 categoryId: categoryId,
                 allocatedAmount: allocatedAmount,
                 spentAmount: budget.spentAmount,
-                date: budget.date,
+                startDate: budget.startDate,
+                endDate: budget.endDate
               ),
             );
           },
@@ -82,9 +84,18 @@ class ManageBudgetPage extends ConsumerWidget {
         itemBuilder: (context, index) {
           final budget = budgets[index];
           final category = getCategoryDetails(budget.categoryId);
+          final double progress = budget.spentAmount / budget.allocatedAmount;
+
           return Dismissible(
             key: Key(budget.id),
-            background: Container(color: Colors.red),
+            background: Container(
+              margin: EdgeInsets.symmetric(vertical: 6.0),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(16)
+                ),
+              child: Icon(Icons.delete, color: Colors.white,),
+            ),
             confirmDismiss: (direction) async {
               return await showDialog(
                 context: context,
@@ -105,52 +116,118 @@ class ManageBudgetPage extends ConsumerWidget {
               );
             },
             onDismissed: (direction) => _deleteBudget(budget.id),
-            child: Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: category.color,
-                  child: Icon(
-                    category.icon,color: Colors.white,
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15), // Subtle shadow
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4), // Bottom shadow
                   ),
-                ),
-                title: Text(
-                  category.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 4),
-                    LinearProgressIndicator(
-                      value: budget.spentAmount / budget.allocatedAmount,
-                      backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(budget.spentAmount / budget.allocatedAmount),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05), // Lighter top shadow
+                    blurRadius: 8,
+                    spreadRadius: -1,
+                    offset: const Offset(0, -2), // Top shadow
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon and Label Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: category.color.withOpacity(0.2),
+                            child: Icon(
+                              category.icon,
+                              color: category.color,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                category.name,
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Spent: \$${budget.spentAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 12),
+                      SizedBox(width: 16,),
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 20),
+                        onPressed: () => _editBudget(budget),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Progress Bar with Labels Inside
+                  Stack(
+                    children: [
+                      // Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          minHeight: 24,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            category.color,
+                          ),
                         ),
-                        Text(
-                          'Limit: \$${budget.allocatedAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 12),
+                      ),
+                      // Labels Inside Progress Bar
+                      Positioned.fill(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                '\$${budget.spentAmount.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Text(
+                                '\$${budget.allocatedAmount.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit, size: 20),
-                  onPressed: () => _editBudget(budget),
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           );

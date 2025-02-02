@@ -31,7 +31,7 @@ class ReportsScreen extends StatelessWidget {
                     SizedBox(height: 16),
                     ReportsButton(),
                     SizedBox(height: 16),
-                    MonthlyBudgetCard(),
+                    BudgetCard(),
                   ],
                 ),
               ),
@@ -290,32 +290,64 @@ class ReportsButton extends StatelessWidget {
   }
 }
 
-class MonthlyBudgetCard extends ConsumerWidget {
-  const MonthlyBudgetCard({super.key});
+
+
+class BudgetCard extends ConsumerWidget {
+  const BudgetCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
+    final selectedTimePeriod = ref.watch(timePeriodProvider);
+
+    // Determine the title and days in the selected time period
+    String title;
+    int daysInPeriod;
+    switch (selectedTimePeriod) {
+      case TimePeriod.week:
+        title = "Weekly Budget";
+        daysInPeriod = 7;
+        break;
+      case TimePeriod.month:
+        title = "Monthly Budget";
+        daysInPeriod = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+        break;
+      case TimePeriod.year:
+        title = "Yearly Budget";
+        daysInPeriod = 365;
+        break;
+      default:
+        title = "Monthly Budget";
+        daysInPeriod = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+    }
+
+    // Filter the budgets based on the selected time period
+    final filteredBudgets = budgets.where((budget) {
+      final budgetDate = budget.startDate;
+      final now = DateTime.now();
+      switch (selectedTimePeriod) {
+        case TimePeriod.week:
+          return budgetDate.isAfter(now.subtract(Duration(days: 7)));
+        case TimePeriod.month:
+          return budgetDate.isAfter(now.subtract(Duration(days: 30)));
+        case TimePeriod.year:
+          return budgetDate.isAfter(now.subtract(Duration(days: 365)));
+        default:
+          return true;
+      }
+    }).toList();
 
     // Calculate total allocated amount and total spent amount
-    final double totalAllocatedAmount =
-        budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount =
-        budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
 
     // Calculate progress
-    final double progress = totalSpentAmount / totalAllocatedAmount;
-
-    // Get the current date
-    final DateTime now = DateTime.now();
-    // Get the number of days in the current month
-    final int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final double progress = totalSpentAmount / (totalAllocatedAmount != 0 ? totalAllocatedAmount : 1);
 
     // Calculate daily budget
-    final double dailyBudget = totalAllocatedAmount / daysInMonth;
+    final double dailyBudget = totalAllocatedAmount / daysInPeriod;
 
     // Example data (replace with dynamic data from your budget and categories state)
-    final String title = "Monthly Budget";
     final String totalExpense = totalSpentAmount.toStringAsFixed(2);
     final String totalBudget = totalAllocatedAmount.toStringAsFixed(2);
 
@@ -323,7 +355,7 @@ class MonthlyBudgetCard extends ConsumerWidget {
     if (progress <= 0.5) {
       progressColor = Colors.red; // Red for less than 50%
     } else if (progress <= 0.8) {
-      progressColor = Colors.blue; // Yellow for 50-80%
+      progressColor = Colors.blue; // Blue for 50-80%
     } else {
       progressColor = Colors.green; // Green for 80% and above
     }
@@ -380,15 +412,11 @@ class MonthlyBudgetCard extends ConsumerWidget {
           children: [
             Text(
               '\$${totalExpense} Exp',
-              style: const TextStyle(
-                  color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
               'Of \$${totalBudget}',
-              style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black54),
             ),
           ],
         ),
@@ -396,3 +424,4 @@ class MonthlyBudgetCard extends ConsumerWidget {
     );
   }
 }
+

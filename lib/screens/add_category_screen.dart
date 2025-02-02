@@ -42,7 +42,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
   Future<void> _saveCategory() async {
     if (_formKey.currentState?.validate() ?? false) {
       String categoryName = _categoryNameController.text;
-      IconData categoryIcon = _selectedIcon ?? Icons.category;
+      IconData categoryIcon = _selectedIcon ?? Icons.question_mark;
       Color categoryColor = _selectedColor;
 
       // Add to local list immediately
