@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
+import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/reports_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-
-import '../models/transaction.dart';
 import '../providers/time_period_provider.dart';
 import '../providers/transaction_provider.dart';
 
@@ -59,53 +58,30 @@ class TotalBalanceContainer extends ConsumerWidget {
 
     // Calculate total balance
     final double totalBalance = transactions.fold(0, (sum, transaction) {
-      if (transaction['transaction'].type == 'Income') {
-        return sum + transaction['transaction'].amount;
-      } else if (transaction['transaction'].type == 'Expense') {
-        return sum - transaction['transaction'].amount;
+      if (transaction.type == 'Income') {
+        return sum + transaction.amount;
+      } else if (transaction.type == 'Expense') {
+        return sum - transaction.amount;
       }
       return sum;
     });
 
-    return Container(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          // Bottom shadow for elevation
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15), // Subtle shadow
-            blurRadius: 5,
-            spreadRadius: 1,
-            offset: const Offset(0, 4), // Bottom shadow
-          ),
-          // Light top shadow for visibility
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            spreadRadius: -1,
-            offset: const Offset(0, -2), // Top shadow
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54)),
-            subtitle: Text('\$${totalBalance.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-            trailing: const CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: Icon(Icons.account_balance_wallet, color: Colors.white),
+    return ContainerWIthBoxShadow(padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),child: Column(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54)),
+              subtitle: Text('\$${totalBalance.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              trailing: const CircleAvatar(
+                backgroundColor: Colors.blue,
+                child: Icon(Icons.account_balance_wallet, color: Colors.white),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const SummaryCardContainer(),
-        ],
-      ),
-    );
+            const SizedBox(height: 16),
+            const SummaryCardContainer(),
+          ],
+        ));
   }
 }
 
@@ -251,7 +227,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
     final expenseMap = <int, double>{};
 
     for (var transactionData in transactions) {
-      final transaction = transactionData['transaction'] as Transaction;
+      final transaction = transactionData;
       final date = transaction.date;
       int groupKey;
 
@@ -328,7 +304,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
   double _calculateNetIncome(List transactions, TimePeriod period) {
     final now = DateTime.now();
     final filteredTransactions = transactions.where((transactionData) {
-      final transaction = transactionData['transaction'] as Transaction;
+      final transaction = transactionData;
       final date = transaction.date;
 
       switch (period) {
@@ -349,7 +325,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
     double expense = 0;
 
     for (var transactionData in filteredTransactions) {
-      final transaction = transactionData['transaction'] as Transaction;
+      final transaction = transactionData;
       if (transaction.type == 'Income') {
         income += transaction.amount;
       } else {
@@ -379,7 +355,7 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
 
     // Filter the transactions based on the selected time period
     final filteredTransactions = transactions.where((transactionData) {
-      final transaction = transactionData['transaction'] as Transaction;
+      final transaction = transactionData;
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
@@ -391,7 +367,7 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
         default:
           return true;
       }
-    }).map((transactionData) => transactionData['transaction'] as Transaction).toList();
+    }).map((transactionData) => transactionData).toList();
 
     // Filter transactions based on type (Income or Expense)
     final filteredByType = filteredTransactions.where((transaction) => transaction.type == (isIncome ? 'Income' : 'Expense')).toList();

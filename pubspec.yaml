@@ -27,6 +27,8 @@ dependencies:
   cloud_firestore: ^5.6.2
   flutter_riverpod: ^2.6.1
   smooth_page_indicator: ^1.2.0+3
+  shared_preferences: ^2.3.3
+  grouped_list: ^6.0.0
 
 dev_dependencies:
   flutter_test:

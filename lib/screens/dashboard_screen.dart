@@ -4,16 +4,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/data/data.dart';
+import 'package:yegna_eqif_new/providers/bank_account_provider.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
+import 'package:yegna_eqif_new/providers/cash_card_provider.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
 import 'package:yegna_eqif_new/providers/time_period_provider.dart';
+import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/profile_page.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
 
 import '../models/category.dart';
 import '../models/transaction.dart';
-import '../providers/card_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PageController _pageController = PageController(initialPage: 1);
@@ -44,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                     title: 'Monthly Budget',
                     leftText: 'View All',
                     viewAllCallback: () {},
-                    child:  MonthlyBudget(),
+                    child: MonthlyBudget(),
                   ),
                   SectionWithHeader(
                     title: 'People You Owe',
@@ -75,7 +77,6 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-
 class ProfileBalance extends ConsumerWidget {
   const ProfileBalance({super.key});
 
@@ -83,21 +84,23 @@ class ProfileBalance extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(transactionProvider);
 
-    // Calculate total balance
-    final double totalBalance = transactions.fold(0, (sum, transaction) {
-      if (transaction['transaction'].type == 'Income') {
-        return sum + transaction['transaction'].amount;
-      } else if (transaction['transaction'].type == 'Expense') {
-        return sum - transaction['transaction'].amount;
+// Calculate total balance
+    final double totalBalance = transactions.fold(0.0, (sum, transaction) {
+      if (transaction.type == 'Income') {
+        return sum + transaction.amount;
+      } else if (transaction.type == 'Expense') {
+        return sum - transaction.amount;
       }
       return sum;
     });
-    final totalExpenses = ref.watch(transactionProvider)
-        .map((transactionData) => transactionData['transaction'] as Transaction)
+
+// Calculate total expenses
+    final double totalExpenses = transactions
         .where((transaction) => transaction.type == 'Expense')
         .fold(0.0, (sum, transaction) => sum + transaction.amount);
 
-    final progress = totalExpenses / (totalBalance + totalExpenses) * 100;
+// Calculate progress
+    final double progress = totalExpenses / (totalBalance + totalExpenses) * 100;
 
     return Padding(
       padding: const EdgeInsets.only(left: 16.0),
@@ -112,7 +115,8 @@ class ProfileBalance extends ConsumerWidget {
                 child: IconButton(
                   color: Colors.yellow[900],
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()));
                   },
                   icon: Icon(CupertinoIcons.person_fill),
                 ),
@@ -124,8 +128,8 @@ class ProfileBalance extends ConsumerWidget {
                   Text(
                     'Hamdi Abdulfetah',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
@@ -139,9 +143,12 @@ class ProfileBalance extends ConsumerWidget {
               )
             ],
           ),
-          IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
-          }, icon: const Icon(Icons.settings)),
+          IconButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsPage()));
+              },
+              icon: const Icon(Icons.settings)),
         ],
       ),
     );
@@ -153,7 +160,8 @@ class ProgressBar extends StatelessWidget {
   final double maxValue;
   final String label;
 
-  const ProgressBar({super.key,
+  const ProgressBar({
+    super.key,
     required this.value,
     required this.maxValue,
     required this.label,
@@ -193,17 +201,18 @@ class ProgressBar extends StatelessWidget {
   }
 }
 
-
 class SectionWithHeader extends StatelessWidget {
   final String title;
   final String leftText;
   final VoidCallback viewAllCallback;
   final Widget child;
 
-  const SectionWithHeader({super.key,
+  const SectionWithHeader({
+    super.key,
     required this.title,
     required this.viewAllCallback,
-    required this.child, required this.leftText,
+    required this.child,
+    required this.leftText,
   });
 
   @override
@@ -219,15 +228,15 @@ class SectionWithHeader extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+              ),
               GestureDetector(
                 onTap: viewAllCallback,
                 child: Text(
                   leftText,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -255,27 +264,9 @@ class PeopleList extends StatelessWidget {
         itemCount: data.length,
         itemBuilder: (context, index) {
           final item = data[index];
-          return Container(
+          return ContainerWIthBoxShadow(
             width: 110,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.13), // Darker shadow
-                  blurRadius: 15, // Increased blur for smoother shadow edges
-                  spreadRadius: 2, // Slight spread for better visibility
-                  offset: const Offset(0, 4), // Adjust offset to balance top and bottom shadows
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Lighter shadow for subtle effect
-                  blurRadius: 10,
-                  spreadRadius: -1,
-                  offset: const Offset(0, -3), // Slight upward shadow to enhance the top edge
-                ),
-              ],
-            ),
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -313,14 +304,55 @@ class PeopleList extends StatelessWidget {
   }
 }
 
-class TotalBalanceCard extends ConsumerWidget {
+class ContainerWIthBoxShadow extends StatelessWidget {
+  const ContainerWIthBoxShadow(
+      {super.key, this.width, required this.child, this.margin, this.padding});
 
+  final Widget child;
+  final double? width;
+  final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      padding: padding,
+      margin: margin,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.13), // Darker shadow
+            blurRadius: 15, // Increased blur for smoother shadow edges
+            spreadRadius: 2, // Slight spread for better visibility
+            offset: const Offset(
+                0, 4), // Adjust offset to balance top and bottom shadows
+          ),
+          BoxShadow(
+            color: Colors.black
+                .withOpacity(0.05), // Lighter shadow for subtle effect
+            blurRadius: 10,
+            spreadRadius: -1,
+            offset: const Offset(
+                0, -3), // Slight upward shadow to enhance the top edge
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class TotalBalanceCard extends ConsumerWidget {
   const TotalBalanceCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final PageController pageController = PageController(viewportFraction: 0.9, initialPage: 1);
-    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+    final PageController pageController =
+        PageController(viewportFraction: 0.9, initialPage: 1);
+    final bankAccountCards = ref.watch(bankAccountProvider);
 
     return Column(
       children: [
@@ -328,20 +360,25 @@ class TotalBalanceCard extends ConsumerWidget {
           height: 230,
           child: PageView.builder(
             controller: pageController,
-            itemCount: 2 + bankAccountCards.length, // Cash and Total Balance + bank accounts
+            itemCount: 2 +
+                bankAccountCards
+                    .length, // Cash and Total Balance + bank accounts
             itemBuilder: (context, index) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0), // Adjust the padding values as needed
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 6.0), // Adjust the padding values as needed
                 child: index == 0
                     ? CashCardWidget()
                     : index == 1
-                    ? TotalBalanceCardWidget()
-                    : BankAccountCardWidget(index: index - 2),
+                        ? TotalBalanceCardWidget()
+                        : BankAccountCardWidget(index: index - 2),
               );
             },
           ),
         ),
-        SizedBox(height: 16), // Add some space between the cards and the indicator
+        SizedBox(
+            height: 16), // Add some space between the cards and the indicator
         SmoothPageIndicator(
           controller: pageController,
           count: 2 + bankAccountCards.length,
@@ -357,10 +394,6 @@ class TotalBalanceCard extends ConsumerWidget {
     );
   }
 }
-
-
-
-
 
 class CardWidget extends StatelessWidget {
   final double totalBalance;
@@ -386,99 +419,63 @@ class CardWidget extends StatelessWidget {
   }
 
   Widget _buildCardWithOriginalDesign(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width / 2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: LinearGradient(
-          colors: [
-            cardColor.withOpacity(0.9),
-            cardColor.withOpacity(0.7),
-            cardColor,
-          ],
-          transform: const GradientRotation(pi / 4),
+    return ContainerForCard(modelCard: cardColor, child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Total Balance',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 5,
-            color: Colors.grey.shade300,
-            offset: const Offset(5, 5),
+        const SizedBox(height: 12),
+        Text(
+          "\$${totalBalance.toStringAsFixed(2)}",
+          style: const TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Total Balance',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+        Padding(
+          padding:
+          const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildInfoRow(
+                icon: CupertinoIcons.arrow_down,
+                label: 'Income',
+                value: income,
+                iconColor: Colors.green,
+              ),
+              _buildInfoRow(
+                icon: CupertinoIcons.arrow_up,
+                label: 'Expense',
+                value: expense,
+                iconColor: Colors.red,
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            "\$${totalBalance.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoRow(
-                  icon: CupertinoIcons.arrow_down,
-                  label: 'Income',
-                  value: income,
-                  iconColor: Colors.green,
-                ),
-                _buildInfoRow(
-                  icon: CupertinoIcons.arrow_up,
-                  label: 'Expense',
-                  value: expense,
-                  iconColor: Colors.red,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ));
   }
 
   Widget _buildCardWithDifferentDesign(BuildContext context) {
     // Placeholder for different card design
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width / 2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        color: Colors.grey.shade200,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 5,
-            color: Colors.grey.shade300,
-            offset: const Offset(5, 5),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          "Different Design Card ${cardIndex + 1}",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+    return ContainerForCard(modelCard: cardColor, child: Center(
+      child: Text(
+        "Different Design Card ${cardIndex + 1}",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildInfoRow({
@@ -531,8 +528,6 @@ class CardWidget extends StatelessWidget {
   }
 }
 
-
-
 class TopSpending extends ConsumerWidget {
   const TopSpending({super.key});
 
@@ -541,28 +536,29 @@ class TopSpending extends ConsumerWidget {
     final transactions = ref.watch(transactionProvider);
     final categories = ref.watch(categoryProvider);
 
-    // Calculate spending by category
+// Calculate spending by category
     final Map<String, double> spendingByCategory = {};
 
-    for (var transactionData in transactions) {
-      final transaction = transactionData['transaction'] as Transaction;
+    for (var transaction in transactions) {
       if (transaction.type == 'Expense') {
-        spendingByCategory.update(transaction.category, (value) => value + transaction.amount,
-            ifAbsent: () => transaction.amount);
+        spendingByCategory.update(
+          transaction.category,
+              (value) => value + transaction.amount,
+          ifAbsent: () => transaction.amount,
+        );
       }
     }
 
-    // Sort categories by spending in descending order
-    final sortedCategories = spendingByCategory.entries
-        .map((entry) {
+// Sort categories by spending in descending order
+    final sortedCategories = spendingByCategory.entries.map((entry) {
       final category = categories.firstWhere((category) => category.name == entry.key);
       return {
         'category': category,
         'amount': entry.value,
       };
-    })
-        .toList()
+    }).toList()
       ..sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
+
 
     return SizedBox(
       height: 160,
@@ -574,75 +570,58 @@ class TopSpending extends ConsumerWidget {
           final category = item['category'] as Category;
           final amount = item['amount'] as double;
 
-          return Container(
-            width: 110,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12), // Darker shadow
-                  blurRadius: 10, // Increased blur for smoother shadow edges
-                  spreadRadius: 1, // Slight spread for better visibility
-                  offset: const Offset(0, 4), // Adjust offset to balance top and bottom shadows
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Lighter shadow for subtle effect
-                  blurRadius: 10,
-                  spreadRadius: -1,
-                  offset: const Offset(0, -2), // Slight upward shadow to enhance the top edge
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: category.color,
-                    borderRadius: BorderRadius.circular(20),
+          return ContainerWIthBoxShadow(
+              width: 110,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: category.color,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(
+                      category.icon,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: Icon(
-                    category.icon,
-                    color: Colors.white,
+                  const SizedBox(height: 8),
+                  Text(
+                    category.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  category.name,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '\$${amount.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.red),
-                ),
-              ],
-            ),
-          );
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$${amount.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold, color: Colors.red),
+                  ),
+                ],
+              ),
+              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 10));
         },
       ),
     );
   }
 }
 
-
-
 class MonthlyBudget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final budgets = ref.watch(budgetProvider);
     final categories = ref.watch(categoryProvider);
 
     // Helper function to get category details
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-            (cat) => cat.id == categoryId,
-        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
+        (cat) => cat.name == categoryId,
+        orElse: () => Category(
+            id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
       );
     }
 
@@ -650,116 +629,98 @@ class MonthlyBudget extends ConsumerWidget {
       height: 170,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 3,
+        itemCount: budgets.length,
         itemBuilder: (context, index) {
           final budget = budgets[index];
-          final category = getCategoryDetails(budget.categoryId);
+          final category = getCategoryDetails(budget.category);
           final double progress = budget.spentAmount / budget.allocatedAmount;
           final Color progressColor = category.color;
 
-          return Container(
-            width: 230,
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10.0),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12), // Darker shadow
-                  blurRadius: 10, // Increased blur for smoother shadow edges
-                  spreadRadius: 1, // Slight spread for better visibility
-                  offset: const Offset(0, 4), // Adjust offset to balance top and bottom shadows
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Lighter shadow for subtle effect
-                  blurRadius: 10,
-                  spreadRadius: -1,
-                  offset: const Offset(0, -2), // Slight upward shadow to enhance the top edge
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon and Label Row
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: progressColor.withOpacity(0.1),
-                      child: Icon(
-                        category.icon,
-                        color: progressColor,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.name,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Progress Bar with Labels Inside
-                Stack(
-                  children: [
-                    // Progress Bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
-                        minHeight: 24,
-                        backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          progressColor,
+          return ContainerWIthBoxShadow(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              width: 230,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Icon and Label Row
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: progressColor.withOpacity(0.1),
+                        child: Icon(
+                          category.icon,
+                          color: progressColor,
                         ),
                       ),
-                    ),
-                    // Labels Inside Progress Bar
-                    Positioned.fill(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              '\$${(budget.spentAmount).toStringAsFixed(0)} ',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                          Text(
+                            category.name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Text(
-                              '\$${budget.allocatedAmount}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
+                          Text(
+                            '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Progress Bar with Labels Inside
+                  Stack(
+                    children: [
+                      // Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          minHeight: 24,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            progressColor,
+                          ),
+                        ),
+                      ),
+                      // Labels Inside Progress Bar
+                      Positioned.fill(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                '\$${(budget.spentAmount).toStringAsFixed(0)} ',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Text(
+                                '\$${budget.allocatedAmount}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ));
         },
       ),
     );
@@ -771,12 +732,11 @@ class RecentTransaction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactionsWithCategoryDetails = ref.watch(transactionProvider);
+    final transactions = ref.watch(transactionProvider);
+    final categories = ref.watch(categoryProvider);
     final selectedTimePeriod = ref.watch(timePeriodProvider);
 
-    // Filter the transactions based on the selected time period
-    final filteredTransactions = transactionsWithCategoryDetails.where((transactionData) {
-      final transaction = transactionData['transaction'] as Transaction;
+    final filteredTransactions = transactions.where((transaction) {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
@@ -790,7 +750,16 @@ class RecentTransaction extends ConsumerWidget {
       }
     }).toList();
 
-    print('Rendering transactions: $filteredTransactions');
+
+
+    // Merge transaction data with category details
+    final transactionsWithCategoryDetails = filteredTransactions.map((transaction) {
+      final category = categories.firstWhere((cat) => cat.name == transaction.category);
+      return {
+        'transaction': transaction,
+        'category': category,
+      };
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -799,42 +768,26 @@ class RecentTransaction extends ConsumerWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: filteredTransactions.length,
+          itemCount: transactionsWithCategoryDetails.length,
           itemBuilder: (context, index) {
-            final transactionData = filteredTransactions[index];
+            final transactionData = transactionsWithCategoryDetails[index];
             final transaction = transactionData['transaction'] as Transaction;
-            final categoryIcon = transactionData['icon'] as IconData;
-            final categoryColor = transactionData['color'] as Color;
+            final category = transactionData['category'] as Category;
             final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
 
-            return Container(
+            return ContainerWIthBoxShadow(
               margin: const EdgeInsets.symmetric(vertical: 8),
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    spreadRadius: -1,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
-                  backgroundColor: categoryColor,
-                  child: Icon(categoryIcon, color: Colors.white),
+                  backgroundColor: category.color.withOpacity(0.2),
+                  child: Icon(category.icon, color: category.color),
                 ),
-                title: Text(transaction.category, style: TextStyle(fontWeight: FontWeight.bold),),
+                title: Text(
+                  category.name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text(transaction.bankType),
                 trailing: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -862,8 +815,6 @@ class RecentTransaction extends ConsumerWidget {
   }
 }
 
-
-
 class TotalBalanceCardWidget extends ConsumerWidget {
   const TotalBalanceCardWidget({Key? key}) : super(key: key);
 
@@ -871,70 +822,51 @@ class TotalBalanceCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final totalBalanceCard = ref.watch(totalBalanceCardProvider);
 
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width / 2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: LinearGradient(
-          colors: [
-            totalBalanceCard.cardColor.withOpacity(0.9),
-            totalBalanceCard.cardColor.withOpacity(0.7),
-            totalBalanceCard.cardColor,
+    return ContainerForCard(
+        modelCard: totalBalanceCard,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Total Balance',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "\$${totalBalanceCard.totalBalance}",
+              style: const TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoRow(
+                    icon: CupertinoIcons.arrow_down,
+                    label: 'Income',
+                    value: totalBalanceCard.income,
+                    iconColor: Colors.green,
+                  ),
+                  _buildInfoRow(
+                    icon: CupertinoIcons.arrow_up,
+                    label: 'Expense',
+                    value: totalBalanceCard.expense,
+                    iconColor: Colors.red,
+                  ),
+                ],
+              ),
+            ),
           ],
-          transform: const GradientRotation(pi / 4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 5,
-            color: Colors.grey.shade300,
-            offset: const Offset(5, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Total Balance',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            "\$${totalBalanceCard.totalBalance.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoRow(
-                  icon: CupertinoIcons.arrow_down,
-                  label: 'Income',
-                  value: totalBalanceCard.income,
-                  iconColor: Colors.green,
-                ),
-                _buildInfoRow(
-                  icon: CupertinoIcons.arrow_up,
-                  label: 'Expense',
-                  value: totalBalanceCard.expense,
-                  iconColor: Colors.red,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildInfoRow({
@@ -987,7 +919,6 @@ class TotalBalanceCardWidget extends ConsumerWidget {
   }
 }
 
-
 class CashCardWidget extends ConsumerWidget {
   const CashCardWidget({Key? key}) : super(key: key);
 
@@ -995,6 +926,45 @@ class CashCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cashCard = ref.watch(cashCardProvider);
 
+    return ContainerForCard(
+        modelCard: cashCard,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Cash Amount',
+                style: TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              Text(
+                "\$${cashCard.balance}",
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+}
+
+class ContainerForCard extends StatelessWidget {
+  const ContainerForCard({
+    super.key,
+    required this.modelCard,
+    required this.child,
+  });
+
+  final modelCard;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.width / 2,
@@ -1002,9 +972,9 @@ class CashCardWidget extends ConsumerWidget {
         borderRadius: BorderRadius.circular(25),
         gradient: LinearGradient(
           colors: [
-            cashCard.cardColor.withOpacity(0.9),
-            cashCard.cardColor.withOpacity(0.7),
-            cashCard.cardColor,
+            modelCard.cardColor.withOpacity(0.9),
+            modelCard.cardColor.withOpacity(0.7),
+            modelCard.cardColor,
           ],
           transform: const GradientRotation(pi / 4),
         ),
@@ -1016,115 +986,62 @@ class CashCardWidget extends ConsumerWidget {
           ),
         ],
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Cash Amount',
-              style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Colors.white),
-
-            ),
-            Text(
-              "\$${cashCard.balance.toStringAsFixed(2)}",
-              style: const TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: child,
     );
   }
 }
-
-
-
 
 class BankAccountCardWidget extends ConsumerWidget {
   final int index;
 
-  const BankAccountCardWidget({Key? key, required this.index}) : super(key: key);
+  const BankAccountCardWidget({Key? key, required this.index})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+    final bankAccountCards = ref.watch(bankAccountProvider);
     final bankCard = bankAccountCards[index];
 
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.width / 2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
-        gradient: LinearGradient(
-          colors: [
-            bankCard.cardColor.withOpacity(0.9),
-            bankCard.cardColor.withOpacity(0.7),
-            bankCard.cardColor,
-          ],
-          transform: const GradientRotation(pi / 4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 5,
-            color: Colors.grey.shade300,
-            offset: const Offset(5, 5),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 20,
-            left: 18,
-            child: Text(
-              bankCard.accountName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    return ContainerForCard(
+        modelCard: bankCard,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 20,
+              left: 18,
+              child: Text(
+                bankCard.accountName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Account No: ${bankCard.accountNumber}",
-                  style: const TextStyle(
-                    fontSize: 17,
-                    color: Colors.white,
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Account No: ${bankCard.accountNumber}",
+                    style: const TextStyle(
+                      fontSize: 17,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "\$${bankCard.balance.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                  const SizedBox(height: 8),
+                  Text(
+                    "\$${bankCard.balance.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ));
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-

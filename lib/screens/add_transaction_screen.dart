@@ -3,53 +3,84 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:yegna_eqif_new/screens/add_bank_card_page.dart';
 import 'package:yegna_eqif_new/screens/add_category_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 
 import '../models/category.dart';
-import '../providers/card_provider.dart';
+import '../models/transaction.dart';
+import '../providers/bank_account_provider.dart';
+import '../providers/budget_provider.dart';
+import '../providers/cash_card_provider.dart';
 import '../providers/category_provider.dart';
-import '../services/firestore_service.dart';
+import '../providers/transaction_provider.dart';
 
 
-class AddTransactionScreen extends StatefulWidget {
+class AddTransactionScreen extends ConsumerStatefulWidget {
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
+class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-  Map<String, dynamic> selectedCategory = {
-    "label": "Select Category",
-    "icon": Icons.category,
-    "backgroundColor": Colors.grey.shade300
-  };
+  Category? selectedCategory;
   final TextEditingController noteController = TextEditingController();
   String _enteredAmount = "";
-  String _selectedBank = "CBE";
+  String _selectedBank = "Cash"; // Initialize with default value
   String _incomeExpense = "Income"; // Default toggle value
   DateTime? _selectedDate;
   bool isCategorySelected = false;
 
-  void _saveTransaction() {
-    if (_formKey.currentState!.validate() && isCategorySelected) {
-      final transactionData = {
-        "type": _incomeExpense,
-        "category": selectedCategory['label'],
-        "bank": _selectedBank,
-        "date": _selectedDate != null
-            ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
-            : "No Date Selected",
-        "amount": _enteredAmount,
-        "note": noteController.text.isNotEmpty ? noteController.text : null,
-      };
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Transaction Saved: $transactionData')),
+  void _saveTransaction() async {
+    if (_formKey.currentState!.validate() && isCategorySelected) {
+      final transaction = Transaction(
+        id: UniqueKey().toString(), // Generate a unique ID
+        type: _incomeExpense,
+        bankType: _selectedBank,
+        category: selectedCategory!.name,
+        amount: double.parse(_enteredAmount),
+        date: _selectedDate ?? DateTime.now(), // Use the selected date or current date
       );
+
+        // Update local state
+        final transactionNotifier = ref.read(transactionProvider.notifier);
+        transactionNotifier.addTransaction(transaction);
+      // Update bank account balance if applicable
+      if (_selectedBank != 'Cash') {
+        final bankCardNotifier = ref.read(bankAccountProvider.notifier);
+        bankCardNotifier.updateBalance(
+            _selectedBank,
+            transaction.amount,
+            transaction.type == 'Income'
+        );
+      }
+
+      // Update cash card balance if bank type is 'Cash'
+      if (_selectedBank == 'Cash') {
+        final cashCardNotifier = ref.read(cashCardProvider.notifier);
+        final amount = transaction.type == 'Income'
+            ? transaction.amount
+            : -transaction.amount;
+        cashCardNotifier.updateCashCardBalance(amount);
+      }
+      if (transaction.type == 'Expense') {
+        ref.read(budgetProvider.notifier).updateSpentAmount(
+            transaction.category, transaction.amount);
+      }
+        ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Transaction Saved')),
+      );
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter all required fields.')),
       );
     }
+  }
+
+  void _updateSelectedBank(String bank) {
+    setState(() {
+      _selectedBank = bank;
+    });
   }
 
   void _updateAmount(String amount) {
@@ -58,10 +89,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     });
   }
 
-  void _updateCategory(category) {
+  void _updateIncomeExpense(String type) {
+    setState(() {
+      _incomeExpense = type;
+    });
+  }
+
+  void _updateCategory(Category category) {
     setState(() {
       selectedCategory = category;
       isCategorySelected = true;
+    });
+  }
+
+  void _updateDueDate(DateTime date) {
+    setState(() {
+      _selectedDate = date;
     });
   }
 
@@ -79,111 +122,69 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Column(
               children: [
                 SizedBox(height: 20),
-                IncomeExpenseToggle(),
+                Toggle(onToggle: _updateIncomeExpense, labels: ["Income", "Expense"],),
                 SizedBox(height: 20),
-                BankCardDropdown(),
+                BankCardDropdown(onBankSelected: _updateSelectedBank,),
                 SizedBox(height: 16),
                 // EnterAmountTile calls _updateAmount when an amount is entered
                 EnterAmountTile(onAmountSaved: _updateAmount),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        spreadRadius: -1,
-                        offset: const Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CategoryListPage(
-                            onCategorySelected: _updateCategory,
-                            userId: 'user123',
+                ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CategoryListPage(
+                              onCategorySelected: _updateCategory,
+                              userId: 'user123',
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          backgroundColor: selectedCategory != null ? selectedCategory!.color.withOpacity(0.2) : Colors.grey.shade300,
+                          child: Icon(
+                            selectedCategory != null ? selectedCategory!.icon : Icons.category,
+                            color: selectedCategory != null ? selectedCategory!.color : Colors.black54,
                           ),
                         ),
-                      );
-                    },
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(
-                        backgroundColor: selectedCategory['backgroundColor'],
-                        child: Icon(
-                          selectedCategory['icon'],
-                          color: selectedCategory['color'],
+                        title: Text(
+                          selectedCategory != null ? selectedCategory!.name : 'Select Category',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
                         ),
                       ),
-                      title: Text(
-                        selectedCategory['label'],
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        spreadRadius: -1,
-                        offset: const Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.grey.shade300,
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 14,
-                      ),
-                      SizedBox(
-                        width: 270,
-                        child: TextFormField(
-                          controller: noteController,
-                          decoration: const InputDecoration(
-                            hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                            hintText: 'Write Note',
-                            border: InputBorder.none,
+                    )),
+                ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.grey.shade300,
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.grey,
                           ),
-                          keyboardType: TextInputType.text,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                SelectDateWidget(),
+                        SizedBox(
+                          width: 14,
+                        ),
+                        SizedBox(
+                          width: 270,
+                          child: TextFormField(
+                            controller: noteController,
+                            decoration: const InputDecoration(
+                              hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                              hintText: 'Write Note',
+                              border: InputBorder.none,
+                            ),
+                            keyboardType: TextInputType.text,
+                          ),
+                        ),
+                      ],
+                    )),
+                SelectDateWidget(label:'Set Date',firstDay: DateTime(2000), lastDay: DateTime.now(), onDateSelected: _updateDueDate),
                 SizedBox(height: 20),
                 // SaveButton validates if all inputs are provided
                 SaveButton(
@@ -233,17 +234,19 @@ class SaveButton extends StatelessWidget {
 }
 
 
-class IncomeExpenseToggle extends StatefulWidget {
-  const IncomeExpenseToggle({super.key});
+class Toggle extends StatefulWidget {
+  final Function(String) onToggle; // Callback to update the parent widget
+  final List<String> labels;
+
+  const Toggle({required this.onToggle, Key? key, required this.labels}) : super(key: key);
 
   @override
-  _IncomeExpenseToggleState createState() => _IncomeExpenseToggleState();
+  _ToggleState createState() => _ToggleState();
 }
 
-class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
+class _ToggleState extends State<Toggle> {
   int selectedIndex = 0; // Tracks the selected option
-
-  final List<String> labels = ["Income", "Expense"]; // Toggle labels
+  // Toggle labels
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +259,7 @@ class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
         borderRadius: BorderRadius.circular(16), // Rounded corners
       ),
       child: Row(
-        children: List.generate(labels.length, (index) {
+        children: List.generate(widget.labels.length, (index) {
           final isSelected =
               index == selectedIndex; // Check if this is selected
           return Expanded(
@@ -266,6 +269,7 @@ class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
                 setState(() {
                   selectedIndex = index; // Update selected index on tap
                 });
+                widget.onToggle(widget.labels[index]); // Invoke the callback
               },
               child: Container(
                 height: 42,
@@ -274,11 +278,11 @@ class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
                       ? Colors.blue
                       : Colors.transparent, // Active tab background color
                   borderRadius:
-                      BorderRadius.circular(12), // Rounded corners for tabs
+                  BorderRadius.circular(12), // Rounded corners for tabs
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  labels[index],
+                  widget.labels[index],
                   style: TextStyle(
                     fontSize: 16,
                     color: isSelected
@@ -295,6 +299,7 @@ class _IncomeExpenseToggleState extends State<IncomeExpenseToggle> {
     );
   }
 }
+
 
 
 class EnterAmountTile extends StatefulWidget {
@@ -325,41 +330,18 @@ class _EnterAmountTileState extends State<EnterAmountTile> {
           widget.onAmountSaved(_enteredAmount); // Call the callback
         }
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 17),
-        decoration: BoxDecoration(
-          color: Colors.white, // White background for each transaction
-          borderRadius: BorderRadius.circular(16), // Rounded corners
-          boxShadow: [
-            // Bottom shadow for elevation
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15), // Subtle shadow
-              blurRadius: 10,
-              spreadRadius: 1,
-              offset: const Offset(0, 4), // Bottom shadow
+      child: ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 17),child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              "Enter amount",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            // Light top shadow for visibility
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              spreadRadius: -1,
-              offset: const Offset(0, -2), // Top shadow
+            trailing: Text(
+              _enteredAmount.isEmpty ? "\$00.00" : "\$$_enteredAmount",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-          ],
-        ),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text(
-            "Enter amount",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          trailing: Text(
-            _enteredAmount.isEmpty ? "\$00.00" : "\$$_enteredAmount",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
+          )),
     );
   }
 }
@@ -398,6 +380,7 @@ class _AddPageState extends State<AddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text('Add Page'),
       ),
       body: Padding(
@@ -407,9 +390,11 @@ class _AddPageState extends State<AddPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Enter Amount',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Center(
+                child: Text(
+                  'Enter Amount',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
               SizedBox(height: 16),
               Expanded(
@@ -422,8 +407,11 @@ class _AddPageState extends State<AddPage> {
                         child: TextFormField(
                           focusNode: _focusNode,
                           controller: _amountController,
+                          onFieldSubmitted: (value){
+                            _saveAmount();
+                          },
                           keyboardType: TextInputType.numberWithOptions(decimal: true), // For decimal input
-                          textInputAction: TextInputAction.none, // Remove "check" button
+                          textInputAction: TextInputAction.done, // Remove "check" button
                           decoration: InputDecoration(
                             hintText: "\$00.00",
                             hintStyle: TextStyle(fontSize: 48, color: Colors.grey.shade500),
@@ -477,9 +465,10 @@ class _AddPageState extends State<AddPage> {
 }
 
 
-
 class BankCardDropdown extends ConsumerStatefulWidget {
-  const BankCardDropdown({super.key});
+  final Function(String) onBankSelected; // Callback to update the parent widget
+
+  const BankCardDropdown({required this.onBankSelected, Key? key}) : super(key: key);
 
   @override
   _BankCardDropdownState createState() => _BankCardDropdownState();
@@ -502,7 +491,7 @@ class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
   @override
   Widget build(BuildContext context) {
     final cashCard = ref.watch(cashCardProvider);
-    final bankAccountCards = ref.watch(bankAccountCardsProvider);
+    final bankAccountCards = ref.watch(bankAccountProvider);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -582,6 +571,7 @@ class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
                       selectedCardBalance = cashCard.balance;
                       _isExpanded = false;
                     });
+                    widget.onBankSelected('Cash'); // Update parent widget
                   },
                 ),
                 Divider(
@@ -599,6 +589,7 @@ class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
                             selectedCardBalance = card.balance;
                             _isExpanded = false;
                           });
+                          widget.onBankSelected(card.accountName); // Update parent widget
                         },
                       ),
                       Divider(
@@ -625,6 +616,8 @@ class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
     );
   }
 }
+
+
 
 
 
@@ -688,7 +681,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  AddCategoryPage()),
+                    MaterialPageRoute(builder: (context) => AddCategoryPage()),
                   );
                 },
                 child: Column(
@@ -716,7 +709,7 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
               onTap: () {
                 // Pass the selected category back to the previous screen
                 widget.onCategorySelected(category);
-                Navigator.pop(context);
+                Navigator.pop(context); // Ensure this line is correctly handling navigation
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -753,7 +746,17 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
 
 
 
+
+
+
 class SelectDateWidget extends StatefulWidget {
+  final DateTime firstDay;
+  final DateTime lastDay;
+  final Function(DateTime) onDateSelected;
+  final String label;// Callback to pass the selected date to the parent
+
+  const SelectDateWidget({super.key, required this.label,required this.firstDay, required this.lastDay, required this.onDateSelected});
+
   @override
   _SelectDateWidgetState createState() => _SelectDateWidgetState();
 }
@@ -769,6 +772,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
       iconColor = Colors.blue;
       backgroundColor = Colors.blue.withOpacity(0.2);
     });
+    widget.onDateSelected(date); // Pass the selected date to the parent widget
   }
 
   String formatDate(DateTime date) {
@@ -823,18 +827,18 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
                     ),
                     child: Column(
                       mainAxisSize:
-                          MainAxisSize.min, // Adjust height based on content
+                      MainAxisSize.min, // Adjust height based on content
                       children: [
-                        const Text(
-                          'Select Date',
+                         Text(
+                           'Select Date',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         CalendarDatePicker(
                           initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
+                          firstDate: widget.firstDay,
+                          lastDate: widget.lastDay,
                           onDateChanged: (date) {
                             setState(() {
                               selectedDate = date;
@@ -851,7 +855,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
                               selectedDate = dateToSet;
                             }); // Close the bottom sheet
                           },
-                          child: const Text('Set Date',
+                          child:  Text('Set Date',
                               style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue, // Button color
@@ -883,7 +887,7 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
           title: Text(
             selectedDate != null
                 ? formatDate(selectedDate!)
-                : 'Set Date', // Title
+                : widget.label, // Title
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -894,33 +898,5 @@ class _SelectDateWidgetState extends State<SelectDateWidget> {
     );
   }
 }
-//
-// class SaveButton extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-//       child: TextButton(
-//         onPressed: () {
-//         },
-//         style: TextButton.styleFrom(
-//           backgroundColor: Colors.blue,
-//           padding: const EdgeInsets.symmetric(vertical: 10),
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(16),
-//           ),
-//           minimumSize: Size(double.infinity, 50), // Make the button cover the full width
-//         ),
-//         child: const Text(
-//           'Save',
-//           style: TextStyle(
-//             fontSize: 20,
-//             fontWeight: FontWeight.w500,
-//             color: Colors.white,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+
 

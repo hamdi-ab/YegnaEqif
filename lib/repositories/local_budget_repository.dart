@@ -5,7 +5,7 @@ class LocalBudgetRepository {
     // Groceries
     Budget(
       id: '1',
-      categoryId: '1',
+      category: '1',
       allocatedAmount: 200.00,
       spentAmount: 150.00,
       startDate: DateTime(2024, 5, 1),
@@ -13,7 +13,7 @@ class LocalBudgetRepository {
     ),
     Budget(
       id: '2',
-      categoryId: '2',
+      category: '2',
       allocatedAmount: 250.00,
       spentAmount: 200.00,
       startDate: DateTime(2025, 1, 1),
@@ -23,7 +23,7 @@ class LocalBudgetRepository {
     // Salary
     Budget(
       id: '3',
-      categoryId: '3',
+      category: '3',
       allocatedAmount: 1500.00,
       spentAmount: 1200.00,
       startDate: DateTime(2025, 1, 1),
@@ -31,7 +31,7 @@ class LocalBudgetRepository {
     ),
     Budget(
       id: '4',
-      categoryId: '4',
+      category: '4',
       allocatedAmount: 1600.00,
       spentAmount: 1400.00,
       startDate: DateTime(2024, 2, 1),
@@ -41,7 +41,7 @@ class LocalBudgetRepository {
     // Utilities
     Budget(
       id: '5',
-      categoryId: '5',
+      category: '5',
       allocatedAmount: 300.00,
       spentAmount: 250.00,
       startDate: DateTime(2024, 1, 1),
@@ -49,7 +49,7 @@ class LocalBudgetRepository {
     ),
     Budget(
       id: '6',
-      categoryId: '6',
+      category: '6',
       allocatedAmount: 320.00,
       spentAmount: 280.00,
       startDate: DateTime(2024, 2, 1),
@@ -59,7 +59,7 @@ class LocalBudgetRepository {
     // Transport
     Budget(
       id: '7',
-      categoryId: '7',
+      category: '7',
       allocatedAmount: 100.00,
       spentAmount: 80.00,
       startDate: DateTime(2024, 3, 1),
@@ -67,7 +67,7 @@ class LocalBudgetRepository {
     ),
     Budget(
       id: '8',
-      categoryId: '8',
+      category: '8',
       allocatedAmount: 120.00,
       spentAmount: 90.00,
       startDate: DateTime(2024, 4, 1),

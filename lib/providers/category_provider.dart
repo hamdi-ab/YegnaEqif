@@ -1,68 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/category.dart';
-import '../repositories/local_category_repository.dart';
+import '../services/firestore_service.dart';
 
-final localCategoryRepositoryProvider = Provider<LocalCategoryRepository>((ref) {
-  return LocalCategoryRepository();
+final firestoreServiceProvider = Provider<FirestoreService>((ref) {
+  return FirestoreService();
 });
 
 final categoryProvider = StateNotifierProvider<CategoryNotifier, List<Category>>((ref) {
-  final repository = ref.read(localCategoryRepositoryProvider);
-  return CategoryNotifier(repository);
+  return CategoryNotifier(ref: ref, firestoreService: ref.watch(firestoreServiceProvider));
 });
 
 class CategoryNotifier extends StateNotifier<List<Category>> {
-  final LocalCategoryRepository repository;
+  final Ref ref;
+  final FirestoreService firestoreService;
 
-  CategoryNotifier(this.repository) : super([]) {
-    fetchCategories(); // Fetch categories when the notifier is created
+  CategoryNotifier({required this.ref, required this.firestoreService}) : super([]) {
+    fetchCategories();
   }
 
   Future<void> fetchCategories() async {
-    print('Fetching categories...');
-    final categories = await repository.fetchCategories();
-    print('Fetched categories: $categories');
+    final categories = await firestoreService.fetchCategories('userId'); // Replace 'userId' with the actual user ID
     state = categories;
   }
 
   Future<void> addCategory(Category category) async {
-    if (!state.any((c) => c.id == category.id)) {
-      await repository.addCategory(category);
-      state = [...state, category];
-    }
-    print('Added category: $category');
+    await firestoreService.addCategory('userId', category.name, category.icon, category.color); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchCategories('userId'); // Refresh state after addition
   }
 }
-
-
-
-
-
-
-// final categoryProvider = StateNotifierProvider<CategoryNotifier, List<Category>>((ref) {
-//   final firestoreService = FirestoreService();
-//   return CategoryNotifier(firestoreService);
-// });
-//
-// class CategoryNotifier extends StateNotifier<List<Category>> {
-//   final FirestoreService firestoreService;
-//
-//   CategoryNotifier(this.firestoreService) : super([]);
-//
-//   // Add category
-//   Future<void> addCategory(String userId, String name, IconData icon, Color color) async {
-//     await firestoreService.addCategory(userId, name, icon, color);
-//     state = [...state, Category(name: name, icon: icon, color: color)];
-//   }
-//
-//   // Fetch categories
-//   Future<void> fetchCategories(String userId) async {
-//     try {
-//       final categories = await firestoreService.fetchCategories(userId);
-//       state = categories;
-//     } catch (e) {
-//       // Handle error (e.g., show a snackbar or set an error state)
-//       debugPrint("Failed to fetch categories: $e");
-//     }
-//   }
-// }

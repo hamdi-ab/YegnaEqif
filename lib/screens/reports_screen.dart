@@ -6,7 +6,8 @@ import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/reports_generated_screen.dart';
-import 'package:yegna_eqif_new/models/transaction.dart';
+
+import '../providers/total_balance_card_provider.dart';
 
 class ReportsScreen extends StatelessWidget {
   @override
@@ -50,11 +51,12 @@ class ReportsScreen extends StatelessWidget {
   }
 }
 
-class ProfileBalance extends StatelessWidget {
+class ProfileBalance extends ConsumerWidget {
   const ProfileBalance({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final totalBalanceCard = ref.watch(totalBalanceCardProvider);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 12.0),
       child: Row(
@@ -76,7 +78,7 @@ class ProfileBalance extends StatelessWidget {
                 children: [
                   Text('Balance',
                       style: Theme.of(context).textTheme.bodyMedium),
-                  const Text('\$50,000',
+                  Text('\$${totalBalanceCard.totalBalance}',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ],
@@ -198,7 +200,7 @@ class SummaryCardContainer extends ConsumerWidget {
 
     // Filter the transactions based on the selected time period
     final filteredTransactions = transactionsWithCategoryDetails.where((transactionData) {
-      final transaction = transactionData['transaction'] as Transaction;
+      final transaction = transactionData;
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
@@ -210,7 +212,7 @@ class SummaryCardContainer extends ConsumerWidget {
         default:
           return true;
       }
-    }).map((transactionData) => transactionData['transaction'] as Transaction).toList();
+    }).map((transactionData) => transactionData).toList();
 
     // Calculate total income and expenses
     final double totalIncome = filteredTransactions

@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/models/category.dart';
+import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 
 import '../providers/category_provider.dart';
 
@@ -87,183 +88,99 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: SizedBox(
-                  width: 250,
-                  child: TextFormField(
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    controller: _categoryNameController,
-                    decoration: const InputDecoration(
-                      hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                      hintText: 'Category Name',
-                      border: InputBorder.none,
-                      errorStyle: TextStyle(color: Colors.red),
-                    ),
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Category name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Icon Type',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButton<IconPack>(
-                      alignment: AlignmentDirectional.centerEnd,
-                      value: _selectedIconPack,
-                      onChanged: (IconPack? newValue) {
-                        setState(() {
-                          _selectedIconPack = newValue!;
-                        });
-                      },
-                      items: IconPack.values.map<DropdownMenuItem<IconPack>>((IconPack value) {
-                        return DropdownMenuItem<IconPack>(
-                          value: value,
-                          child: Text(value.toString().split('.').last),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                padding: const EdgeInsets.only(top: 10, bottom: 10, left: 16, right: 6.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(_selectedIcon ?? Icons.category),
-                      color: _selectedColor,
-                      onPressed: () {
-                        _selectIcon(context);
+              ContainerWIthBoxShadow(width: double.infinity,
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: SizedBox(
+                    width: 250,
+                    child: TextFormField(
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      controller: _categoryNameController,
+                      decoration: const InputDecoration(
+                        hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                        hintText: 'Category Name',
+                        border: InputBorder.none,
+                        errorStyle: TextStyle(color: Colors.red),
+                      ),
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Category name is required';
+                        }
+                        return null;
                       },
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      spreadRadius: -1,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Select Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  trailing: GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            content: BlockPicker(
-                              pickerColor: _selectedColor,
-                              onColorChanged: _selectColor,
-                            ),
-                            actions: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Select'),
-                              ),
-                            ],
-                          );
+                  )),
+              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Icon Type',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 16),
+                      DropdownButton<IconPack>(
+                        alignment: AlignmentDirectional.centerEnd,
+                        value: _selectedIconPack,
+                        onChanged: (IconPack? newValue) {
+                          setState(() {
+                            _selectedIconPack = newValue!;
+                          });
                         },
-                      );
-                    },
-                    child: Icon(Icons.circle, color: _selectedColor),
-                  ),
-                ),
-              ),
+                        items: IconPack.values.map<DropdownMenuItem<IconPack>>((IconPack value) {
+                          return DropdownMenuItem<IconPack>(
+                            value: value,
+                            child: Text(value.toString().split('.').last),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )),
+              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 16, right: 6.0),child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      SizedBox(width: 16),
+                      IconButton(
+                        icon: Icon(_selectedIcon ?? Icons.category),
+                        color: _selectedColor,
+                        onPressed: () {
+                          _selectIcon(context);
+                        },
+                      ),
+                    ],
+                  )),
+              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Select Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    trailing: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: BlockPicker(
+                                pickerColor: _selectedColor,
+                                onColorChanged: _selectColor,
+                              ),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Select'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: Icon(Icons.circle, color: _selectedColor),
+                    ),
+                  )),
               const SizedBox(height: 16),
               Center(
                 child: TextButton(

@@ -68,90 +68,73 @@ class CategoriesGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryProvider);
 
-    print('Rendering categories: $categories');
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+    return ContainerWIthBoxShadow(margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),child: categories.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.8,
           ),
-        ],
-      ),
-      child: categories.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.8,
-        ),
-        itemCount: categories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == categories.length) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>  AddCategoryPage()),
-                );
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.grey.withOpacity(0.2),
-                    child: const Icon(Icons.add, color: Colors.black, size: 20),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Add',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final category = categories[index];
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: category.color.withOpacity(0.1),
-                child: Icon(
-                  category.icon,
-                  color: category.color,
-                  size: 20,
+          itemCount: categories.length + 1,
+          itemBuilder: (context, index) {
+            if (index == categories.length) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>  AddCategoryPage()),
+                  );
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.grey.withOpacity(0.2),
+                      child: const Icon(Icons.add, color: Colors.black, size: 20),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Add',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                category.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          );
-        },
-      ),
-    );
+              );
+            }
+
+            final category = categories[index];
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: category.color.withOpacity(0.1),
+                  child: Icon(
+                    category.icon,
+                    color: category.color,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  category.name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+          },
+        ));
   }
 }
 
@@ -255,7 +238,7 @@ class MonthlyBudget extends ConsumerWidget {
     // Helper function to get category details
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-            (cat) => cat.id == categoryId,
+            (cat) => cat.name == categoryId,
         orElse: () => Category(id: '', name: 'Unknown', icon: Icons.question_mark, color: Colors.grey),
       );
     }
@@ -269,7 +252,7 @@ class MonthlyBudget extends ConsumerWidget {
         itemBuilder: (context, index) {
           final budget = budgets[index];
           final double dailyBudget = budget.allocatedAmount / 7;
-          final category = getCategoryDetails(budget.categoryId);
+          final category = getCategoryDetails(budget.category);
           final double progress = budget.spentAmount / budget.allocatedAmount;
           final Color progressColor = category.color;
 
@@ -292,133 +275,112 @@ class MonthlyBudget extends ConsumerWidget {
             statusColor = Colors.red;
           }
 
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15), // Subtle shadow
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 4), // Bottom shadow
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Lighter top shadow
-                  blurRadius: 8,
-                  spreadRadius: -1,
-                  offset: const Offset(0, -2), // Top shadow
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Icon and Label Row
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: category.color.withOpacity(0.2),
-                      child: Icon(
-                        category.icon,
-                        color: progressColor,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.name,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '\$${dailyBudget.toStringAsFixed(2)}/Day',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Progress Bar with Labels Inside
-                Stack(
-                  children: [
-                    // Progress Bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: LinearProgressIndicator(
-                        value: progress.clamp(0.0, 1.0),
-                        minHeight: 24,
-                        backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          progressColor,
+          return ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon and Label Row
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: category.color.withOpacity(0.2),
+                        child: Icon(
+                          category.icon,
+                          color: progressColor,
                         ),
                       ),
-                    ),
-                    // Labels Inside Progress Bar
-                    Positioned.fill(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              '\$${budget.spentAmount.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                          Text(
+                            category.name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Text(
-                              '\$${budget.allocatedAmount.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
+                          Text(
+                            '\$${dailyBudget.toStringAsFixed(2)}/Day',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Status Indicator
-                Row(
-                  children: [
-                    Icon(
-                      statusIcon,
-                      color: statusColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      statusText,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Progress Bar with Labels Inside
+                  Stack(
+                    children: [
+                      // Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          minHeight: 24,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            progressColor,
+                          ),
+                        ),
+                      ),
+                      // Labels Inside Progress Bar
+                      Positioned.fill(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                '\$${budget.spentAmount.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Text(
+                                '\$${budget.allocatedAmount.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Status Indicator
+                  Row(
+                    children: [
+                      Icon(
+                        statusIcon,
                         color: statusColor,
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
+                      const SizedBox(width: 8),
+                      Text(
+                        statusText,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ));
         },
       ),
     );
@@ -456,88 +418,67 @@ class BudgetOverview extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 10,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              spreadRadius: -1,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.green.withOpacity(0.1),
-                      radius: 22,
-                      child: Icon(Icons.attach_money, color: Colors.green, size: 22),
-                    ),
-                    title: const Text('Total Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    subtitle: Text('\$${totalAllocatedAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      child: ContainerWIthBoxShadow(padding: const EdgeInsets.all(16.0), child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.green.withOpacity(0.1),
+                    radius: 22,
+                    child: Icon(Icons.attach_money, color: Colors.green, size: 22),
                   ),
+                  title: const Text('Total Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  subtitle: Text('\$${totalAllocatedAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-                Expanded(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.red.withOpacity(0.1),
-                      radius: 22,
-                      child: Icon(Icons.money_off, color: Colors.red, size: 22),
-                    ),
-                    title: const Text('Budget Spent', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    subtitle: Text('\$${totalSpentAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.red.withOpacity(0.1),
+                    radius: 22,
+                    child: Icon(Icons.money_off, color: Colors.red, size: 22),
                   ),
+                  title: const Text('Budget Spent', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  subtitle: Text('\$${totalSpentAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue.withOpacity(0.1),
-                      radius: 22,
-                      child: Icon(Icons.account_balance_wallet, color: Colors.blue, size: 22),
-                    ),
-                    title: const Text('Remaining Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    subtitle: Text('\$${remainingBudget.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    radius: 22,
+                    child: Icon(Icons.account_balance_wallet, color: Colors.blue, size: 22),
                   ),
+                  title: const Text('Remaining Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  subtitle: Text('\$${remainingBudget.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-                Expanded(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.purple.withOpacity(0.1),
-                      radius: 22,
-                      child: Icon(Icons.percent, color: Colors.purple, size: 22),
-                    ),
-                    title: const Text('Saving Percentage', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    subtitle: Text('${savingPercentage.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Expanded(
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.purple.withOpacity(0.1),
+                    radius: 22,
+                    child: Icon(Icons.percent, color: Colors.purple, size: 22),
                   ),
+                  title: const Text('Saving Percentage', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  subtitle: Text('${savingPercentage.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              ),
+            ],
+          ),
+        ],
+      ),),
     );
   }
 }

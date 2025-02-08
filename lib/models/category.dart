@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/icon_utils.dart'; // Assuming you have a utility file for converting icons
 
 class Category {
   final String id;
@@ -18,7 +19,7 @@ class Category {
     return Category(
       id: data['id'],
       name: data['name'],
-      icon: IconData(data['icon'], fontFamily: 'MaterialIcons'),
+      icon: convertStringToIcon(data['icon']),
       color: Color(data['color']),
     );
   }
@@ -27,8 +28,22 @@ class Category {
     return {
       'id': id,
       'name': name,
-      'icon': icon.codePoint,
+      'icon': convertIconToString(icon),
       'color': color.value,
     };
+  }
+
+  Category copyWith({
+    String? id,
+    String? name,
+    IconData? icon,
+    Color? color,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+      color: color ?? this.color,
+    );
   }
 }

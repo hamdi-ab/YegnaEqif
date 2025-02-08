@@ -15,7 +15,7 @@ class ManageBudgetPage extends ConsumerWidget {
 
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-            (cat) => cat.id == categoryId,
+            (cat) => cat.name == categoryId,
         orElse: () => Category(id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
       );
     }
@@ -28,7 +28,7 @@ class ManageBudgetPage extends ConsumerWidget {
             ref.read(budgetProvider.notifier).addBudget(
               Budget(
                 id: DateTime.now().toString(),
-                categoryId: categoryId,
+                category: categoryId,
                 allocatedAmount: allocatedAmount,
                 spentAmount: 0,
                 startDate: DateTime.now(),
@@ -44,13 +44,13 @@ class ManageBudgetPage extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (context) => _BudgetDialog(
-          initialCategoryId: budget.categoryId,
+          initialCategoryId: budget.category,
           initialAllocatedAmount: budget.allocatedAmount.toString(),
           onSave: (categoryId, allocatedAmount) {
             ref.read(budgetProvider.notifier).updateBudget(
               Budget(
                 id: budget.id,
-                categoryId: categoryId,
+                category: categoryId,
                 allocatedAmount: allocatedAmount,
                 spentAmount: budget.spentAmount,
                 startDate: budget.startDate,
@@ -83,7 +83,7 @@ class ManageBudgetPage extends ConsumerWidget {
         itemCount: budgets.length,
         itemBuilder: (context, index) {
           final budget = budgets[index];
-          final category = getCategoryDetails(budget.categoryId);
+          final category = getCategoryDetails(budget.category);
           final double progress = budget.spentAmount / budget.allocatedAmount;
 
           return Dismissible(
@@ -101,7 +101,7 @@ class ManageBudgetPage extends ConsumerWidget {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Delete Budget'),
-                  content: Text('Are you sure you want to delete this budget for ${budget.categoryId}?'),
+                  content: Text('Are you sure you want to delete this budget for ${budget.category}?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),

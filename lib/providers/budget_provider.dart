@@ -1,45 +1,52 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/budget.dart';
-import '../repositories/local_budget_repository.dart';
-
-final localBudgetRepositoryProvider = Provider<LocalBudgetRepository>((ref) {
-  return LocalBudgetRepository();
-});
+import '../services/firestore_service.dart';
+import 'debt_provider.dart';
 
 final budgetProvider = StateNotifierProvider<BudgetNotifier, List<Budget>>((ref) {
-  final repository = ref.read(localBudgetRepositoryProvider);
-  return BudgetNotifier(repository);
+  return BudgetNotifier(ref: ref, firestoreService: ref.watch(firestoreServiceProvider));
 });
 
 class BudgetNotifier extends StateNotifier<List<Budget>> {
-  final LocalBudgetRepository repository;
+  final Ref ref;
+  final FirestoreService firestoreService;
 
-  BudgetNotifier(this.repository) : super([]) {
-    fetchBudgets();
+  BudgetNotifier({required this.ref, required this.firestoreService}) : super([]) {
+    _fetchBudgets();
   }
 
-  Future<void> fetchBudgets() async {
-    print('Fetching budgets...');
-    final budgets = await repository.fetchBudgets();
-    print('Fetched budgets: $budgets');
+  Future<void> _fetchBudgets() async {
+    final budgets = await firestoreService.fetchBudgets('userId'); // Replace 'userId' with the actual user ID
     state = budgets;
   }
 
   Future<void> addBudget(Budget budget) async {
-    await repository.addBudget(budget);
-    state = [...state, budget];
-    print('Added budget: $budget');
+    await firestoreService.addBudget('userId', budget); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBudgets('userId'); // Refresh state after addition
+  }
+  Future<void> updateSpentAmount(String category, double amount) async {
+    // First update Firebase
+    for (final budget in state) {
+      if (budget.category == category) {
+        await firestoreService.updateBudget('userId', budget.id ,budget.copyWith(spentAmount: budget.spentAmount + amount));
+      }
+    }
+    // Then refresh state
+    state = await firestoreService.fetchBudgets('userId');
   }
 
-  Future<void> updateBudget(Budget budget) async {
-    await repository.updateBudget(budget);
-    state = state.map((b) => b.id == budget.id ? budget : b).toList();
-    print('Updated budget: $budget');
+  Future<void> removeBudget(String id) async {
+    await firestoreService.removeBudget('userId', id); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBudgets('userId'); // Refresh state after removal
+  }
+
+  Future<void> updateBudget(Budget updatedBudget) async {
+    await firestoreService.updateBudget('userId', updatedBudget.id, updatedBudget); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBudgets('userId'); // Refresh state after update
   }
 
   Future<void> deleteBudget(String id) async {
-    await repository.deleteBudget(id);
-    state = state.where((b) => b.id != id).toList();
-    print('Deleted budget with id: $id');
+    await firestoreService.removeBudget('userId', id); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBudgets('userId'); // Refresh state after deletion
   }
 }

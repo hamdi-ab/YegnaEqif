@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
 
-import '../models/card.dart';
-import '../providers/card_provider.dart';
+import '../models/bank_account.dart';
+import '../providers/bank_account_provider.dart';
 
 class AddBankCardPage extends ConsumerStatefulWidget {
   const AddBankCardPage({Key? key}) : super(key: key);
@@ -41,198 +42,122 @@ class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 4),
+                  ContainerWIthBoxShadow(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      child: SizedBox(
+                        width: 250,
+                        child: TextFormField(
+                          controller: _accountNameController,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                          decoration: const InputDecoration(
+                            hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                            hintText: 'Bank Account Name',
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(color: Colors.red),
+                          ),
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Bank account name is required';
+                            }
+                            return null;
+                          },
                         ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          spreadRadius: -1,
-                          offset: const Offset(0, -2),
+                      )),
+                  ContainerWIthBoxShadow(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      child: SizedBox(
+                        width: 250,
+                        child: TextFormField(
+                          controller: _accountNumberController,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                          decoration: const InputDecoration(
+                            hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                            hintText: 'Account Number',
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(color: Colors.red),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Account number is required';
+                            }
+                            return null;
+                          },
                         ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: 250,
-                      child: TextFormField(
-                        controller: _accountNameController,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                          hintText: 'Bank Account Name',
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(color: Colors.red),
+                      )),
+                  ContainerWIthBoxShadow(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      child: SizedBox(
+                        width: 250,
+                        child: TextFormField(
+                          controller: _balanceController,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                          decoration: const InputDecoration(
+                            hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                            hintText: 'Balance',
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(color: Colors.red),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Balance is required';
+                            }
+                            return null;
+                          },
                         ),
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Bank account name is required';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 4),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          spreadRadius: -1,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: 250,
-                      child: TextFormField(
-                        controller: _accountNumberController,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                          hintText: 'Account Number',
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(color: Colors.red),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Account number is required';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 4),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          spreadRadius: -1,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: 250,
-                      child: TextFormField(
-                        controller: _balanceController,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                          hintText: 'Balance',
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(color: Colors.red),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Balance is required';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 10,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 4),
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          spreadRadius: -1,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Select Color:',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      trailing: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                content: BlockPicker(
-                                  pickerColor: _selectedColor,
-                                  onColorChanged: _selectColor,
-                                ),
-                                actions: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Select'),
+                      )),
+                  ContainerWIthBoxShadow(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 16),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Select Color:',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        trailing: GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: BlockPicker(
+                                    pickerColor: _selectedColor,
+                                    onColorChanged: _selectColor,
                                   ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Icon(Icons.circle, color: _selectedColor),
-                      ),
-                    ),
-                  ),
+                                  actions: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Select'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: Icon(Icons.circle, color: _selectedColor),
+                        ),
+                      )),
                   const SizedBox(height: 24),
                   Center(
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           final String accountName =
                               _accountNameController.text;
@@ -246,11 +171,11 @@ class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
                             accountName: accountName,
                             accountNumber: accountNumber,
                             balance: balance,
-                            cardColor: _selectedColor, // Use the selected color
+                            cardColor: _selectedColor,
                           );
 
                           ref
-                              .read(bankAccountCardsProvider.notifier)
+                              .read(bankAccountProvider.notifier)
                               .addBankAccount(newBankCard);
 
                           Navigator.pop(context); // Close the page

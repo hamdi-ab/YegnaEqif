@@ -1,59 +1,37 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/transaction.dart';
-import '../models/category.dart';
-import '../repositories/local_transaction_repository.dart';
-import '../repositories/local_category_repository.dart';
+import '../services/firestore_service.dart';
 import 'category_provider.dart';
 
-final localTransactionRepositoryProvider = Provider<LocalTransactionRepository>((ref) {
-  return LocalTransactionRepository();
+final transactionProvider = StateNotifierProvider<TransactionNotifier, List<Transaction>>((ref) {
+  return TransactionNotifier(ref: ref, firestoreService: ref.watch(firestoreServiceProvider));
 });
 
+class TransactionNotifier extends StateNotifier<List<Transaction>> {
+  final Ref ref;
+  final FirestoreService firestoreService;
 
-final transactionProvider = StateNotifierProvider<TransactionNotifier, List<Map<String, dynamic>>>((ref) {
-  final transactionRepository = ref.read(localTransactionRepositoryProvider);
-  final categoryRepository = ref.read(localCategoryRepositoryProvider);
-  return TransactionNotifier(transactionRepository, categoryRepository);
-});
-
-class TransactionNotifier extends StateNotifier<List<Map<String, dynamic>>> {
-  final LocalTransactionRepository transactionRepository;
-  final LocalCategoryRepository categoryRepository;
-
-  TransactionNotifier(this.transactionRepository, this.categoryRepository) : super([]) {
-    fetchTransactions();
+  TransactionNotifier({required this.ref, required this.firestoreService}) : super([]) {
+    _fetchTransactions();
   }
 
-  Future<void> fetchTransactions() async {
-    print('Fetching transactions...');
-    final transactions = await transactionRepository.fetchTransactions();
-    final categories = await categoryRepository.fetchCategories();
-
-    final updatedTransactions = transactions.map((transaction) {
-      final categoryDetails = categories.firstWhere(
-            (category) => category.name == transaction.category,
-        orElse: () => Category(id: '', name: '', icon: Icons.category, color: Colors.grey),
-      );
-
-      return {
-        'transaction': transaction,
-        'icon': categoryDetails.icon,
-        'color': categoryDetails.color,
-      };
-    }).toList();
-
-    print('Fetched and updated transactions: $updatedTransactions');
-    state = updatedTransactions;
+  Future<void> _fetchTransactions() async {
+    final transactions = await firestoreService.fetchTransactions('userId'); // Replace 'userId' with the actual user ID
+    state = transactions;
   }
 
   Future<void> addTransaction(Transaction transaction) async {
-    await transactionRepository.addTransaction(transaction);
-    state = [...state, {
-      'transaction': transaction,
-      'icon': Icons.category, // Default icon
-      'color': Colors.grey, // Default color
-    }];
-    print('Added transaction: $transaction');
+    await firestoreService.addTransaction('userId', transaction); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchTransactions('userId'); // Refresh state after addition
+  }
+
+  Future<void> removeTransaction(String id) async {
+    await firestoreService.removeTransaction('userId', id); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchTransactions('userId'); // Refresh state after removal
+  }
+
+  Future<void> updateTransaction(String id, Transaction updatedTransaction) async {
+    await firestoreService.updateTransaction('userId', id, updatedTransaction); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchTransactions('userId'); // Refresh state after update
   }
 }
