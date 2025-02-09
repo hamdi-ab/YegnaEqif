@@ -26,7 +26,6 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
       _formKey.currentState!.save();
 
       final budget = Budget(
-        id: UniqueKey().toString(),
         allocatedAmount: double.parse(_enteredAmount),
         startDate: _selectedStartDate!,
         endDate: _selectedEndDate!,

@@ -12,6 +12,7 @@ import '../providers/budget_provider.dart';
 import '../providers/cash_card_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../utils/transaction_handler.dart';
 
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -42,26 +43,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
 
         // Update local state
-        final transactionNotifier = ref.read(transactionProvider.notifier);
-        transactionNotifier.addTransaction(transaction);
-      // Update bank account balance if applicable
-      if (_selectedBank != 'Cash') {
-        final bankCardNotifier = ref.read(bankAccountProvider.notifier);
-        bankCardNotifier.updateBalance(
-            _selectedBank,
-            transaction.amount,
-            transaction.type == 'Income'
-        );
-      }
+      final transactionNotifier = ref.read(transactionProvider.notifier);
+      transactionNotifier.addTransaction(transaction);
 
-      // Update cash card balance if bank type is 'Cash'
-      if (_selectedBank == 'Cash') {
-        final cashCardNotifier = ref.read(cashCardProvider.notifier);
-        final amount = transaction.type == 'Income'
-            ? transaction.amount
-            : -transaction.amount;
-        cashCardNotifier.updateCashCardBalance(amount);
-      }
+      final transactionHandler = TransactionHandler(ref: ref);
+      transactionHandler.handleTransaction(transaction.bankType, transaction.amount, transaction.type);
+
       if (transaction.type == 'Expense') {
         ref.read(budgetProvider.notifier).updateSpentAmount(
             transaction.category, transaction.amount);

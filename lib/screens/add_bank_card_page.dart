@@ -166,8 +166,7 @@ class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
                           final double balance =
                               double.parse(_balanceController.text);
 
-                          final newBankCard = BankAccountCardModel(
-                            id: UniqueKey().toString(), // Generate a unique ID
+                          final newBankCard = BankAccountCardModel( // Generate a unique ID
                             accountName: accountName,
                             accountNumber: accountNumber,
                             balance: balance,

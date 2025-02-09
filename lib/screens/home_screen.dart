@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yegna_eqif_new/screens/add_budget_screen.dart';
-import 'package:yegna_eqif_new/screens/add_category_screen.dart';
 import 'package:yegna_eqif_new/screens/add_debt_transaction_screen.dart';
 import 'package:yegna_eqif_new/screens/add_transaction_screen.dart';
 import 'package:yegna_eqif_new/screens/budget_screen.dart';

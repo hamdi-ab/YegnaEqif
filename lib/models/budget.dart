@@ -1,5 +1,5 @@
 class Budget {
-  final String id; // Unique ID for the budget
+  final String? id; // Unique ID for the budget
   final String category; // Unique ID for the category
   final double allocatedAmount; // Planned budget amount
   final double spentAmount; // Total spent from this budget
@@ -7,7 +7,7 @@ class Budget {
   final DateTime endDate; // Budget end date
 
   Budget({
-    required this.id,
+    this.id,
     required this.category, // Changed to categoryId
     required this.allocatedAmount,
     this.spentAmount = 0.0,

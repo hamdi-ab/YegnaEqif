@@ -12,24 +12,23 @@ class TransactionHandler {
   void handleTransaction(String accountName, double amount, String type) async {
     // Determine if it's income or expense
     bool isIncome = type == 'Income';
-
+    final amountToUpdate = isIncome ? amount : -amount;
     // Update cash card balance if the account name is 'Cash'
     if (accountName == 'Cash') {
       final cashCardNotifier = ref.read(cashCardProvider.notifier);
-      await cashCardNotifier.updateCashCardBalance(amount);
+      await cashCardNotifier.updateCashCardBalance(amountToUpdate);
     } else {
       // Update bank account balance
       final bankCardNotifier = ref.read(bankAccountProvider.notifier);
-      bankCardNotifier.updateBalance(accountName, amount, isIncome);
+      bankCardNotifier.updateBalance(accountName, amountToUpdate, isIncome);
     }
 
     // Update total balance
     final totalBalanceNotifier = ref.read(totalBalanceCardProvider.notifier);
-    totalBalanceNotifier.updateTotalBalance(amount, isIncome);
+    await totalBalanceNotifier.updateTotalBalance(amountToUpdate, isIncome);
   }
 
-  void handleLendingAndBorrowing(String accountName, double amount, bool isLending) async {
-    final amountToUpdate = isLending ? -amount : amount; // Lending is an expense, borrowing is income
-    handleTransaction(accountName, amountToUpdate, isLending ? 'Expense' : 'Income');
+  void handleLendingAndBorrowing(String accountName, double amount, bool isLending) async {// Lending is an expense, borrowing is income
+    handleTransaction(accountName, amount, isLending ? 'Expense' : 'Income');
   }
 }

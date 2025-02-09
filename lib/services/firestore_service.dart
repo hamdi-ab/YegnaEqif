@@ -77,14 +77,25 @@ class FirestoreService {
 
   // Budget Methods
   Future<void> addBudget(String userId, Budget budget) async {
-    await _firestore.collection('users').doc(userId).collection('budgets').add(budget.toMap());
+    final docRef = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('budgets')
+        .add(budget.toMap());
+
+    await docRef.update({'id': docRef.id});
   }
 
   Future<List<Budget>> fetchBudgets(String userId) async {
-    final snapshot = await _firestore.collection('users').doc(userId).collection('budgets').get();
+    final snapshot = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('budgets')
+        .get();
 
     return snapshot.docs.map((doc) {
-      return Budget.fromMap(doc.data());
+      final data = doc.data();
+      return Budget.fromMap(data..['id'] = doc.id);
     }).toList();
   }
 
@@ -119,7 +130,13 @@ class FirestoreService {
 
   // Bank Account Methods
   Future<void> addBankAccount(String userId, BankAccountCardModel bankAccount) async {
-    await _firestore.collection('users').doc(userId).collection('bankAccounts').add(bankAccount.toMap());
+    final docRef = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('bankAccounts')
+        .add(bankAccount.toMap());
+
+    await docRef.update({'id': docRef.id});
   }
 
   Future<List<BankAccountCardModel>> fetchBankAccounts(String userId) async {

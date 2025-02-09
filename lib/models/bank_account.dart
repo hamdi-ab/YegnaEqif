@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 class BankAccountCardModel {
-  final String id;
+  final String? id;
   final String accountName;
   final String accountNumber;
   final double balance;
   final Color cardColor;
 
   BankAccountCardModel({
-    required this.id,
+    this.id,
     required this.accountName,
     required this.accountNumber,
     required this.balance,

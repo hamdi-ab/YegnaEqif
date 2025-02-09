@@ -87,7 +87,7 @@ class ManageBudgetPage extends ConsumerWidget {
           final double progress = budget.spentAmount / budget.allocatedAmount;
 
           return Dismissible(
-            key: Key(budget.id),
+            key: Key(budget.id ?? ''),
             background: Container(
               margin: EdgeInsets.symmetric(vertical: 6.0),
                 decoration: BoxDecoration(
@@ -115,7 +115,7 @@ class ManageBudgetPage extends ConsumerWidget {
                 ),
               );
             },
-            onDismissed: (direction) => _deleteBudget(budget.id),
+            onDismissed: (direction) => _deleteBudget(budget.id ?? ''),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -241,11 +241,6 @@ class ManageBudgetPage extends ConsumerWidget {
     );
   }
 
-  Color _getProgressColor(double progress) {
-    if (progress < 0.5) return Colors.green;
-    if (progress < 0.8) return Colors.orange;
-    return Colors.red;
-  }
 }
 
 class _BudgetDialog extends StatefulWidget {

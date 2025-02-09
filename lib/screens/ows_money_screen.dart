@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/debt_provider.dart';
 
+
 class DebtTrackerPage extends ConsumerStatefulWidget {
   @override
   _DebtTrackerPageState createState() => _DebtTrackerPageState();
@@ -310,4 +311,95 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
     );
   }
 }
+
+
+// final cardVisibilityProvider = StateProvider<bool>((ref) => false);
+//
+// class DebitCard extends ConsumerWidget {
+//   final String cardHolder;
+//   final String cardNumber;
+//   final double balance;
+//   final String bankName;
+//
+//   const DebitCard({
+//     super.key,
+//     required this.cardHolder,
+//     required this.cardNumber,
+//     required this.balance,
+//     required this.bankName,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final isVisible = ref.watch(cardVisibilityProvider);
+//
+//     return Card(
+//       elevation: 4,
+//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//       color: Colors.blueGrey[900],
+//       child: Container(
+//         padding: const EdgeInsets.all(20),
+//         width: double.infinity,
+//         height: 220,
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(16),
+//           gradient: const LinearGradient(
+//             colors: [Colors.blueGrey, Colors.black87],
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//           ),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Bank Name
+//             Text(
+//               bankName,
+//               style: const TextStyle(
+//                 color: Colors.white,
+//                 fontSize: 18,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             const Spacer(),
+//
+//             // Card Number
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 Text(
+//                   isVisible ? cardNumber : '•••• •••• •••• ${cardNumber.substring(cardNumber.length - 4)}',
+//                   style: const TextStyle(color: Colors.white, fontSize: 20, letterSpacing: 2),
+//                 ),
+//                 IconButton(
+//                   icon: Icon(
+//                     isVisible ? Icons.visibility : Icons.visibility_off,
+//                     color: Colors.white,
+//                   ),
+//                   onPressed: () => ref.read(cardVisibilityProvider.notifier).state = !isVisible,
+//                 ),
+//               ],
+//             ),
+//
+//             // Balance
+//             Text(
+//               isVisible ? "\$${balance.toStringAsFixed(2)}" : "••••",
+//               style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+//             ),
+//
+//             const Spacer(),
+//
+//             // Cardholder Name
+//             Text(
+//               cardHolder.toUpperCase(),
+//               style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
 

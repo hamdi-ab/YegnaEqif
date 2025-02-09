@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart';
 import '../models/bank_account.dart';
 import '../services/firestore_service.dart';
 import 'debt_provider.dart';
@@ -45,13 +44,28 @@ class BankAccountNotifier extends StateNotifier<List<BankAccountCardModel>> {
     updateBalance(accountName, amount, false); // Treat borrowed as expense
   }
 
-  void updateBalance(String accountName, double amount, bool isIncome) {
-    state = [
-      for (final card in state)
-        if (card.accountName == accountName)
-          card.copyWith(balance: card.balance + amount)
-        else
-          card,
-    ];
+  void updateBalance(String accountName, double amount, bool isIncome) async {
+    try {
+      for (final card in state) {
+        if (card.accountName == accountName) {
+          final newBalance = card.balance + amount;
+          final updatedCard = card.copyWith(balance: newBalance);
+
+          // Update Firebase
+          await firestoreService.updateBankAccount('userId', card.id ?? '', updatedCard); // Replace 'userId' with the actual user ID
+
+          // Update local state
+          state = [
+            for (final card in state)
+              if (card.accountName == accountName)
+                updatedCard
+              else
+                card,
+          ];
+        }
+      }
+    } catch (e) {
+      print('Error updating balance: $e');
+    }
   }
 }

@@ -13,7 +13,7 @@ import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/profile_page.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
-
+import 'package:intl/intl.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
 
@@ -727,6 +727,8 @@ class MonthlyBudget extends ConsumerWidget {
   }
 }
 
+
+
 class RecentTransaction extends ConsumerWidget {
   const RecentTransaction({super.key});
 
@@ -736,77 +738,88 @@ class RecentTransaction extends ConsumerWidget {
     final categories = ref.watch(categoryProvider);
     final selectedTimePeriod = ref.watch(timePeriodProvider);
 
+    final now = DateTime.now();
     final filteredTransactions = transactions.where((transaction) {
-      final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
+          return transaction.date.isAfter(now.subtract(const Duration(days: 7)));
         case TimePeriod.month:
-          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
+          return transaction.date.isAfter(now.subtract(const Duration(days: 30)));
         case TimePeriod.year:
-          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
+          return transaction.date.isAfter(now.subtract(const Duration(days: 365)));
         default:
           return true;
       }
     }).toList();
 
+    // Group transactions by date (formatted correctly)
+    final Map<String, List<Transaction>> groupedTransactions = {};
+    for (var transaction in filteredTransactions) {
+      final dateKey = DateFormat('yyyy-MM-dd').format(transaction.date); //
+      groupedTransactions.putIfAbsent(dateKey, () => []).add(transaction);
+    }
 
-
-    // Merge transaction data with category details
-    final transactionsWithCategoryDetails = filteredTransactions.map((transaction) {
-      final category = categories.firstWhere((cat) => cat.name == transaction.category);
-      return {
-        'transaction': transaction,
-        'category': category,
-      };
-    }).toList();
+    // Sort dates (newest first)
+    final sortedDates = groupedTransactions.keys.toList()
+      ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a))); //
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: transactionsWithCategoryDetails.length,
-          itemBuilder: (context, index) {
-            final transactionData = transactionsWithCategoryDetails[index];
-            final transaction = transactionData['transaction'] as Transaction;
-            final category = transactionData['category'] as Category;
-            final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
+          itemCount: sortedDates.length,
+          itemBuilder: (context, dateIndex) {
+            final dateKey = sortedDates[dateIndex];
+            final transactionsOnDate = groupedTransactions[dateKey]!;
 
-            return ContainerWIthBoxShadow(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  backgroundColor: category.color.withOpacity(0.2),
-                  child: Icon(category.icon, color: category.color),
-                ),
-                title: Text(
-                  category.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(transaction.bankType),
-                trailing: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '\$${transaction.amount.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: amountColor,
-                        fontSize: 14,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Date Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      dateKey,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+
                       ),
                     ),
-                    Text(
-                      '${transaction.date.year}-${transaction.date.month}-${transaction.date.day}',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                // Transactions under this date
+                ...transactionsOnDate.map((transaction) {
+                  final category = categories.firstWhere((cat) => cat.name == transaction.category);
+                  final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
+
+                  return ContainerWIthBoxShadow(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: category.color.withOpacity(0.2),
+                        child: Icon(category.icon, color: category.color),
+                      ),
+                      title: Text(
+                        category.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(transaction.bankType),
+                      trailing: Text(
+                        '\$${transaction.amount.toStringAsFixed(2)}',
+                        style: TextStyle(color: amountColor, fontSize: 14),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
             );
           },
         ),
@@ -814,6 +827,7 @@ class RecentTransaction extends ConsumerWidget {
     );
   }
 }
+
 
 class TotalBalanceCardWidget extends ConsumerWidget {
   const TotalBalanceCardWidget({Key? key}) : super(key: key);
@@ -991,57 +1005,81 @@ class ContainerForCard extends StatelessWidget {
   }
 }
 
+
+final cardVisibilityProvider = StateProvider<bool>((ref) => false);
+
 class BankAccountCardWidget extends ConsumerWidget {
   final int index;
 
-  const BankAccountCardWidget({Key? key, required this.index})
-      : super(key: key);
+  const BankAccountCardWidget({Key? key, required this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bankAccountCards = ref.watch(bankAccountProvider);
     final bankCard = bankAccountCards[index];
+    final isVisible = ref.watch(cardVisibilityProvider);
 
-    return ContainerForCard(
-        modelCard: bankCard,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 20,
-              left: 18,
-              child: Text(
-                bankCard.accountName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      height: 220,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            bankCard.cardColor.withOpacity(0.7),
+            bankCard.cardColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Account Name
+          Text(
+            bankCard.accountName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+
+          // Account Number & Eye Icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                isVisible ? bankCard.accountNumber : "•••• •••• ${bankCard.accountNumber.substring(bankCard.accountNumber.length - 4)}",
+                style: const TextStyle(color: Colors.white, fontSize: 20, letterSpacing: 2),
+              ),
+              IconButton(
+                icon: Icon(
+                  isVisible ? Icons.visibility : Icons.visibility_off,
                   color: Colors.white,
                 ),
+                onPressed: () => ref.read(cardVisibilityProvider.notifier).state = !isVisible,
               ),
-            ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Account No: ${bankCard.accountNumber}",
-                    style: const TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "\$${bankCard.balance.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ));
+            ],
+          ),
+
+          // Balance
+          Text(
+            isVisible ? "\$${bankCard.balance.toStringAsFixed(2)}" : "••••",
+            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          // Cardholder Name
+          Text(
+           'Hamdi Abdulfetah'.toUpperCase(),
+            style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 }
+

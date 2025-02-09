@@ -25,23 +25,30 @@ class BudgetNotifier extends StateNotifier<List<Budget>> {
     state = await firestoreService.fetchBudgets('userId'); // Refresh state after addition
   }
   Future<void> updateSpentAmount(String category, double amount) async {
-    // First update Firebase
-    for (final budget in state) {
-      if (budget.category == category) {
-        await firestoreService.updateBudget('userId', budget.id ,budget.copyWith(spentAmount: budget.spentAmount + amount));
+    try {
+      for (final budget in state) {
+        if (budget.category == category) {
+          final updatedBudget = budget.copyWith(
+              spentAmount: budget.spentAmount + amount);
+          await firestoreService.updateBudget('userId', budget.id ?? '',
+              updatedBudget); // Replace 'userId' with the actual user ID
+        }
       }
+      // Refresh state after update
+      state = await firestoreService.fetchBudgets('userId');
+    } catch (e) {
+      // Handle errors if any
+      print('Error updating spent amount: $e');
     }
-    // Then refresh state
-    state = await firestoreService.fetchBudgets('userId');
   }
 
-  Future<void> removeBudget(String id) async {
+    Future<void> removeBudget(String id) async {
     await firestoreService.removeBudget('userId', id); // Replace 'userId' with the actual user ID
     state = await firestoreService.fetchBudgets('userId'); // Refresh state after removal
   }
 
   Future<void> updateBudget(Budget updatedBudget) async {
-    await firestoreService.updateBudget('userId', updatedBudget.id, updatedBudget); // Replace 'userId' with the actual user ID
+    await firestoreService.updateBudget('userId', updatedBudget.id ?? '', updatedBudget); // Replace 'userId' with the actual user ID
     state = await firestoreService.fetchBudgets('userId'); // Refresh state after update
   }
 
