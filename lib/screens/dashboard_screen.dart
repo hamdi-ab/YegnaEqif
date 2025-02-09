@@ -14,8 +14,10 @@ import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/profile_page.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
 import 'package:intl/intl.dart';
+import 'package:yegna_eqif_new/screens/top_spending_detail_page.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
+import 'budget_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PageController _pageController = PageController(initialPage: 1);
@@ -39,15 +41,30 @@ class DashboardScreen extends StatelessWidget {
                   SectionWithHeader(
                     title: 'Top Spending',
                     leftText: 'View All',
-                    viewAllCallback: () {},
+                    viewAllCallback: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TopSpendingDetailPage(),
+                        ),
+                      );
+                    },
                     child: const TopSpending(),
                   ),
                   SectionWithHeader(
                     title: 'Monthly Budget',
                     leftText: 'View All',
-                    viewAllCallback: () {},
+                    viewAllCallback: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BudgetScreen(scrollToMonthlyBudget: true),
+                        ),
+                      );
+                    },
                     child: MonthlyBudget(),
                   ),
+
                   SectionWithHeader(
                     title: 'People You Owe',
                     leftText: 'View All',
@@ -286,8 +303,8 @@ class PeopleList extends StatelessWidget {
                 ),
                 Text(
                   isOwed
-                      ? '+\$${item['amountOwed']}'
-                      : '-\$${item['moneyOwed']}',
+                      ? '+${item['amountOwed']} Br.'
+                      : '-${item['moneyOwed']} Br.',
                   style: TextStyle(
                     fontSize: 14,
                     color: isOwed ? Colors.green : Colors.red,
@@ -432,7 +449,7 @@ class CardWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          "\$${totalBalance.toStringAsFixed(2)}",
+          "${totalBalance.toStringAsFixed(2)} Br.",
           style: const TextStyle(
             fontSize: 40,
             fontWeight: FontWeight.bold,
@@ -514,7 +531,7 @@ class CardWidget extends StatelessWidget {
               ),
             ),
             Text(
-              "\$${value.toStringAsFixed(2)}",
+              "${value.toStringAsFixed(2)} Br.",
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,
@@ -597,7 +614,7 @@ class TopSpending extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${amount.toStringAsFixed(2)}',
+                    '${amount.toStringAsFixed(2)} Br.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold, color: Colors.red),
                   ),
@@ -664,7 +681,7 @@ class MonthlyBudget extends ConsumerWidget {
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
+                            '${budget.allocatedAmount.toStringAsFixed(0)} Br. total',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -695,7 +712,7 @@ class MonthlyBudget extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Text(
-                                '\$${(budget.spentAmount).toStringAsFixed(0)} ',
+                                '${(budget.spentAmount).toStringAsFixed(0)} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -706,7 +723,7 @@ class MonthlyBudget extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: Text(
-                                '\$${budget.allocatedAmount}',
+                                '${budget.allocatedAmount} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -813,7 +830,7 @@ class RecentTransaction extends ConsumerWidget {
                       ),
                       subtitle: Text(transaction.bankType),
                       trailing: Text(
-                        '\$${transaction.amount.toStringAsFixed(2)}',
+                        '${transaction.amount.toStringAsFixed(2)} Br.',
                         style: TextStyle(color: amountColor, fontSize: 14),
                       ),
                     ),
@@ -829,6 +846,10 @@ class RecentTransaction extends ConsumerWidget {
 }
 
 
+
+
+
+
 class TotalBalanceCardWidget extends ConsumerWidget {
   const TotalBalanceCardWidget({Key? key}) : super(key: key);
 
@@ -836,51 +857,61 @@ class TotalBalanceCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final totalBalanceCard = ref.watch(totalBalanceCardProvider);
 
-    return ContainerForCard(
-        modelCard: totalBalanceCard,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Total Balance',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Colors.blueGrey, Colors.black87],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Total Balance',
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "\$${totalBalanceCard.totalBalance}",
-              style: const TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "${totalBalanceCard.totalBalance.toStringAsFixed(2)} Br.",
+            style: const TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildInfoRow(
-                    icon: CupertinoIcons.arrow_down,
-                    label: 'Income',
-                    value: totalBalanceCard.income,
-                    iconColor: Colors.green,
-                  ),
-                  _buildInfoRow(
-                    icon: CupertinoIcons.arrow_up,
-                    label: 'Expense',
-                    value: totalBalanceCard.expense,
-                    iconColor: Colors.red,
-                  ),
-                ],
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoRow(
+                  icon: Icons.arrow_downward,
+                  label: 'Income',
+                  value: totalBalanceCard.income,
+                  iconColor: Colors.green,
+                  context: context,
+                ),
+                _buildInfoRow(
+                  icon: Icons.arrow_upward,
+                  label: 'Expense',
+                  value: totalBalanceCard.expense,
+                  iconColor: Colors.red,
+                  context: context,
+                ),
+              ],
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildInfoRow({
@@ -888,13 +919,14 @@ class TotalBalanceCardWidget extends ConsumerWidget {
     required String label,
     required double value,
     required Color iconColor,
+    required BuildContext context,
   }) {
     return Row(
       children: [
         Container(
           width: 25,
           height: 25,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.white30,
             shape: BoxShape.circle,
           ),
@@ -919,7 +951,7 @@ class TotalBalanceCardWidget extends ConsumerWidget {
               ),
             ),
             Text(
-              "\$${value.toStringAsFixed(2)}",
+              "${value.toStringAsFixed(2)} Br.",
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,
@@ -940,30 +972,62 @@ class CashCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cashCard = ref.watch(cashCardProvider);
 
-    return ContainerForCard(
-        modelCard: cashCard,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF4CAF50),
+            Color(0xFF81C784),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Cash Amount',
-                style: TextStyle(
-                    fontSize: 22.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+              const Icon(
+                Icons.monetization_on,
+                color: Colors.white,
+                size: 24,
               ),
-              Text(
-                "\$${cashCard.balance}",
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              Tooltip(
+                message: "Account Details:\n- Type: Cash Account\n- Last Transaction: \$100 withdrawal\n- Transfer Options\n- Budget Overview\n- Help and Support",
+                child: IconButton(
+                  icon: const Icon(Icons.info_outline, color: Colors.white),
+                  onPressed: () {
+                    // Implement additional actions or show details
+                  },
                 ),
               ),
             ],
           ),
-        ));
+          const SizedBox(height: 20),
+          const Text(
+            'Cash Amount',
+            style: TextStyle(
+              fontSize: 22.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "${cashCard.balance.toStringAsFixed(2)} Br.",
+            style: const TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1005,7 +1069,6 @@ class ContainerForCard extends StatelessWidget {
   }
 }
 
-
 final cardVisibilityProvider = StateProvider<bool>((ref) => false);
 
 class BankAccountCardWidget extends ConsumerWidget {
@@ -1041,7 +1104,7 @@ class BankAccountCardWidget extends ConsumerWidget {
           Text(
             bankCard.accountName,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -1068,7 +1131,7 @@ class BankAccountCardWidget extends ConsumerWidget {
 
           // Balance
           Text(
-            isVisible ? "\$${bankCard.balance.toStringAsFixed(2)}" : "••••",
+            isVisible ? "${bankCard.balance.toStringAsFixed(2)} Br." : "•••• Br.",
             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const Spacer(),

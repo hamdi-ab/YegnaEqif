@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/debt_provider.dart';
-
+import 'package:yegna_eqif_new/utils/transaction_handler.dart';
 
 class DebtTrackerPage extends ConsumerStatefulWidget {
   @override
@@ -197,7 +197,7 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    'Remaining: \$${transaction.remainingAmount}',
+                                    'Remaining: \$${transaction.remainingAmount.toStringAsFixed(2)}',
                                     style: TextStyle(fontSize: 15),
                                   ),
                                 ],
@@ -207,7 +207,7 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Amount: \$${transaction.totalAmount}',
+                                    'Amount: \$${transaction.totalAmount.toStringAsFixed(2)}',
                                     style: TextStyle(fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
@@ -223,6 +223,14 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                                 color: Colors.green,
                               ),
                             ],
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.payments),
+                            onPressed: () async {
+                              final transactionHandler = TransactionHandler(ref: ref);
+                              double amountPaid = await _getAmountPaidFromUser(context); // Implement a method to get the amount paid from user
+                              await transactionHandler.adjustDebtWhenSomeonePays(transaction.id, amountPaid);
+                            },
                           ),
                         ),
                       );
@@ -271,7 +279,7 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    'Remaining: \$${transaction.remainingAmount}',
+                                    'Remaining: \$${transaction.remainingAmount.toStringAsFixed(2)}',
                                     style: TextStyle(fontSize: 15),
                                   ),
                                 ],
@@ -281,7 +289,7 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Amount: \$${transaction.totalAmount}',
+                                    'Amount: \$${transaction.totalAmount.toStringAsFixed(2)}',
                                     style: TextStyle(fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
@@ -298,6 +306,14 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                               ),
                             ],
                           ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.payments),
+                            onPressed: () async {
+                              final transactionHandler = TransactionHandler(ref: ref);
+                              double amountPaid = await _getAmountPaidFromUser(context); // Implement a method to get the amount paid from user
+                              await transactionHandler.adjustDebtWhenYouPay(transaction.id, amountPaid);
+                            },
+                          ),
                         ),
                       );
                     },
@@ -305,11 +321,46 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage> with SingleTi
                 ],
               ),
             ),
+
           ],
         ),
       ),
     );
   }
+}
+
+Future<double> _getAmountPaidFromUser(BuildContext context) async {
+  double amountPaid = 0.0;
+  await showDialog(
+    context: context,
+    builder: (context) {
+      TextEditingController controller = TextEditingController();
+      return AlertDialog(
+        title: Text('Enter Amount Paid'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(hintText: "Amount"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              amountPaid = double.parse(controller.text);
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+  return amountPaid;
 }
 
 

@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static final List<Widget> _pages = <Widget>[
     DashboardScreen(),
     ReportsScreen(),
-    BudgetScreen(),
+    BudgetScreen(scrollToMonthlyBudget: false),
     DebtTrackerPage(),
   ];
 
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
           spaceBetweenChildren: 14, // Add space between SpeedDial children
           children: [
             SpeedDialChild(
-              child: Icon(Icons.attach_money, color: Colors.green),
+              child: Icon(Icons.payments, color: Colors.green),
               backgroundColor: Colors.green.shade200,
               labelWidget: Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // Add padding to label

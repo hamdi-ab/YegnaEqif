@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/bank_account_provider.dart';
 import '../providers/cash_card_provider.dart';
+import '../providers/debt_provider.dart';
 import '../providers/total_balance_card_provider.dart';
 
 class TransactionHandler {
@@ -31,4 +32,16 @@ class TransactionHandler {
   void handleLendingAndBorrowing(String accountName, double amount, bool isLending) async {// Lending is an expense, borrowing is income
     handleTransaction(accountName, amount, isLending ? 'Expense' : 'Income');
   }
+
+  // When someone pays you back
+  Future<void> adjustDebtWhenSomeonePays(String debtId, double amountPaid) async {
+    await ref.read(borrowOrDebtProvider.notifier).updateDebtAmount(debtId, amountPaid);
+  }
+
+// When you pay someone back
+  Future<void> adjustDebtWhenYouPay(String debtId, double amountPaid) async {
+    await ref.read(borrowOrDebtProvider.notifier).updateDebtAmount(debtId, amountPaid);
+  }
+
+
 }

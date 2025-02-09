@@ -38,4 +38,31 @@ class BorrowOrDebtNotifier extends StateNotifier<List<Debt>> {
     await firestoreService.updateTransaction('userId', id, updatedTransaction as Transaction); // Replace 'userId' with the actual user ID
     state = await firestoreService.fetchDebts('userId'); // Refresh state after update
   }
+
+  Future<void> updateDebtAmount(String debtId, double amountPaid) async {
+    try {
+      for (final debt in state) {
+        if (debt.id == debtId) {
+          final newRemainingAmount = debt.remainingAmount - amountPaid;
+          final newProgress = (debt.totalAmount - newRemainingAmount) / debt.totalAmount;
+          final updatedDebt = debt.copyWith(remainingAmount: newRemainingAmount, progress: newProgress);
+
+          // Update Firebase
+          await firestoreService.updateDebt('userId', debtId, updatedDebt); // Replace 'userId' with the actual user ID
+
+          // Update local state
+          state = [
+            for (final debt in state)
+              if (debt.id == debtId)
+                updatedDebt
+              else
+                debt,
+          ];
+        }
+      }
+    } catch (e) {
+      print('Error updating debt amount: $e');
+    }
+  }
+
 }

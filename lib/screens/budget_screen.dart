@@ -10,15 +10,48 @@ import 'package:yegna_eqif_new/providers/category_provider.dart';
 
 import '../models/category.dart';
 
-class BudgetScreen extends StatelessWidget {
+
+class BudgetScreen extends StatefulWidget {
+  final bool scrollToMonthlyBudget;
+
+  BudgetScreen({this.scrollToMonthlyBudget = false});
+
+  @override
+  _BudgetScreenState createState() => _BudgetScreenState();
+}
+
+class _BudgetScreenState extends State<BudgetScreen> {
+  final GlobalKey _monthlyBudgetKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollToMonthlyBudget) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToMonthlyBudget();
+      });
+    }
+  }
+
+  void _scrollToMonthlyBudget() {
+    Scrollable.ensureVisible(
+      _monthlyBudgetKey.currentContext!,
+      duration: Duration(seconds: 1),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Budget'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -30,29 +63,26 @@ class BudgetScreen extends StatelessWidget {
               SectionWithHeader(
                 title: 'Budget Summary',
                 leftText: 'Manage budget',
-                viewAllCallback: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ManageBudgetPage()));
+                viewAllCallback: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ManageBudgetPage()));
                 },
                 child: BudgetOverview(),
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Text('Category List',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               CategoriesGrid(),
               SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Text('Category Budget',
-                    style:
-                    TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 16),
-              MonthlyBudget(),
+              // Assign the GlobalKey to the MonthlyBudget widget
+              MonthlyBudget(key: _monthlyBudgetKey),
             ],
           ),
         ),
@@ -60,6 +90,7 @@ class BudgetScreen extends StatelessWidget {
     );
   }
 }
+
 
 class CategoriesGrid extends ConsumerWidget {
   const CategoriesGrid({super.key});
@@ -230,6 +261,8 @@ class CircularProgressBar extends ConsumerWidget {
 
 
 class MonthlyBudget extends ConsumerWidget {
+  final Key? key;
+  MonthlyBudget({this.key}) : super(key: key);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
