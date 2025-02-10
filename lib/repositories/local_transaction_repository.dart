@@ -6,6 +6,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '1',
       type: 'Expense',
+      name: 'film',
       bankType: 'Credit Card',
       category: 'Groceries',
       amount: 50.00,
@@ -14,6 +15,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '2',
       type: 'Expense',
+      name: 'film',
       bankType: 'Debit Card',
       category: 'Groceries',
       amount: 30.00,
@@ -24,6 +26,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '3',
       type: 'Income',
+      name: 'film',
       bankType: 'Bank Transfer',
       category: 'Salary',
       amount: 2000.00,
@@ -32,6 +35,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '4',
       type: 'Income',
+      name: 'film',
       bankType: 'Bank Transfer',
       category: 'Salary',
       amount: 2100.00,
@@ -42,6 +46,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '5',
       type: 'Expense',
+      name: 'film',
       bankType: 'Debit Card',
       category: 'Utilities',
       amount: 75.00,
@@ -50,6 +55,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '6',
       type: 'Expense',
+      name: 'film',
       bankType: 'Debit Card',
       category: 'Utilities',
       amount: 80.00,
@@ -60,6 +66,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '7',
       type: 'Expense',
+      name: 'film',
       bankType: 'Credit Card',
       category: 'Transport',
       amount: 20.00,
@@ -68,6 +75,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '8',
       type: 'Expense',
+      name: 'film',
       bankType: 'Debit Card',
       category: 'Transport',
       amount: 25.00,
@@ -78,6 +86,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '9',
       type: 'Expense',
+      name: 'film',
       bankType: 'Credit Card',
       category: 'Entertainment',
       amount: 40.00,
@@ -86,6 +95,7 @@ class LocalTransactionRepository {
     Transaction(
       id: '10',
       type: 'Expense',
+      name: 'film',
       bankType: 'Debit Card',
       category: 'Entertainment',
       amount: 50.00,

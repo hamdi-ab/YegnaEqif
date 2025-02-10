@@ -165,7 +165,7 @@ class ManageBudgetPage extends ConsumerWidget {
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                '\$${budget.allocatedAmount.toStringAsFixed(0)} total',
+                                '${budget.allocatedAmount.toStringAsFixed(0)} Br. total',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
@@ -203,7 +203,7 @@ class ManageBudgetPage extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Text(
-                                '\$${budget.spentAmount.toStringAsFixed(0)}',
+                                '${budget.spentAmount.toStringAsFixed(0)} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -214,7 +214,7 @@ class ManageBudgetPage extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: Text(
-                                '\$${budget.allocatedAmount.toStringAsFixed(0)}',
+                                '${budget.allocatedAmount.toStringAsFixed(0)} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -282,7 +282,7 @@ class __BudgetDialogState extends State<_BudgetDialog> {
             TextFormField(
               controller: _categoryIdController,
               decoration: const InputDecoration(
-                labelText: 'Category ID',
+                labelText: 'Category',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
@@ -298,7 +298,7 @@ class __BudgetDialogState extends State<_BudgetDialog> {
               decoration: const InputDecoration(
                 labelText: 'Allocated Amount',
                 border: OutlineInputBorder(),
-                prefixText: '\$',
+                suffixText: 'Br.',
               ),
               keyboardType: TextInputType.number,
               validator: (value) {

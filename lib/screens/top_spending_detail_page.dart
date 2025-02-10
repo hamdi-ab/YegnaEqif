@@ -102,7 +102,7 @@ class TopSpendingDetailPage extends ConsumerWidget {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         Text(
-                          '\$${amount.toStringAsFixed(2)}',
+                          '${amount.toStringAsFixed(2)} Br.',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold, color: Colors.red),
                         ),

@@ -72,7 +72,7 @@ class TotalBalanceContainer extends ConsumerWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54)),
-              subtitle: Text('\$${totalBalance.toStringAsFixed(2)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              subtitle: Text('${totalBalance.toStringAsFixed(2)} Br.', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
               trailing: const CircleAvatar(
                 backgroundColor: Colors.blue,
                 child: Icon(Icons.account_balance_wallet, color: Colors.white),
@@ -121,7 +121,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${netIncome.toStringAsFixed(2)}',
+            '${netIncome.toStringAsFixed(2)} Br.',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
           ),
           const SizedBox(height: 16),
@@ -199,7 +199,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
           sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) => Text(
-              '\$${value.toInt()}',
+              '${value.toInt()} Br.',
               style: const TextStyle(fontSize: 10),
             ),
             reservedSize: 40,
@@ -431,7 +431,7 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '\$${totalValue.toStringAsFixed(2)}', // Dynamic total value
+                    '${totalValue.toStringAsFixed(2)} Br.', // Dynamic total value
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -501,7 +501,7 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${(category['amount'] as double) .toStringAsFixed(2)}',
+                          '${(category['amount'] as double) .toStringAsFixed(2)} Br.',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Text(

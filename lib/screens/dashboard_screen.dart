@@ -3,7 +3,6 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/data/data.dart';
 import 'package:yegna_eqif_new/providers/bank_account_provider.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
 import 'package:yegna_eqif_new/providers/cash_card_provider.dart';
@@ -17,6 +16,8 @@ import 'package:intl/intl.dart';
 import 'package:yegna_eqif_new/screens/top_spending_detail_page.dart';
 import '../models/category.dart';
 import '../models/transaction.dart';
+import '../providers/debt_provider.dart';
+import '../utils/string_formater.dart';
 import 'budget_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -66,16 +67,16 @@ class DashboardScreen extends StatelessWidget {
                   ),
 
                   SectionWithHeader(
-                    title: 'People You Owe',
+                    title: 'Lent',
                     leftText: 'View All',
                     viewAllCallback: () {},
-                    child: PeopleList(data: peopleYouOweData, isOwed: false),
+                    child: PeopleList(isOwed: true),
                   ),
                   SectionWithHeader(
-                    title: 'People Who Owe You',
+                    title: 'Borrowed',
                     leftText: 'View All',
                     viewAllCallback: () {},
-                    child: PeopleList(data: peopleWhoOweYou, isOwed: true),
+                    child: PeopleList(isOwed: false),
                   ),
                   SectionWithHeader(
                     title: 'Recent Transaction',
@@ -94,33 +95,26 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
+
 class ProfileBalance extends ConsumerWidget {
   const ProfileBalance({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionProvider);
+    final budget = ref.watch(budgetProvider);
 
-// Calculate total balance
-    final double totalBalance = transactions.fold(0.0, (sum, transaction) {
-      if (transaction.type == 'Income') {
-        return sum + transaction.amount;
-      } else if (transaction.type == 'Expense') {
-        return sum - transaction.amount;
-      }
-      return sum;
-    });
-
-// Calculate total expenses
-    final double totalExpenses = transactions
-        .where((transaction) => transaction.type == 'Expense')
-        .fold(0.0, (sum, transaction) => sum + transaction.amount);
+    final double totalAllocatedAmount = budget.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount = budget.fold(0, (sum, budget) => sum + budget.spentAmount);
 
 // Calculate progress
-    final double progress = totalExpenses / (totalBalance + totalExpenses) * 100;
+    final double progressInRation = (totalAllocatedAmount != 0)
+        ? totalSpentAmount / totalAllocatedAmount
+        : 0.0;
+
+    final double progress = (1 - progressInRation) * 100;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -132,8 +126,10 @@ class ProfileBalance extends ConsumerWidget {
                 child: IconButton(
                   color: Colors.yellow[900],
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
                   },
                   icon: Icon(CupertinoIcons.person_fill),
                 ),
@@ -145,15 +141,15 @@ class ProfileBalance extends ConsumerWidget {
                   Text(
                     'Hamdi Abdulfetah',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: ProgressBar(
                       value: progress,
                       maxValue: 100,
-                      label: "${progress.toStringAsFixed(0)}/100",
+                      label: "${progress.toStringAsFixed(0)} / 100",
                     ),
                   ),
                 ],
@@ -161,11 +157,14 @@ class ProfileBalance extends ConsumerWidget {
             ],
           ),
           IconButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SettingsPage()));
-              },
-              icon: const Icon(Icons.settings)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+            icon: const Icon(Icons.settings),
+          ),
         ],
       ),
     );
@@ -190,22 +189,12 @@ class ProgressBar extends StatelessWidget {
       children: [
         Container(
           width: 100,
-          height: 8,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: FractionallySizedBox(
-            widthFactor: value / maxValue,
-            alignment: Alignment.centerLeft,
-            child: Container(
-              decoration: BoxDecoration(
-                color: value > 50
-                    ? Colors.green
-                    : (value > 20 ? Colors.yellow : Colors.red),
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
+          child: LinearProgressIndicator(
+            value: value / maxValue,
+            backgroundColor: Colors.grey[300],
+            color: value > 50
+                ? Colors.green
+                : (value > 20 ? Colors.yellow : Colors.red),
           ),
         ),
         const SizedBox(width: 8),
@@ -217,6 +206,7 @@ class ProgressBar extends StatelessWidget {
     );
   }
 }
+
 
 class SectionWithHeader extends StatelessWidget {
   final String title;
@@ -266,21 +256,26 @@ class SectionWithHeader extends StatelessWidget {
   }
 }
 
-class PeopleList extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
+class PeopleList extends ConsumerWidget {
   final bool isOwed;
 
-  const PeopleList({super.key, required this.data, required this.isOwed});
+  const PeopleList({super.key, required this.isOwed});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(borrowOrDebtProvider);
+    final filteredTransactions = transactions
+        .where((transaction) =>
+    transaction.transactionType == (isOwed ? 'lent' : 'borrowed'))
+        .toList();
+
     return SizedBox(
       height: 160,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: data.length,
+        itemCount: filteredTransactions.length,
         itemBuilder: (context, index) {
-          final item = data[index];
+          final transaction = filteredTransactions[index];
           return ContainerWIthBoxShadow(
             width: 110,
             margin: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -289,22 +284,22 @@ class PeopleList extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 35,
-                  backgroundColor: item['backgroundColor'],
+                  backgroundColor: isOwed ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
                   child: Icon(
-                    item['icon'],
-                    color: item['color'],
+                    Icons.person,
+                    color: isOwed ? Colors.green : Colors.red,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  item['name'],
+                  transaction.personName,
                   style: Theme.of(context).textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
                 Text(
                   isOwed
-                      ? '+${item['amountOwed']} Br.'
-                      : '-${item['moneyOwed']} Br.',
+                      ? '-${transaction.remainingAmount.toStringAsFixed(2)} Br.'
+                      : '+${transaction.remainingAmount.toStringAsFixed(2)} Br.',
                   style: TextStyle(
                     fontSize: 14,
                     color: isOwed ? Colors.green : Colors.red,
@@ -320,6 +315,7 @@ class PeopleList extends StatelessWidget {
     );
   }
 }
+
 
 class ContainerWIthBoxShadow extends StatelessWidget {
   const ContainerWIthBoxShadow(
@@ -796,18 +792,25 @@ class RecentTransaction extends ConsumerWidget {
               children: [
                 // Date Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      dateKey,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        fontSize: 16,
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+                  child: Row(
+                    children: [
+                      Text('Date',style: const TextStyle(
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
-
+                        color: Colors.black54
+                      ),),
+                      Text(
+                        dateKey,
+                        textAlign: TextAlign.left,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54
+                        ),
                       ),
-                    ),
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   ),
                 ),
                 // Transactions under this date
@@ -825,13 +828,23 @@ class RecentTransaction extends ConsumerWidget {
                         child: Icon(category.icon, color: category.color),
                       ),
                       title: Text(
-                        category.name,
+                        transaction.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(transaction.bankType),
-                      trailing: Text(
-                        '${transaction.amount.toStringAsFixed(2)} Br.',
-                        style: TextStyle(color: amountColor, fontSize: 14),
+                      subtitle: Text(category.name),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${transaction.amount.toStringAsFixed(2)} Br.',
+                            style: TextStyle(color: amountColor, fontSize: 14),
+                          ),
+                          Text(
+                            '${transaction.bankType}',
+                            style: TextStyle(color: Colors.black, fontSize: 14),
+                          )
+                        ],
                       ),
                     ),
                   );
@@ -1116,7 +1129,7 @@ class BankAccountCardWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isVisible ? bankCard.accountNumber : "•••• •••• ${bankCard.accountNumber.substring(bankCard.accountNumber.length - 4)}",
+                isVisible ? formatAccountNumber(bankCard.accountNumber) : "•••• •••• ${bankCard.accountNumber.substring(bankCard.accountNumber.length - 4)}",
                 style: const TextStyle(color: Colors.white, fontSize: 20, letterSpacing: 2),
               ),
               IconButton(

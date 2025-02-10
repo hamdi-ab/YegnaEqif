@@ -36,6 +36,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final transaction = Transaction(
         id: UniqueKey().toString(), // Generate a unique ID
         type: _incomeExpense,
+        name: noteController.text,
         bankType: _selectedBank,
         category: selectedCategory!.name,
         amount: double.parse(_enteredAmount),
@@ -113,7 +114,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 SizedBox(height: 20),
                 BankCardDropdown(onBankSelected: _updateSelectedBank,),
                 SizedBox(height: 16),
-                // EnterAmountTile calls _updateAmount when an amount is entered
+                ContainerWIthBoxShadow(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 14.0),
+                  child: TextFormField(
+                    controller: noteController,
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                    decoration: const InputDecoration(
+                      hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                      hintText: 'Enter Name',
+                      border: InputBorder.none,
+                    ),
+                    keyboardType: TextInputType.text,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                  ),
+                )
+                ,
                 EnterAmountTile(onAmountSaved: _updateAmount),
                 ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: GestureDetector(
@@ -143,39 +165,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ),
                       ),
                     )),
-                ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.grey.shade300,
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 14,
-                        ),
-                        SizedBox(
-                          width: 270,
-                          child: TextFormField(
-                            controller: noteController,
-                            decoration: const InputDecoration(
-                              hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                              hintText: 'Write Note',
-                              border: InputBorder.none,
-                            ),
-                            keyboardType: TextInputType.text,
-                          ),
-                        ),
-                      ],
-                    )),
                 SelectDateWidget(label:'Set Date',firstDay: DateTime(2000), lastDay: DateTime.now(), onDateSelected: _updateDueDate),
                 SizedBox(height: 20),
                 // SaveButton validates if all inputs are provided
                 SaveButton(
-                  isValid: _formKey.currentState?.validate() ?? false && isCategorySelected && _enteredAmount.isNotEmpty,
+                  isValid: (_formKey.currentState?.validate() ?? false)
+                      && isCategorySelected
+                      && _enteredAmount.isNotEmpty,
                   onSave: _saveTransaction,
                 ),
               ],
@@ -325,7 +321,7 @@ class _EnterAmountTileState extends State<EnterAmountTile> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             trailing: Text(
-              _enteredAmount.isEmpty ? "\$00.00" : "\$$_enteredAmount",
+              _enteredAmount.isEmpty ? "00.00 Br." : "$_enteredAmount Br.",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           )),
@@ -400,7 +396,7 @@ class _AddPageState extends State<AddPage> {
                           keyboardType: TextInputType.numberWithOptions(decimal: true), // For decimal input
                           textInputAction: TextInputAction.done, // Remove "check" button
                           decoration: InputDecoration(
-                            hintText: "\$00.00",
+                            hintText: "00.00 Br.",
                             hintStyle: TextStyle(fontSize: 48, color: Colors.grey.shade500),
                             filled: true,
                             fillColor: Colors.transparent, // Transparent background
@@ -528,7 +524,7 @@ class _BankCardDropdownState extends ConsumerState<BankCardDropdown> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${selectedCardBalance.toStringAsFixed(2)}',
+                        '${selectedCardBalance.toStringAsFixed(2)} Br.',
                         style: const TextStyle(
                           color: Colors.red,
                           fontSize: 14,

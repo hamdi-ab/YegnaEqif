@@ -78,7 +78,7 @@ class ProfileBalance extends ConsumerWidget {
                 children: [
                   Text('Balance',
                       style: Theme.of(context).textTheme.bodyMedium),
-                  Text('\$${totalBalanceCard.totalBalance}',
+                  Text('${totalBalanceCard.totalBalance} Br.',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ],
@@ -228,7 +228,7 @@ class SummaryCardContainer extends ConsumerWidget {
         Expanded(
           child: SummaryCard(
             title: 'Income',
-            amount: '\$${totalIncome.toStringAsFixed(2)}',
+            amount: '${totalIncome.toStringAsFixed(2)} Br.',
             color: const Color(0xFFE1F5FE), // Light Blue Accent
           ),
         ),
@@ -236,7 +236,7 @@ class SummaryCardContainer extends ConsumerWidget {
         Expanded(
           child: SummaryCard(
             title: 'Expense',
-            amount: '\$${totalExpenses.toStringAsFixed(2)}',
+            amount: '${totalExpenses.toStringAsFixed(2)} Br.',
             color: const Color(0xFFF8BBD0), // Pink Accent
           ),
         ),
@@ -401,7 +401,7 @@ class BudgetCard extends ConsumerWidget {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          '\$${dailyBudget.toStringAsFixed(2)}/Day',
+          '${dailyBudget.toStringAsFixed(2)} Br./Day',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -413,11 +413,11 @@ class BudgetCard extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '\$${totalExpense} Exp',
+              '${totalExpense} Br. Exp',
               style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Of \$${totalBudget}',
+              'Of ${totalBudget} Br.',
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black54),
             ),
           ],

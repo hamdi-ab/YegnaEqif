@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Transaction {
   final String id;
   final String type;
+  final String name;
   final String bankType;
   final String category;
   final double amount;
@@ -11,6 +12,7 @@ class Transaction {
   Transaction({
     required this.id,
     required this.type,
+    required this.name,
     required this.bankType,
     required this.category,
     required this.amount,
@@ -21,6 +23,7 @@ class Transaction {
     return Transaction(
       id: documentId,
       type: data['type'],
+      name: data['name'],
       bankType: data['bankType'],
       category: data['category'],
       amount: data['amount'],
@@ -31,6 +34,7 @@ class Transaction {
   Map<String, dynamic> toMap() {
     return {
       'type': type,
+      'name': name,
       'bankType': bankType,
       'category': category,
       'amount': amount,

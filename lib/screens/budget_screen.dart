@@ -242,7 +242,7 @@ class CircularProgressBar extends ConsumerWidget {
               const SizedBox(height: 16),
               // Current and Total amount
               Text(
-                '\$${totalSpentAmount.toStringAsFixed(0)} of \$${totalAllocatedAmount.toStringAsFixed(0)}',
+                '${totalSpentAmount.toStringAsFixed(0)} Br. of ${totalAllocatedAmount.toStringAsFixed(0)} Br.',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -334,7 +334,7 @@ class MonthlyBudget extends ConsumerWidget {
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '\$${dailyBudget.toStringAsFixed(2)}/Day',
+                            '${dailyBudget.toStringAsFixed(2)} Br./Day',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -369,7 +369,7 @@ class MonthlyBudget extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Text(
-                                '\$${budget.spentAmount.toStringAsFixed(0)}',
+                                '${budget.spentAmount.toStringAsFixed(0)} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -380,7 +380,7 @@ class MonthlyBudget extends ConsumerWidget {
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: Text(
-                                '\$${budget.allocatedAmount.toStringAsFixed(0)}',
+                                '${budget.allocatedAmount.toStringAsFixed(0)} Br.',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -464,7 +464,7 @@ class BudgetOverview extends ConsumerWidget {
                     child: Icon(Icons.attach_money, color: Colors.green, size: 22),
                   ),
                   title: const Text('Total Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('\$${totalAllocatedAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  subtitle: Text('${totalAllocatedAmount.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               Expanded(
@@ -476,7 +476,7 @@ class BudgetOverview extends ConsumerWidget {
                     child: Icon(Icons.money_off, color: Colors.red, size: 22),
                   ),
                   title: const Text('Budget Spent', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('\$${totalSpentAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  subtitle: Text('${totalSpentAmount.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -493,7 +493,7 @@ class BudgetOverview extends ConsumerWidget {
                     child: Icon(Icons.account_balance_wallet, color: Colors.blue, size: 22),
                   ),
                   title: const Text('Remaining Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('\$${remainingBudget.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  subtitle: Text('${remainingBudget.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               Expanded(

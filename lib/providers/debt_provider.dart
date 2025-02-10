@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/models/transaction.dart';
 import '../models/debt.dart';
 import '../services/firestore_service.dart';
 
@@ -30,12 +29,12 @@ class BorrowOrDebtNotifier extends StateNotifier<List<Debt>> {
   }
 
   Future<void> removeTransaction(String id) async {
-    await firestoreService.removeTransaction('userId', id); // Replace 'userId' with the actual user ID
+    await firestoreService.removeDebt('userId', id); // Replace 'userId' with the actual user ID
     state = await firestoreService.fetchDebts('userId'); // Refresh state after removal
   }
 
   Future<void> updateTransaction(String id, Debt updatedTransaction) async {
-    await firestoreService.updateTransaction('userId', id, updatedTransaction as Transaction); // Replace 'userId' with the actual user ID
+    await firestoreService.updateDebt('userId', id, updatedTransaction); // Replace 'userId' with the actual user ID
     state = await firestoreService.fetchDebts('userId'); // Refresh state after update
   }
 
