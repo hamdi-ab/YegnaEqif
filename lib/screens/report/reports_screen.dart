@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
 import 'package:yegna_eqif_new/providers/time_period_provider.dart';
 import 'package:yegna_eqif_new/providers/transaction_provider.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/reports_generated_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/report/reports_generated_screen.dart';
 
-import '../providers/total_balance_card_provider.dart';
+import '../../providers/total_balance_card_provider.dart';
 
 class ReportsScreen extends StatelessWidget {
   @override

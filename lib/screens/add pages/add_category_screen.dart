@@ -3,9 +3,9 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/models/category.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
 
-import '../providers/category_provider.dart';
+import '../../providers/category_provider.dart';
 
 class AddCategoryPage extends ConsumerStatefulWidget {
   @override
@@ -18,13 +18,12 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
   Color _selectedColor = Colors.blue;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   IconPack _selectedIconPack = IconPack.material;
-  final List<Map<String, dynamic>> _categories = [];
-  final String userId = 'user123';  // Mock user ID, replace with Firebase Auth user ID later
+  final List<Map<String, dynamic>> _categories = [];  // Mock user ID, replace with Firebase Auth user ID later
 
   void _selectIcon(BuildContext context) async {
     IconData? icon = await showIconPicker(
       context,
-      iconPackModes: [IconPack.material],
+      iconPackModes: [_selectedIconPack],
       adaptiveDialog: true,
     );
     if (icon != null) {
@@ -120,21 +119,24 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(width: 16),
-                      DropdownButton<IconPack>(
-                        alignment: AlignmentDirectional.centerEnd,
-                        value: _selectedIconPack,
-                        onChanged: (IconPack? newValue) {
-                          setState(() {
-                            _selectedIconPack = newValue!;
-                          });
-                        },
-                        items: IconPack.values.map<DropdownMenuItem<IconPack>>((IconPack value) {
-                          return DropdownMenuItem<IconPack>(
-                            value: value,
-                            child: Text(value.toString().split('.').last),
-                          );
-                        }).toList(),
-                      ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<IconPack>(
+                          alignment: AlignmentDirectional.centerEnd,
+                          value: _selectedIconPack,
+                          onChanged: (IconPack? newValue) {
+                            setState(() {
+                              _selectedIconPack = newValue!;
+                            });
+                          },
+                          items: IconPack.values.map<DropdownMenuItem<IconPack>>((IconPack value) {
+                            return DropdownMenuItem<IconPack>(
+                              value: value,
+                              child: Text(value.toString().split('.').last),
+                            );
+                          }).toList(),
+                        ),
+                      )
+                      ,
                     ],
                   )),
               ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),

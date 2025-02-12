@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/budget_provider.dart';
 import 'package:yegna_eqif_new/providers/time_period_provider.dart';
-import 'package:yegna_eqif_new/screens/add_category_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/manage_budget_page.dart';
-import 'package:yegna_eqif_new/screens/reports_screen.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_category_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/budget/manage_budget_page.dart';
+import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
 
-import '../models/category.dart';
+import '../../models/category.dart';
 
 
 class BudgetScreen extends StatefulWidget {
@@ -99,26 +99,22 @@ class CategoriesGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryProvider);
 
-    return ContainerWIthBoxShadow(margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(16),child: categories.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.8,
-          ),
-          itemCount: categories.length + 1,
-          itemBuilder: (context, index) {
-            if (index == categories.length) {
-              return GestureDetector(
+    return ContainerWIthBoxShadow(
+      width: double.infinity,
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      child: categories.isEmpty
+          ? FutureBuilder(
+        future: Future.delayed(Duration(seconds: 1)),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Align(
+              alignment: AlignmentDirectional.topStart,
+              child: GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  AddCategoryPage()),
+                    MaterialPageRoute(builder: (context) => AddCategoryPage()),
                   );
                 },
                 child: Column(
@@ -137,37 +133,81 @@ class CategoriesGrid extends ConsumerWidget {
                     ),
                   ],
                 ),
-              );
-            }
-
-            final category = categories[index];
-
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: category.color.withOpacity(0.1),
-                  child: Icon(
-                    category.icon,
-                    color: category.color,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  category.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              ),
             );
-          },
-        ));
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      )
+          : GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.8,
+        ),
+        itemCount: categories.length + 1,
+        itemBuilder: (context, index) {
+          if (index == categories.length) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddCategoryPage()),
+                );
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.grey.withOpacity(0.2),
+                    child: const Icon(Icons.add, color: Colors.black, size: 20),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Add',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final category = categories[index];
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: category.color.withOpacity(0.1),
+                child: Icon(
+                  category.icon,
+                  color: category.color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                category.name,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
+
 
 
 
@@ -258,26 +298,38 @@ class CircularProgressBar extends ConsumerWidget {
 }
 
 
-
-
 class MonthlyBudget extends ConsumerWidget {
   final Key? key;
-  MonthlyBudget({this.key}) : super(key: key);
+  const MonthlyBudget({this.key}) : super(key: key);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
     final categories = ref.watch(categoryProvider);
 
+    if (budgets.isEmpty || categories.isEmpty) {
+      return const Center(
+        child: Text(
+          'No budgets or categories available.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
     // Helper function to get category details
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
             (cat) => cat.name == categoryId,
-        orElse: () => Category(id: '', name: 'Unknown', icon: Icons.question_mark, color: Colors.grey),
+        orElse: () => Category(
+          id: '',
+          name: 'Unknown',
+          icon: Icons.question_mark,
+          color: Colors.grey,
+        ),
       );
     }
 
     return SizedBox(
-      // Adjust the height as needed
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -308,117 +360,121 @@ class MonthlyBudget extends ConsumerWidget {
             statusColor = Colors.red;
           }
 
-          return ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon and Label Row
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: category.color.withOpacity(0.2),
-                        child: Icon(
-                          category.icon,
-                          color: progressColor,
+          return ContainerWIthBoxShadow(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon and Label Row
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: category.color.withOpacity(0.2),
+                      child: Icon(
+                        category.icon,
+                        color: progressColor,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${dailyBudget.toStringAsFixed(2)} Br./Day',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Progress Bar with Labels Inside
+                Stack(
+                  children: [
+                    // Progress Bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        minHeight: 24,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressColor,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    // Labels Inside Progress Bar
+                    Positioned.fill(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            category.name,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              '${budget.spentAmount.toStringAsFixed(0)} Br.',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          Text(
-                            '${dailyBudget.toStringAsFixed(2)} Br./Day',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text(
+                              '${budget.allocatedAmount.toStringAsFixed(0)} Br.',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Progress Bar with Labels Inside
-                  Stack(
-                    children: [
-                      // Progress Bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: LinearProgressIndicator(
-                          value: progress.clamp(0.0, 1.0),
-                          minHeight: 24,
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            progressColor,
-                          ),
-                        ),
-                      ),
-                      // Labels Inside Progress Bar
-                      Positioned.fill(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
-                                '${budget.spentAmount.toStringAsFixed(0)} Br.',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Text(
-                                '${budget.allocatedAmount.toStringAsFixed(0)} Br.',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Status Indicator
-                  Row(
-                    children: [
-                      Icon(
-                        statusIcon,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Status Indicator
+                Row(
+                  children: [
+                    Icon(
+                      statusIcon,
+                      color: statusColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                         color: statusColor,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        statusText,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ));
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 }
+
 
 class BudgetOverview extends ConsumerWidget {
   @override

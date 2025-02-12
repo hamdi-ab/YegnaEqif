@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
+import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
 
-import '../models/bank_account.dart';
-import '../providers/bank_account_provider.dart';
+import '../../models/bank_account.dart';
+import '../../providers/bank_account_provider.dart';
 
 class AddBankCardPage extends ConsumerStatefulWidget {
   const AddBankCardPage({Key? key}) : super(key: key);
@@ -176,6 +177,10 @@ class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
                           ref
                               .read(bankAccountProvider.notifier)
                               .addBankAccount(newBankCard);
+
+                          ref
+                              .read(totalBalanceCardProvider.notifier)
+                              .updateTotalBalance(newBankCard.balance, true);
 
                           Navigator.pop(context); // Close the page
                         }

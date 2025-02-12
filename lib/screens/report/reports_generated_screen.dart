@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/reports_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../providers/time_period_provider.dart';
-import '../providers/transaction_provider.dart';
+import '../../providers/time_period_provider.dart';
+import '../../providers/transaction_provider.dart';
 
 class ReportsGeneratedScreen extends StatelessWidget {
   const ReportsGeneratedScreen({super.key});

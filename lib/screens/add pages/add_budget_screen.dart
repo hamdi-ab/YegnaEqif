@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/budget.dart';
-import '../models/category.dart';
-import '../providers/budget_provider.dart';
+import '../../models/budget.dart';
+import '../../models/category.dart';
+import '../../providers/budget_provider.dart';
 import 'add_transaction_screen.dart';
-import 'dashboard_screen.dart'; // Import your Category provider
+import '../dashboard/dashboard_screen.dart'; // Import your Category provider
 
 class AddBudgetPage extends ConsumerStatefulWidget {
   const AddBudgetPage({Key? key}) : super(key: key);

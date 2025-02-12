@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/models/debt.dart';
-import 'package:yegna_eqif_new/screens/add_transaction_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
-import '../providers/debt_provider.dart';
-import '../utils/transaction_handler.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import '../../providers/debt_provider.dart';
+import '../../utils/transaction_handler.dart';
 
 class AddDebtTransactionScreen extends ConsumerStatefulWidget {
   @override

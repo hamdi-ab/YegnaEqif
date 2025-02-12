@@ -13,12 +13,12 @@ import 'package:yegna_eqif_new/providers/transaction_provider.dart';
 import 'package:yegna_eqif_new/screens/profile_page.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
 import 'package:intl/intl.dart';
-import 'package:yegna_eqif_new/screens/top_spending_detail_page.dart';
-import '../models/category.dart';
-import '../models/transaction.dart';
-import '../providers/debt_provider.dart';
-import '../utils/string_formater.dart';
-import 'budget_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/top_spending_detail_page.dart';
+import '../../models/category.dart';
+import '../../models/transaction.dart';
+import '../../providers/debt_provider.dart';
+import '../../utils/string_formater.dart';
+import '../budget/budget_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PageController _pageController = PageController(initialPage: 1);
@@ -256,6 +256,7 @@ class SectionWithHeader extends StatelessWidget {
   }
 }
 
+
 class PeopleList extends ConsumerWidget {
   final bool isOwed;
 
@@ -265,11 +266,17 @@ class PeopleList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactions = ref.watch(borrowOrDebtProvider);
     final filteredTransactions = transactions
-        .where((transaction) =>
-    transaction.transactionType == (isOwed ? 'lent' : 'borrowed'))
+        .where((transaction) => transaction.transactionType == (isOwed ? 'lent' : 'borrowed'))
         .toList();
 
-    return SizedBox(
+    return filteredTransactions.isEmpty
+        ? Center(
+      child: Text(
+        isOwed ? 'No people owe you money.' : 'You owe no one money.',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+    )
+        : SizedBox(
       height: 160,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -315,6 +322,7 @@ class PeopleList extends ConsumerWidget {
     );
   }
 }
+
 
 
 class ContainerWIthBoxShadow extends StatelessWidget {
@@ -541,18 +549,24 @@ class CardWidget extends StatelessWidget {
   }
 }
 
+
 class TopSpending extends ConsumerWidget {
   const TopSpending({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionProvider);
-    final categories = ref.watch(categoryProvider);
+    final transactionsState = ref.watch(transactionProvider);
+    final categoriesState = ref.watch(categoryProvider);
 
-// Calculate spending by category
+    // Check for loading, error, or empty state
+    if (transactionsState.isEmpty || categoriesState.isEmpty) {
+      return const Center(child: Text('No transactions or categories available.',style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)));
+    }
+
+    // Calculate spending by category
     final Map<String, double> spendingByCategory = {};
 
-    for (var transaction in transactions) {
+    for (var transaction in transactionsState) {
       if (transaction.type == 'Expense') {
         spendingByCategory.update(
           transaction.category,
@@ -562,9 +576,9 @@ class TopSpending extends ConsumerWidget {
       }
     }
 
-// Sort categories by spending in descending order
+    // Sort categories by spending in descending order
     final sortedCategories = spendingByCategory.entries.map((entry) {
-      final category = categories.firstWhere((category) => category.name == entry.key);
+      final category = categoriesState.firstWhere((category) => category.name == entry.key);
       return {
         'category': category,
         'amount': entry.value,
@@ -572,8 +586,14 @@ class TopSpending extends ConsumerWidget {
     }).toList()
       ..sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
 
-
-    return SizedBox(
+    return sortedCategories.isEmpty
+        ? const Center(
+      child: Text(
+        'No spending data available.',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+    )
+        : SizedBox(
       height: 160,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -584,39 +604,40 @@ class TopSpending extends ConsumerWidget {
           final amount = item['amount'] as double;
 
           return ContainerWIthBoxShadow(
-              width: 110,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: category.color,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      category.icon,
-                      color: Colors.white,
-                    ),
+            width: 110,
+            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: category.color,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    category.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  child: Icon(
+                    category.icon,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${amount.toStringAsFixed(2)} Br.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold, color: Colors.red),
-                  ),
-                ],
-              ),
-              margin: EdgeInsets.symmetric(horizontal: 8, vertical: 10));
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  category.name,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${amount.toStringAsFixed(2)} Br.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -624,17 +645,32 @@ class TopSpending extends ConsumerWidget {
 }
 
 class MonthlyBudget extends ConsumerWidget {
+  const MonthlyBudget({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final budgets = ref.watch(budgetProvider);
     final categories = ref.watch(categoryProvider);
 
+    if (budgets.isEmpty || categories.isEmpty) {
+      return const Center(
+        child: Text(
+          'No budgets or categories available.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      );
+    }
+
     // Helper function to get category details
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-        (cat) => cat.name == categoryId,
+            (cat) => cat.name == categoryId,
         orElse: () => Category(
-            id: '', name: 'Unknown', icon: Icons.category, color: Colors.grey),
+          id: '',
+          name: 'Unknown',
+          icon: Icons.category,
+          color: Colors.grey,
+        ),
       );
     }
 
@@ -650,96 +686,96 @@ class MonthlyBudget extends ConsumerWidget {
           final Color progressColor = category.color;
 
           return ContainerWIthBoxShadow(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10.0),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              width: 230,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Icon and Label Row
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: progressColor.withOpacity(0.1),
-                        child: Icon(
-                          category.icon,
-                          color: progressColor,
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            width: 230,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon and Label Row
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: progressColor.withOpacity(0.1),
+                      child: Icon(
+                        category.icon,
+                        color: progressColor,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${budget.allocatedAmount.toStringAsFixed(0)} Br. total',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Progress Bar with Labels Inside
+                Stack(
+                  children: [
+                    // Progress Bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0),
+                        minHeight: 24,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressColor,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    // Labels Inside Progress Bar
+                    Positioned.fill(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            category.name,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              '${(budget.spentAmount).toStringAsFixed(0)} Br.',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          Text(
-                            '${budget.allocatedAmount.toStringAsFixed(0)} Br. total',
-                            style: Theme.of(context).textTheme.bodySmall,
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text(
+                              '${budget.allocatedAmount} Br.',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Progress Bar with Labels Inside
-                  Stack(
-                    children: [
-                      // Progress Bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: LinearProgressIndicator(
-                          value: progress.clamp(0.0, 1.0),
-                          minHeight: 24,
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            progressColor,
-                          ),
-                        ),
-                      ),
-                      // Labels Inside Progress Bar
-                      Positioned.fill(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
-                                '${(budget.spentAmount).toStringAsFixed(0)} Br.',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Text(
-                                '${budget.allocatedAmount} Br.',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ));
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 }
-
 
 
 class RecentTransaction extends ConsumerWidget {
@@ -768,13 +804,22 @@ class RecentTransaction extends ConsumerWidget {
     // Group transactions by date (formatted correctly)
     final Map<String, List<Transaction>> groupedTransactions = {};
     for (var transaction in filteredTransactions) {
-      final dateKey = DateFormat('yyyy-MM-dd').format(transaction.date); //
+      final dateKey = DateFormat('yyyy-MM-dd').format(transaction.date);
       groupedTransactions.putIfAbsent(dateKey, () => []).add(transaction);
     }
 
     // Sort dates (newest first)
     final sortedDates = groupedTransactions.keys.toList()
-      ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a))); //
+      ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a)));
+
+    if (transactions.isEmpty) {
+      return const Center(
+        child: Text(
+          'No recent transactions available.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -794,23 +839,26 @@ class RecentTransaction extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Date',style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54
-                      ),),
+                      const Text(
+                        'Date:',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      ),
                       Text(
                         dateKey,
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black54
+                          color: Colors.black54,
                         ),
                       ),
                     ],
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   ),
                 ),
                 // Transactions under this date
@@ -841,9 +889,9 @@ class RecentTransaction extends ConsumerWidget {
                             style: TextStyle(color: amountColor, fontSize: 14),
                           ),
                           Text(
-                            '${transaction.bankType}',
-                            style: TextStyle(color: Colors.black, fontSize: 14),
-                          )
+                            transaction.bankType,
+                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                          ),
                         ],
                       ),
                     ),
@@ -857,6 +905,7 @@ class RecentTransaction extends ConsumerWidget {
     );
   }
 }
+
 
 
 

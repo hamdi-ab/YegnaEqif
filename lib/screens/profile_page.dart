@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yegna_eqif_new/providers/user_provider.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
 
-class ProfilePage extends StatelessWidget {
+import '../splash_screen.dart';
+
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
@@ -40,7 +44,13 @@ class ProfilePage extends StatelessWidget {
               leading: Icon(Icons.logout),
               title: Text('Logout'),
               onTap: () {
-                // Handle logout
+                ref
+                    .read(userProvider.notifier)
+                    .logout();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => SplashScreen()),
+                );
               },
             ),
           ],

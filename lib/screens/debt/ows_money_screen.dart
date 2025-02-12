@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/screens/add_partial_debt_pay_page.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_partial_debt_pay_page.dart';
 
-import '../models/debt.dart';
-import '../providers/debt_provider.dart';
+import '../../models/debt.dart';
+import '../../providers/debt_provider.dart';
 
 class DebtTrackerPage extends ConsumerStatefulWidget {
   @override
@@ -174,160 +174,165 @@ class _DebtTrackerPageState extends ConsumerState<DebtTrackerPage>
                 controller: _tabController,
                 children: [
                   // Tab view for "Lent"
-                  ListView.builder(
-                    itemCount: lentTransactions.length,
-                    itemBuilder: (context, index) {
-                      final transaction = lentTransactions[index];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                              offset: const Offset(0, 4),
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              spreadRadius: -1,
-                              offset: const Offset(0, -1),
-                            ),
-                          ],
+              ListView.builder(
+              itemCount: lentTransactions.length,
+                itemBuilder: (context, index) {
+                  if (lentTransactions.isEmpty) {
+                    return Text(
+                      'No transactions available.',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    );
+                  }
+                  final transaction = lentTransactions[index];
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 4),
                         ),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.all(0),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.green.withOpacity(0.1),
-                            radius: 24,
-                            child: Icon(Icons.person, color: Colors.green, size: 24),
-                          ),
-                          title: Column(
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 4,
+                          spreadRadius: -1,
+                          offset: const Offset(0, -1),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.green.withOpacity(0.1),
+                        radius: 24,
+                        child: Icon(Icons.person, color: Colors.green, size: 24),
+                      ),
+                      title: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    transaction.personName,
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    'Remaining: ${transaction.remainingAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                ],
+                              Text(
+                                transaction.personName,
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Amount: ${transaction.totalAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                  Text(
-                                    'Days Left: ${transaction.daysLeft}',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              LinearProgressIndicator(
-                                value: transaction.progress,
-                                backgroundColor: Colors.grey[300],
-                                color: Colors.green,
+                              Text(
+                                'Remaining: ${transaction.remainingAmount.toStringAsFixed(2)} Br.',
+                                style: TextStyle(fontSize: 15),
                               ),
                             ],
                           ),
-                          trailing: PopupMenuButton<String>(
-                            icon: Icon(Icons.more_vert),
-                            onSelected: (value) async {
-                              if (value == 'Edit') {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditDebtPage(debt: transaction),
-                                  ),
-                                );
-                              } else if (value == 'Delete') {
-                                bool deleteConfirmed = await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Delete Debt'),
-                                    content: Text('Are you sure you want to delete this debt for ${transaction.personName}?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (deleteConfirmed) {
-                                  ref.read(borrowOrDebtProvider.notifier).removeTransaction(transaction.id);
-                                }
-                              } else if (value == 'Pay') {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddPartialDebtPayPage(
-                                      debtId: transaction.id,
-                                      transactionType: transaction.transactionType,
-                                      personName: transaction.personName,
-                                      remainingAmount: transaction.remainingAmount,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            itemBuilder: (BuildContext context) {
-                              return [
-                                PopupMenuItem<String>(
-                                  value: 'Edit',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.edit, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Edit'),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem<String>(
-                                  value: 'Delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.delete, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Delete'),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem<String>(
-                                  value: 'Pay',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.payments, size: 18),
-                                      SizedBox(width: 8),
-                                      Text('Pay'),
-                                    ],
-                                  ),
-                                ),
-                              ];
-                            },
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Amount: ${transaction.totalAmount.toStringAsFixed(2)} Br.',
+                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                              Text(
+                                'Days Left: ${transaction.daysLeft}',
+                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                            ],
                           ),
-                        ),
-                      );
-                    },
-                  )
-                  ,
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(
+                            value: transaction.progress,
+                            backgroundColor: Colors.grey[300],
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert),
+                        onSelected: (value) async {
+                          if (value == 'Edit') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditDebtPage(debt: transaction),
+                              ),
+                            );
+                          } else if (value == 'Delete') {
+                            bool deleteConfirmed = await showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete Debt'),
+                                content: Text('Are you sure you want to delete this debt for ${transaction.personName}?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (deleteConfirmed) {
+                              ref.read(borrowOrDebtProvider.notifier).removeTransaction(transaction.id);
+                            }
+                          } else if (value == 'Pay') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddPartialDebtPayPage(
+                                  debtId: transaction.id,
+                                  transactionType: transaction.transactionType,
+                                  personName: transaction.personName,
+                                  remainingAmount: transaction.remainingAmount,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            PopupMenuItem<String>(
+                              value: 'Edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'Delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'Pay',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.payments, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Pay'),
+                                ],
+                              ),
+                            ),
+                          ];
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
 
                   // Tab view for "Owed"
                   ListView.builder(

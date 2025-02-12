@@ -1,38 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/bank_account.dart';
 import '../services/firestore_service.dart';
+import 'auth_provider.dart';
 import 'debt_provider.dart';
 
 final bankAccountProvider = StateNotifierProvider<BankAccountNotifier, List<BankAccountCardModel>>((ref) {
-  return BankAccountNotifier(ref: ref, firestoreService: ref.watch(firestoreServiceProvider));
+  final currentUser = ref.watch(firebaseAuthProvider).currentUser;
+  return BankAccountNotifier(ref: ref, firestoreService: ref.watch(firestoreServiceProvider), userId: currentUser?.uid ?? '');
 });
 
 class BankAccountNotifier extends StateNotifier<List<BankAccountCardModel>> {
   final Ref ref;
   final FirestoreService firestoreService;
+  final String userId;
 
-  BankAccountNotifier({required this.ref, required this.firestoreService}) : super([]) {
+
+  BankAccountNotifier({required this.ref, required this.firestoreService, required this.userId}) : super([]) {
     _fetchBankAccounts();
   }
 
   Future<void> _fetchBankAccounts() async {
-    final bankAccounts = await firestoreService.fetchBankAccounts('userId'); // Replace 'userId' with the actual user ID
+    final bankAccounts = await firestoreService.fetchBankAccounts(userId); // Replace 'userId' with the actual user ID
     state = bankAccounts;
   }
 
   Future<void> addBankAccount(BankAccountCardModel bankAccount) async {
-    await firestoreService.addBankAccount('userId', bankAccount); // Replace 'userId' with the actual user ID
-    state = await firestoreService.fetchBankAccounts('userId'); // Refresh state after addition
+    await firestoreService.addBankAccount(userId, bankAccount); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBankAccounts(userId); // Refresh state after addition
   }
 
   Future<void> removeBankAccount(String id) async {
-    await firestoreService.removeBankAccount('userId', id); // Replace 'userId' with the actual user ID
-    state = await firestoreService.fetchBankAccounts('userId'); // Refresh state after removal
+    await firestoreService.removeBankAccount(userId, id); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBankAccounts(userId); // Refresh state after removal
   }
 
   Future<void> updateBankAccount(String id, BankAccountCardModel updatedBankAccount) async {
-    await firestoreService.updateBankAccount('userId', id, updatedBankAccount); // Replace 'userId' with the actual user ID
-    state = await firestoreService.fetchBankAccounts('userId'); // Refresh state after update
+    await firestoreService.updateBankAccount(userId, id, updatedBankAccount); // Replace 'userId' with the actual user ID
+    state = await firestoreService.fetchBankAccounts(userId); // Refresh state after update
   }
 
   // Methods to handle transactions
@@ -52,7 +56,7 @@ class BankAccountNotifier extends StateNotifier<List<BankAccountCardModel>> {
           final updatedCard = card.copyWith(balance: newBalance);
 
           // Update Firebase
-          await firestoreService.updateBankAccount('userId', card.id ?? '', updatedCard); // Replace 'userId' with the actual user ID
+          await firestoreService.updateBankAccount(userId, card.id ?? '', updatedCard); // Replace 'userId' with the actual user ID
 
           // Update local state
           state = [

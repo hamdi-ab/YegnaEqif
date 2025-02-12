@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/transaction_handler.dart';
+import '../../utils/transaction_handler.dart';
 import 'add_transaction_screen.dart';
-import 'dashboard_screen.dart';
+import '../dashboard/dashboard_screen.dart';
 
 class AddPartialDebtPayPage extends ConsumerStatefulWidget {
   const AddPartialDebtPayPage({required this.debtId, required this.transactionType, required this.personName, required this.remainingAmount, super.key});

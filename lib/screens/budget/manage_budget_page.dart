@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yegna_eqif_new/providers/category_provider.dart';
-import '../models/budget.dart';
-import '../models/category.dart';
-import '../providers/budget_provider.dart';
+import '../../models/budget.dart';
+import '../../models/category.dart';
+import '../../providers/budget_provider.dart';
 
 class ManageBudgetPage extends ConsumerWidget {
   const ManageBudgetPage({Key? key}) : super(key: key);

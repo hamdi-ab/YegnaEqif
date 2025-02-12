@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:yegna_eqif_new/screens/add_bank_card_page.dart';
-import 'package:yegna_eqif_new/screens/add_category_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_bank_card_page.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_category_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
 
-import '../models/category.dart';
-import '../models/transaction.dart';
-import '../providers/bank_account_provider.dart';
-import '../providers/budget_provider.dart';
-import '../providers/cash_card_provider.dart';
-import '../providers/category_provider.dart';
-import '../providers/transaction_provider.dart';
-import '../utils/transaction_handler.dart';
+import '../../models/category.dart';
+import '../../models/transaction.dart';
+import '../../providers/bank_account_provider.dart';
+import '../../providers/budget_provider.dart';
+import '../../providers/cash_card_provider.dart';
+import '../../providers/category_provider.dart';
+import '../../providers/transaction_provider.dart';
+import '../../utils/transaction_handler.dart';
 
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -646,7 +646,42 @@ class _CategoryListPageState extends ConsumerState<CategoryListPage> {
           ],
         ),
         child: categories.isEmpty
-            ? const Center(child: CircularProgressIndicator()) // Loading State
+            ? FutureBuilder(
+          future: Future.delayed(Duration(seconds: 1)),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Align(
+                alignment: AlignmentDirectional.center,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddCategoryPage()),
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
+                        child: const Icon(Icons.add, color: Colors.black, size: 20),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Add',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ) // Loading State
             : GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

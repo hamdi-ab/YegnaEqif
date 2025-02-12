@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/screens/home_screen.dart';
+import 'package:yegna_eqif_new/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return  ProviderScope(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: HomeScreen()
+        home: SplashScreen()
       ),
     );
   }
