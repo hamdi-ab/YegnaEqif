@@ -1,16 +1,38 @@
-# yegna_eqif_new
+# Yegna Eqif
 
-A new Flutter project.
+**Yegna Eqif** is an expense-tracking app designed to help users manage their spending and loans effectively. This project aims to address common financial issues such as overspending during university and forgetting about lending money. Built with Flutter and Firebase, Yegna Eqif provides an intuitive and user-friendly interface for tracking expenses and managing loans.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Expense Tracking**: Easily record and categorize daily expenses.
+- **Loan Management**: Keep track of money lent and borrowed.
+- **Spending Analytics**: Visualize spending patterns with charts and graphs.
+- **Reminders**: Set reminders for due payments and repayments.
+- **Secure Storage**: Data is securely stored using Firebase.
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies Used
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter**: For cross-platform mobile development.
+- **Dart**: Programming language used with Flutter.
+- **Firebase**: Backend services for authentication, database, and storage.
+- **Riverpod**: State management.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Contributing
+
+Contributions are welcome! If you'd like to contribute to Yegna Eqif, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+If you have any questions or suggestions, feel free to reach out to me at [hamdiabdulfetah22@gmail.com](mailto:hamdiabdulfetah22@gmail.com).
+
+---
