@@ -25,7 +25,7 @@ dependencies:
   flutter_iconpicker: ^3.3.3
   firebase_core: ^3.10.1
   cloud_firestore: ^5.6.2
-  flutter_riverpod: ^2.6.1
+  provider: ^6.1.2
   smooth_page_indicator: ^1.2.0+3
   shared_preferences: ^2.3.3
   grouped_list: ^6.0.0
