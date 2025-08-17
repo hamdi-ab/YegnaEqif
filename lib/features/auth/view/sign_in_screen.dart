@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:yegna_eqif_new/screens/home_screen.dart';
+import 'package:yegna_eqif_new/screens/sign_up_screen.dart';
+import 'package:yegna_eqif_new/core/generic_dialog.dart';
 
-import '../providers/user_provider.dart';
-import '../utils/generic_dialog.dart';
-
-class SignUp extends ConsumerStatefulWidget {
-  const SignUp({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
   @override
-  ConsumerState<SignUp> createState() => _SignUpState();
+  State<SignIn> createState() => _SignInState();
 }
 
-class _SignUpState extends ConsumerState<SignUp> {
-  final GlobalKey<FormState> _signUpKey = GlobalKey();
+class _SignInState extends State<SignIn> {
+  final GlobalKey<FormState> _signInKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final RegExp emailValid = RegExp(
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,9 +28,26 @@ class _SignUpState extends ConsumerState<SignUp> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
+
+    if (authViewModel.user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      });
+    }
+
+    if (authViewModel.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, authViewModel.error!);
+      });
+    }
+
     return Scaffold(
       body: Form(
-        key: _signUpKey,
+        key: _signInKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -41,9 +57,8 @@ class _SignUpState extends ConsumerState<SignUp> {
               child: Image.asset('assets/icon.png'),
             ),
             const Text(
-              'Sign Up to Yegna Eqif',
-              style: TextStyle(
-                  fontSize: 18.0, fontWeight: FontWeight.bold),
+              'Log in to Yegna Eqif',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(25, 25, 25, 0),
@@ -69,7 +84,7 @@ class _SignUpState extends ConsumerState<SignUp> {
               ),
             ),
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+              margin: const EdgeInsets.fromLTRB(25, 15, 25, 15),
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -91,47 +106,33 @@ class _SignUpState extends ConsumerState<SignUp> {
                 },
               ),
             ),
-            _isLoading
+            authViewModel.loading
                 ? const CircularProgressIndicator()
                 : Container(
-              width: 250,
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(30)),
-              child: TextButton(
-                  onPressed: () async {
-                    if (_signUpKey.currentState!.validate()) {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      try {
-                        final notifier = ref.read(userProvider.notifier);
-                        await notifier.signUp(
-                            context, _emailController.text, _passwordController.text);
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomeScreen()),
-                        );
-                      } catch (e) {
-                        await showErrorDialog(context, e.toString());
-                      } finally {
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      }
-                    }
-                  },
-                  child: const Text(
-                    'Sign Up',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  )),
-            ),
+                    width: 250,
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(30)),
+                    child: TextButton(
+                        onPressed: () async {
+                          if (_signInKey.currentState!.validate()) {
+                            await context.read<AuthViewModel>().signIn(
+                                _emailController.text,
+                                _passwordController.text);
+                          }
+                        },
+                        child: const Text(
+                          'Log In',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        )),
+                  ),
             TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const SignUp()));
                 },
                 child: const Text(
-                  "Already have an account? Log in here",
+                  "Don't have an account? Sign up here",
                   style: TextStyle(color: Colors.blue),
                 ))
           ],

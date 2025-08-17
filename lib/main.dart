@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/splash_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/auth/view/splash_screen.dart';
+import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,10 +15,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  ProviderScope(
+    return ChangeNotifierProvider(
+      create: (_) => AuthViewModel(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: SplashScreen()
+        home: SplashScreen(),
       ),
     );
   }

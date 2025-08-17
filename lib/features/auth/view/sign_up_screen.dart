@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:yegna_eqif_new/screens/home_screen.dart';
-import 'package:yegna_eqif_new/screens/sign_up_screen.dart';
+import 'package:yegna_eqif_new/core/generic_dialog.dart';
 
-import '../providers/user_provider.dart';
-import '../utils/generic_dialog.dart';
-
-class SignIn extends ConsumerStatefulWidget {
-  const SignIn({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  ConsumerState<SignIn> createState() => _SignInState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _SignInState extends ConsumerState<SignIn> {
-  final GlobalKey<FormState> _signInKey = GlobalKey();
+class _SignUpState extends State<SignUp> {
+  final GlobalKey<FormState> _signUpKey = GlobalKey();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final RegExp emailValid = RegExp(
       r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$");
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,11 +27,13 @@ class _SignInState extends ConsumerState<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
+
     return Scaffold(
-        body: Form(
-        key: _signInKey,
+      body: Form(
+        key: _signUpKey,
         child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 160,
@@ -42,8 +41,9 @@ class _SignInState extends ConsumerState<SignIn> {
               child: Image.asset('assets/icon.png'),
             ),
             const Text(
-              'Log in to Yegna Eqif',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              'Sign Up to Yegna Eqif',
+              style: TextStyle(
+                  fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(25, 25, 25, 0),
@@ -69,7 +69,7 @@ class _SignInState extends ConsumerState<SignIn> {
               ),
             ),
             Container(
-              margin: const EdgeInsets.fromLTRB(25, 15, 25, 15),
+              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
                   color: Colors.grey.shade200,
@@ -91,7 +91,7 @@ class _SignInState extends ConsumerState<SignIn> {
                 },
               ),
             ),
-            _isLoading
+            authViewModel.loading
                 ? const CircularProgressIndicator()
                 : Container(
               width: 250,
@@ -100,44 +100,37 @@ class _SignInState extends ConsumerState<SignIn> {
                   borderRadius: BorderRadius.circular(30)),
               child: TextButton(
                   onPressed: () async {
-                    if (_signInKey.currentState!.validate()) {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      try {
-                        final notifier = ref.read(userProvider.notifier);
-                        await notifier.logIn(
-                            context, _emailController.text, _passwordController.text);
+                    if (_signUpKey.currentState!.validate()) {
+                      await context.read<AuthViewModel>().signUp(
+                          _emailController.text, _passwordController.text);
+                      if (authViewModel.error != null) {
+                        await showErrorDialog(
+                            context, authViewModel.error!);
+                      } else {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => HomeScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => HomeScreen()),
                         );
-                      } catch (e) {
-                        await showErrorDialog(context, e.toString());
-                      } finally {
-                        setState(() {
-                          _isLoading = false;
-                        });
                       }
                     }
                   },
                   child: const Text(
-                    'Log In',
+                    'Sign Up',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   )),
             ),
             TextButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const SignUp()));
+                  Navigator.pop(context);
                 },
                 child: const Text(
-                  "Don't have an account? Sign up here",
+                  "Already have an account? Log in here",
                   style: TextStyle(color: Colors.blue),
                 ))
           ],
         ),
-        ),
+      ),
     );
   }
 }
