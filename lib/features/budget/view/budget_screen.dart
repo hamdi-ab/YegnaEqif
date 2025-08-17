@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/providers/budget_provider.dart';
-import 'package:yegna_eqif_new/providers/time_period_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
+// import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor to ViewModel
+// import 'package:yegna_eqif_new/providers/category_provider.dart'; // TODO: Refactor to ViewModel
 import 'package:yegna_eqif_new/screens/add%20pages/add_category_screen.dart';
 import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/budget/manage_budget_page.dart';
+import 'manage_budget_page.dart';
 import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
-import 'package:yegna_eqif_new/providers/category_provider.dart';
-
-import '../../models/category.dart';
-
+import 'package:yegna_eqif_new/models/category.dart';
 
 class BudgetScreen extends StatefulWidget {
   final bool scrollToMonthlyBudget;
@@ -56,7 +54,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 20),
-              TimePeriodToggle(),
+              // TimePeriodToggle(), // TODO: Refactor
               SizedBox(height: 40),
               CircularProgressBar(),
               SizedBox(height: 20),
@@ -81,7 +79,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: 16),
-              // Assign the GlobalKey to the MonthlyBudget widget
               MonthlyBudget(key: _monthlyBudgetKey),
             ],
           ),
@@ -91,13 +88,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 }
 
-
-class CategoriesGrid extends ConsumerWidget {
+class CategoriesGrid extends StatelessWidget {
   const CategoriesGrid({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final categories = ref.watch(categoryProvider);
+  Widget build(BuildContext context) {
+    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor to ViewModel
+    final categories = []; // Placeholder
 
     return ContainerWIthBoxShadow(
       width: double.infinity,
@@ -208,18 +205,24 @@ class CategoriesGrid extends ConsumerWidget {
   }
 }
 
-
-
-
-class CircularProgressBar extends ConsumerWidget {
+class CircularProgressBar extends StatelessWidget {
   const CircularProgressBar({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgets = ref.watch(budgetProvider);
-    final selectedTimePeriod = ref.watch(timePeriodProvider);
+  Widget build(BuildContext context) {
+    final budgetViewModel = context.watch<BudgetViewModel>();
+    final budgets = budgetViewModel.budgets;
+    // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
+    final selectedTimePeriod = TimePeriod.month; // Placeholder
 
-    // Filter the budgets based on the selected time period
+    if (budgetViewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (budgetViewModel.error != null) {
+      return Center(child: Text('Error: ${budgetViewModel.error}'));
+    }
+
     final filteredBudgets = budgets.where((budget) {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
@@ -234,28 +237,23 @@ class CircularProgressBar extends ConsumerWidget {
       }
     }).toList();
 
-    // Calculate total allocated amount and total spent amount
     final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
     final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double progress = totalAllocatedAmount > 0 ? totalSpentAmount / totalAllocatedAmount : 0;
 
-    // Calculate progress
-    final double progress = totalSpentAmount / totalAllocatedAmount;
-
-    // Determine color based on progress
     Color progressColor;
     if (progress <= 0.5) {
-      progressColor = Colors.red; // Red for less than 50%
+      progressColor = Colors.red;
     } else if (progress <= 0.8) {
-      progressColor = Colors.yellow; // Yellow for 50-80%
+      progressColor = Colors.yellow;
     } else {
-      progressColor = Colors.green; // Green for 80% and above
+      progressColor = Colors.green;
     }
 
     return Center(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer Circle
           SizedBox(
             width: 200,
             height: 200,
@@ -266,11 +264,9 @@ class CircularProgressBar extends ConsumerWidget {
               backgroundColor: Colors.black12,
             ),
           ),
-          // Inner content
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Progress percentage
               Text(
                 '${(progress * 100).toStringAsFixed(1)}%',
                 style: const TextStyle(
@@ -280,7 +276,6 @@ class CircularProgressBar extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Current and Total amount
               Text(
                 '${totalSpentAmount.toStringAsFixed(0)} Br. of ${totalAllocatedAmount.toStringAsFixed(0)} Br.',
                 style: const TextStyle(
@@ -297,15 +292,16 @@ class CircularProgressBar extends ConsumerWidget {
   }
 }
 
-
-class MonthlyBudget extends ConsumerWidget {
+class MonthlyBudget extends StatelessWidget {
   final Key? key;
   const MonthlyBudget({this.key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgets = ref.watch(budgetProvider);
-    final categories = ref.watch(categoryProvider);
+  Widget build(BuildContext context) {
+    final budgetViewModel = context.watch<BudgetViewModel>();
+    final budgets = budgetViewModel.budgets;
+    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
+    final categories = []; // Placeholder
 
     if (budgets.isEmpty || categories.isEmpty) {
       return const Center(
@@ -316,7 +312,6 @@ class MonthlyBudget extends ConsumerWidget {
       );
     }
 
-    // Helper function to get category details
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
             (cat) => cat.name == categoryId,
@@ -338,10 +333,9 @@ class MonthlyBudget extends ConsumerWidget {
           final budget = budgets[index];
           final double dailyBudget = budget.allocatedAmount / 7;
           final category = getCategoryDetails(budget.category);
-          final double progress = budget.spentAmount / budget.allocatedAmount;
+          final double progress = budget.allocatedAmount > 0 ? budget.spentAmount / budget.allocatedAmount : 0;
           final Color progressColor = category.color;
 
-          // Determine the status and indicator properties
           String statusText;
           IconData statusIcon;
           Color statusColor;
@@ -367,7 +361,6 @@ class MonthlyBudget extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon and Label Row
                 Row(
                   children: [
                     CircleAvatar(
@@ -400,10 +393,8 @@ class MonthlyBudget extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Progress Bar with Labels Inside
                 Stack(
                   children: [
-                    // Progress Bar
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: LinearProgressIndicator(
@@ -415,7 +406,6 @@ class MonthlyBudget extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    // Labels Inside Progress Bar
                     Positioned.fill(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -448,7 +438,6 @@ class MonthlyBudget extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Status Indicator
                 Row(
                   children: [
                     Icon(
@@ -475,14 +464,14 @@ class MonthlyBudget extends ConsumerWidget {
   }
 }
 
-
-class BudgetOverview extends ConsumerWidget {
+class BudgetOverview extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgets = ref.watch(budgetProvider);
-    final selectedTimePeriod = ref.watch(timePeriodProvider);
+  Widget build(BuildContext context) {
+    final budgetViewModel = context.watch<BudgetViewModel>();
+    final budgets = budgetViewModel.budgets;
+    // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
+    final selectedTimePeriod = TimePeriod.month; // Placeholder
 
-    // Filter the budgets based on the selected time period
     final filteredBudgets = budgets.where((budget) {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
@@ -497,11 +486,8 @@ class BudgetOverview extends ConsumerWidget {
       }
     }).toList();
 
-    // Calculate total allocated amount and total spent amount
     final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
     final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
-
-    // Calculate remaining budget and savings percentage
     final double remainingBudget = totalAllocatedAmount - totalSpentAmount;
     final double savingPercentage = totalAllocatedAmount != 0 ? (remainingBudget / totalAllocatedAmount) * 100 : 0;
 
@@ -572,11 +558,64 @@ class BudgetOverview extends ConsumerWidget {
   }
 }
 
+// TODO: Define or import ContainerWIthBoxShadow, SectionWithHeader, TimePeriodToggle, TimePeriod
+class ContainerWIthBoxShadow extends StatelessWidget {
+  final Widget child;
+  final double? width;
+  final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+  const ContainerWIthBoxShadow({Key? key, required this.child, this.width, this.margin, this.padding}) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3), // changes position of shadow
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
 
+class SectionWithHeader extends StatelessWidget {
+  final String title;
+  final String leftText;
+  final VoidCallback viewAllCallback;
+  final Widget child;
 
+  const SectionWithHeader({Key? key, required this.title, required this.leftText, required this.viewAllCallback, required this.child}) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              TextButton(onPressed: viewAllCallback, child: Text(leftText)),
+            ],
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
 
-
-
-
+enum TimePeriod { week, month, year }

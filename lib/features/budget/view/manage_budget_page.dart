@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/providers/category_provider.dart';
-import '../../models/budget.dart';
-import '../../models/category.dart';
-import '../../providers/budget_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/budget/model/budget.dart';
+import 'package:yegna_eqif_new/models/category.dart';
+import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 
-class ManageBudgetPage extends ConsumerWidget {
+class ManageBudgetPage extends StatelessWidget {
   const ManageBudgetPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgets = ref.watch(budgetProvider);
-    final categories = ref.watch(categoryProvider);
+  Widget build(BuildContext context) {
+    final budgetViewModel = context.watch<BudgetViewModel>();
+    final budgets = budgetViewModel.budgets;
+    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
+    final categories = []; // Placeholder
 
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
@@ -25,7 +26,7 @@ class ManageBudgetPage extends ConsumerWidget {
         context: context,
         builder: (context) => _BudgetDialog(
           onSave: (categoryId, allocatedAmount) {
-            ref.read(budgetProvider.notifier).addBudget(
+            context.read<BudgetViewModel>().addBudget(
               Budget(
                 id: DateTime.now().toString(),
                 category: categoryId,
@@ -47,14 +48,14 @@ class ManageBudgetPage extends ConsumerWidget {
           initialCategoryId: budget.category,
           initialAllocatedAmount: budget.allocatedAmount.toString(),
           onSave: (categoryId, allocatedAmount) {
-            ref.read(budgetProvider.notifier).updateBudget(
+            context.read<BudgetViewModel>().updateBudget(
               Budget(
                 id: budget.id,
                 category: categoryId,
                 allocatedAmount: allocatedAmount,
                 spentAmount: budget.spentAmount,
                 startDate: budget.startDate,
-                endDate: budget.endDate
+                endDate: budget.endDate,
               ),
             );
           },
@@ -63,7 +64,7 @@ class ManageBudgetPage extends ConsumerWidget {
     }
 
     void _deleteBudget(String id) {
-      ref.read(budgetProvider.notifier).deleteBudget(id);
+      context.read<BudgetViewModel>().deleteBudget(id);
     }
 
     return Scaffold(
@@ -84,10 +85,10 @@ class ManageBudgetPage extends ConsumerWidget {
         itemBuilder: (context, index) {
           final budget = budgets[index];
           final category = getCategoryDetails(budget.category);
-          final double progress = budget.spentAmount / budget.allocatedAmount;
+          final double progress = budget.allocatedAmount > 0 ? budget.spentAmount / budget.allocatedAmount : 0;
 
           return Dismissible(
-            key: Key(budget.id ?? ''),
+            key: Key(budget.id),
             background: Container(
               margin: EdgeInsets.symmetric(vertical: 6.0),
                 decoration: BoxDecoration(
@@ -115,7 +116,7 @@ class ManageBudgetPage extends ConsumerWidget {
                 ),
               );
             },
-            onDismissed: (direction) => _deleteBudget(budget.id ?? ''),
+            onDismissed: (direction) => _deleteBudget(budget.id),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -124,16 +125,16 @@ class ManageBudgetPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15), // Subtle shadow
+                    color: Colors.black.withOpacity(0.15),
                     blurRadius: 10,
                     spreadRadius: 1,
-                    offset: const Offset(0, 4), // Bottom shadow
+                    offset: const Offset(0, 4),
                   ),
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05), // Lighter top shadow
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 8,
                     spreadRadius: -1,
-                    offset: const Offset(0, -2), // Top shadow
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
@@ -141,7 +142,6 @@ class ManageBudgetPage extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Icon and Label Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -180,10 +180,8 @@ class ManageBudgetPage extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  // Progress Bar with Labels Inside
                   Stack(
                     children: [
-                      // Progress Bar
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: LinearProgressIndicator(
@@ -195,7 +193,6 @@ class ManageBudgetPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      // Labels Inside Progress Bar
                       Positioned.fill(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -240,7 +237,6 @@ class ManageBudgetPage extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 class _BudgetDialog extends StatefulWidget {

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/budget.dart';
-import '../../models/category.dart';
-import '../../providers/budget_provider.dart';
-import 'add_transaction_screen.dart';
-import '../dashboard/dashboard_screen.dart'; // Import your Category provider
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/budget/model/budget.dart';
+import 'package:yegna_eqif_new/models/category.dart';
+import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
+import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
 
-class AddBudgetPage extends ConsumerStatefulWidget {
+class AddBudgetPage extends StatefulWidget {
   const AddBudgetPage({Key? key}) : super(key: key);
 
   @override
   _AddBudgetPageState createState() => _AddBudgetPageState();
 }
 
-class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
+class _AddBudgetPageState extends State<AddBudgetPage> {
   final _formKey = GlobalKey<FormState>();
   String _enteredAmount = "";
   Category? selectedCategory;
@@ -26,13 +25,15 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
       _formKey.currentState!.save();
 
       final budget = Budget(
+        id: DateTime.now().toString(), // Or generate a unique ID
         allocatedAmount: double.parse(_enteredAmount),
+        spentAmount: 0, // Initial spent amount is 0
         startDate: _selectedStartDate!,
         endDate: _selectedEndDate!,
         category: selectedCategory!.name,
       );
 
-      ref.read(budgetProvider.notifier).addBudget(budget);
+      context.read<BudgetViewModel>().addBudget(budget);
 
       Navigator.of(context).pop();
     }
@@ -82,15 +83,15 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CategoryListPage(
-                            onCategorySelected: _updateCategory,
-                            userId: 'user123',
-                          ),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => CategoryListPage(
+                      //       onCategorySelected: _updateCategory,
+                      //       userId: 'user123',
+                      //     ),
+                      //   ),
+                      // );
                     },
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -118,9 +119,9 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                       ),
                     ),
                   )),
-              EnterAmountTile(
-                onAmountSaved: _updateAmount,
-              ),
+              // EnterAmountTile(
+              //   onAmountSaved: _updateAmount,
+              // ),
               SelectDateWidget(
                   label: 'Select Start Date',
                   firstDay: DateTime(2000),
@@ -160,6 +161,59 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class SelectDateWidget extends StatelessWidget {
+  final String label;
+  final DateTime firstDay;
+  final DateTime lastDay;
+  final Function(DateTime) onDateSelected;
+
+  const SelectDateWidget({
+    Key? key,
+    required this.label,
+    required this.firstDay,
+    required this.lastDay,
+    required this.onDateSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(); // Placeholder
+  }
+}
+
+class ContainerWIthBoxShadow extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? margin;
+  final EdgeInsetsGeometry? padding;
+
+  const ContainerWIthBoxShadow({
+    Key? key,
+    required this.child,
+    this.margin,
+    this.padding,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

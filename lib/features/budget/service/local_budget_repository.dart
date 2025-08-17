@@ -1,4 +1,4 @@
-import '../models/budget.dart';
+import '../model/budget.dart';
 
 class LocalBudgetRepository {
   final List<Budget> _budgets = [

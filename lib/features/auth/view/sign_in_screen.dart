@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/auth/view/sign_up_screen.dart';
 import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:yegna_eqif_new/screens/home_screen.dart';
-import 'package:yegna_eqif_new/screens/sign_up_screen.dart';
 import 'package:yegna_eqif_new/core/generic_dialog.dart';
 
 class SignIn extends StatefulWidget {
@@ -72,7 +72,8 @@ class _SignInState extends State<SignIn> {
                 decoration: const InputDecoration(
                     hintText: 'Enter an Email',
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please Enter an Email';
@@ -95,7 +96,8 @@ class _SignInState extends State<SignIn> {
                 decoration: const InputDecoration(
                     hintText: 'Enter a Password',
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 20)),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please Enter a Password';
