@@ -1,4 +1,4 @@
-import '../models/transaction.dart';
+import '../model/transaction.dart';
 
 class LocalTransactionRepository {
   final List<Transaction> _transactions = [
@@ -109,5 +109,16 @@ class LocalTransactionRepository {
 
   Future<void> addTransaction(Transaction transaction) async {
     _transactions.add(transaction);
+  }
+
+  Future<void> updateTransaction(String id, Transaction updatedTransaction) async {
+    int index = _transactions.indexWhere((t) => t.id == id);
+    if (index != -1) {
+      _transactions[index] = updatedTransaction;
+    }
+  }
+
+  Future<void> removeTransaction(String id) async {
+    _transactions.removeWhere((t) => t.id == id);
   }
 }
