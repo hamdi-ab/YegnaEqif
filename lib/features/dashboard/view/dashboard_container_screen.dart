@@ -5,17 +5,17 @@ import 'package:yegna_eqif_new/screens/add%20pages/add_budget_screen.dart';
 import 'package:yegna_eqif_new/screens/add%20pages/add_debt_transaction_screen.dart';
 import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
 import 'package:yegna_eqif_new/screens/budget/budget_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/features/dashboard/view/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/debt/ows_money_screen.dart';
 import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
-class HomeScreen extends StatefulWidget {
+class DashboardContainerScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _DashboardContainerScreenState createState() => _DashboardContainerScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _DashboardContainerScreenState extends State<DashboardContainerScreen> {
   int _selectedIndex = 0;
 
   static final List<Widget> _pages = <Widget>[

@@ -1,16 +1,9 @@
-
 import 'dart:math';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
-import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
-// import 'package:yegna_eqif_new/providers/bank_account_provider.dart'; // TODO: Refactor
-// import 'package:yegna_eqif_new/providers/cash_card_provider.dart'; // TODO: Refactor
-// import 'package:yegna_eqif_new/providers/category_provider.dart'; // TODO: Refactor
-// import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor
-// import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart'; // TODO: Refactor
+import 'package:yegna_eqif_new/features/dashboard/viewmodel/dashboard_viewmodel.dart';
 import 'package:yegna_eqif_new/screens/profile_page.dart';
 import 'package:yegna_eqif_new/screens/setting_page.dart';
 import 'package:intl/intl.dart';
@@ -22,74 +15,72 @@ import '../../utils/string_formater.dart';
 import '../budget/budget_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  final PageController _pageController = PageController(initialPage: 1);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          children: [
-            ProfilePage(),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  ProfileBalance(),
-                  const SizedBox(height: 20),
-                  // TotalBalanceCard(), // TODO: Refactor
-                  const SizedBox(height: 20),
-                  SectionWithHeader(
-                    title: 'Top Spending',
-                    leftText: 'View All',
-                    viewAllCallback: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TopSpendingDetailPage(),
-                        ),
-                      );
-                    },
-                    child: const TopSpending(),
-                  ),
-                  SectionWithHeader(
-                    title: 'Monthly Budget',
-                    leftText: 'View All',
-                    viewAllCallback: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BudgetScreen(scrollToMonthlyBudget: true),
-                        ),
-                      );
-                    },
-                    child: MonthlyBudget(),
-                  ),
-                  SectionWithHeader(
-                    title: 'Lent',
-                    leftText: 'View All',
-                    viewAllCallback: () {},
-                    child: PeopleList(isOwed: true),
-                  ),
-                  SectionWithHeader(
-                    title: 'Borrowed',
-                    leftText: 'View All',
-                    viewAllCallback: () {},
-                    child: PeopleList(isOwed: false),
-                  ),
-                  SectionWithHeader(
-                    title: 'Recent Transaction',
-                    leftText: 'View All',
-                    viewAllCallback: () {},
-                    child: const RecentTransaction(),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ],
-        ),
+    final dashboardViewModel = context.watch<DashboardViewModel>();
+
+    if (dashboardViewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (dashboardViewModel.error != null) {
+      return Center(child: Text('Error: ${dashboardViewModel.error}'));
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 30),
+          ProfileBalance(),
+          const SizedBox(height: 20),
+          // TotalBalanceCard(), // TODO: Refactor
+          const SizedBox(height: 20),
+          SectionWithHeader(
+            title: 'Top Spending',
+            leftText: 'View All',
+            viewAllCallback: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TopSpendingDetailPage(),
+                ),
+              );
+            },
+            child: const TopSpending(),
+          ),
+          SectionWithHeader(
+            title: 'Monthly Budget',
+            leftText: 'View All',
+            viewAllCallback: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BudgetScreen(scrollToMonthlyBudget: true),
+                ),
+              );
+            },
+            child: MonthlyBudget(),
+          ),
+          SectionWithHeader(
+            title: 'Lent',
+            leftText: 'View All',
+            viewAllCallback: () {},
+            child: PeopleList(isOwed: true),
+          ),
+          SectionWithHeader(
+            title: 'Borrowed',
+            leftText: 'View All',
+            viewAllCallback: () {},
+            child: PeopleList(isOwed: false),
+          ),
+          SectionWithHeader(
+            title: 'Recent Transaction',
+            leftText: 'View All',
+            viewAllCallback: () {},
+            child: const RecentTransaction(),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -100,14 +91,12 @@ class ProfileBalance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final budgetViewModel = context.watch<BudgetViewModel>();
-    final budgets = budgetViewModel.budgets;
+    final dashboardViewModel = context.watch<DashboardViewModel>();
+    final totalBudget = dashboardViewModel.dashboardModel?.totalBudget ?? 0;
+    final totalSpent = dashboardViewModel.dashboardModel?.totalSpent ?? 0;
 
-    final double totalAllocatedAmount = budgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = budgets.fold(0, (sum, budget) => sum + budget.spentAmount);
-
-    final double progressInRation = (totalAllocatedAmount != 0)
-        ? totalSpentAmount / totalAllocatedAmount
+    final double progressInRation = (totalBudget != 0)
+        ? totalSpent / totalBudget
         : 0.0;
 
     final double progress = (1 - progressInRation) * 100;
@@ -175,12 +164,11 @@ class MonthlyBudget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final budgetViewModel = context.watch<BudgetViewModel>();
-    final budgets = budgetViewModel.budgets;
+    final dashboardViewModel = context.watch<DashboardViewModel>();
     // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
     final categories = []; // Placeholder
 
-    if (budgets.isEmpty || categories.isEmpty) {
+    if (dashboardViewModel.dashboardModel == null || categories.isEmpty) {
       return const Center(
         child: Text(
           'No budgets or categories available.',
@@ -205,11 +193,11 @@ class MonthlyBudget extends StatelessWidget {
       height: 170,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: budgets.length,
+        itemCount: 1, // Placeholder
         itemBuilder: (context, index) {
-          final budget = budgets[index];
-          final category = getCategoryDetails(budget.category);
-          final double progress = budget.allocatedAmount > 0 ? budget.spentAmount / budget.allocatedAmount : 0;
+          final budget = dashboardViewModel.dashboardModel!;
+          final category = getCategoryDetails('1'); // Placeholder
+          final double progress = budget.totalBudget > 0 ? budget.totalSpent / budget.totalBudget : 0;
           final Color progressColor = category.color;
 
           return ContainerWIthBoxShadow(
@@ -239,7 +227,7 @@ class MonthlyBudget extends StatelessWidget {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${budget.allocatedAmount.toStringAsFixed(0)} Br. total',
+                          '${budget.totalBudget.toStringAsFixed(0)} Br. total',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -267,7 +255,7 @@ class MonthlyBudget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 8),
                             child: Text(
-                              '${(budget.spentAmount).toStringAsFixed(0)} Br.',
+                              '${(budget.totalSpent).toStringAsFixed(0)} Br.',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -278,7 +266,7 @@ class MonthlyBudget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: Text(
-                              '${budget.allocatedAmount} Br.',
+                              '${budget.totalBudget} Br.',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -305,37 +293,13 @@ class RecentTransaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionViewModel = context.watch<TransactionViewModel>();
-    final transactions = transactionViewModel.transactions;
+    final dashboardViewModel = context.watch<DashboardViewModel>();
     // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
     final categories = []; // Placeholder
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
     final selectedTimePeriod = TimePeriod.month; // Placeholder
 
-    final now = DateTime.now();
-    final filteredTransactions = transactions.where((transaction) {
-      switch (selectedTimePeriod) {
-        case TimePeriod.week:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 7)));
-        case TimePeriod.month:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 30)));
-        case TimePeriod.year:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 365)));
-        default:
-          return true;
-      }
-    }).toList();
-
-    final Map<String, List<Transaction>> groupedTransactions = {};
-    for (var transaction in filteredTransactions) {
-      final dateKey = DateFormat('yyyy-MM-dd').format(transaction.date);
-      groupedTransactions.putIfAbsent(dateKey, () => []).add(transaction);
-    }
-
-    final sortedDates = groupedTransactions.keys.toList()
-      ..sort((a, b) => DateTime.parse(b).compareTo(DateTime.parse(a)));
-
-    if (transactions.isEmpty) {
+    if (dashboardViewModel.dashboardModel == null) {
       return const Center(
         child: Text(
           'No recent transactions available.',
@@ -350,11 +314,8 @@ class RecentTransaction extends StatelessWidget {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: sortedDates.length,
+          itemCount: 1, // Placeholder
           itemBuilder: (context, dateIndex) {
-            final dateKey = sortedDates[dateIndex];
-            final transactionsOnDate = groupedTransactions[dateKey]!;
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -372,7 +333,7 @@ class RecentTransaction extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        dateKey,
+                        DateFormat('yyyy-MM-dd').format(DateTime.now()),
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 16,
@@ -383,41 +344,6 @@ class RecentTransaction extends StatelessWidget {
                     ],
                   ),
                 ),
-                ...transactionsOnDate.map((transaction) {
-                  final category = categories.firstWhere((cat) => cat.name == transaction.category); // Placeholder
-                  final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
-
-                  return ContainerWIthBoxShadow(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(
-                        backgroundColor: category.color.withOpacity(0.2),
-                        child: Icon(category.icon, color: category.color),
-                      ),
-                      title: Text(
-                        transaction.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(category.name),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${transaction.amount.toStringAsFixed(2)} Br.',
-                            style: TextStyle(color: amountColor, fontSize: 14),
-                          ),
-                          Text(
-                            transaction.bankType,
-                            style: const TextStyle(color: Colors.black, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
               ],
             );
           },
@@ -428,4 +354,3 @@ class RecentTransaction extends StatelessWidget {
 }
 
 // ... (rest of the file remains the same, with ConsumerWidgets that don't use budgetProvider)
-
