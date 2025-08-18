@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/auth/view/splash_screen.dart';
 import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => BudgetViewModel()),
         ChangeNotifierProvider(create: (_) => TransactionViewModel()),
+        ChangeNotifierProvider(create: (_) => BankCardViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

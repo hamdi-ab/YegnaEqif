@@ -1,20 +1,19 @@
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart';
+import 'package:yegna_eqif_new/features/bank_cards/model/card_model.dart';
+import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
 import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
 
-import '../../models/bank_account.dart';
-import '../../providers/bank_account_provider.dart';
-
-class AddBankCardPage extends ConsumerStatefulWidget {
-  const AddBankCardPage({Key? key}) : super(key: key);
+class AddBankCardScreen extends StatefulWidget {
+  const AddBankCardScreen({Key? key}) : super(key: key);
 
   @override
-  _AddBankCardPageState createState() => _AddBankCardPageState();
+  _AddBankCardScreenState createState() => _AddBankCardScreenState();
 }
 
-class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
+class _AddBankCardScreenState extends State<AddBankCardScreen> {
   final TextEditingController _accountNameController = TextEditingController();
   final TextEditingController _accountNumberController =
       TextEditingController();
@@ -167,20 +166,15 @@ class _AddBankCardPageState extends ConsumerState<AddBankCardPage> {
                           final double balance =
                               double.parse(_balanceController.text);
 
-                          final newBankCard = BankAccountCardModel( // Generate a unique ID
+                          final newBankCard = BankCard( // Generate a unique ID
+                            id: DateTime.now().toString(),
                             accountName: accountName,
                             accountNumber: accountNumber,
                             balance: balance,
                             cardColor: _selectedColor,
                           );
 
-                          ref
-                              .read(bankAccountProvider.notifier)
-                              .addBankAccount(newBankCard);
-
-                          ref
-                              .read(totalBalanceCardProvider.notifier)
-                              .updateTotalBalance(newBankCard.balance, true);
+                          context.read<BankCardViewModel>().addBankCard(newBankCard);
 
                           Navigator.pop(context); // Close the page
                         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:yegna_eqif_new/features/bank_cards/view/add_bank_card_screen.dart';
 import 'package:yegna_eqif_new/screens/add%20pages/add_budget_screen.dart';
 import 'package:yegna_eqif_new/screens/add%20pages/add_debt_transaction_screen.dart';
 import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
@@ -8,8 +9,6 @@ import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
 import 'package:yegna_eqif_new/screens/debt/ows_money_screen.dart';
 import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-
-import 'add pages/add_bank_card_page.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -145,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddBankCardPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AddBankCardScreen()));
             },
           ),
           SpeedDialChild(
