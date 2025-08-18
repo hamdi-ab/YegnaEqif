@@ -9,6 +9,8 @@ import 'package:yegna_eqif_new/features/dashboard/viewmodel/dashboard_viewmodel.
 import 'package:yegna_eqif_new/features/reports/viewmodel/report_viewmodel.dart';
 import 'package:yegna_eqif_new/features/settings/viewmodel/settings_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
+import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
+import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DashboardViewModel()),
         ChangeNotifierProvider(create: (_) => ReportViewModel()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+        ChangeNotifierProvider(create: (_) => CategoryViewModel()),
+        ChangeNotifierProvider(create: (_) => DebtViewModel()),
       ],
       child: Consumer<SettingsViewModel>(
         builder: (context, settingsViewModel, child) {

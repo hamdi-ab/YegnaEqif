@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/models/category.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart'; // Verify this path later
 
-import '../../providers/category_provider.dart';
+import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 
-class AddCategoryPage extends ConsumerStatefulWidget {
+class AddCategoryPage extends StatefulWidget {
   @override
   _AddCategoryPageState createState() => _AddCategoryPageState();
 }
 
-class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
+class _AddCategoryPageState extends State<AddCategoryPage> {
   final TextEditingController _categoryNameController = TextEditingController();
   IconData? _selectedIcon;
   Color _selectedColor = Colors.blue;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   IconPack _selectedIconPack = IconPack.material;
-  final List<Map<String, dynamic>> _categories = [];  // Mock user ID, replace with Firebase Auth user ID later
 
   void _selectIcon(BuildContext context) async {
     IconData? icon = await showIconPicker(
@@ -45,17 +44,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
       IconData categoryIcon = _selectedIcon ?? Icons.question_mark;
       Color categoryColor = _selectedColor;
 
-      // Add to local list immediately
-      setState(() {
-        _categories.add({
-          'name': categoryName,
-          'icon': categoryIcon,
-          'color': categoryColor,
-        });
-      });
-
-      // Add a new category and update the state
-      await ref.read(categoryProvider.notifier).addCategory(
+      await context.read<CategoryViewModel>().addCategory(
         Category(
           id: DateTime.now().toString(), // Generate a unique ID
           name: categoryName,
@@ -210,11 +199,12 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: _categories.length,
+                itemCount: context.watch<CategoryViewModel>().categories.length,
                 itemBuilder: (context, index) {
+                  final category = context.watch<CategoryViewModel>().categories[index];
                   return ListTile(
-                    leading: Icon(_categories[index]['icon'], color: _categories[index]['color']),
-                    title: Text(_categories[index]['name']),
+                    leading: Icon(category.icon, color: category.color),
+                    title: Text(category.name),
                   );
                 },
               ),
@@ -225,4 +215,3 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
     );
   }
 }
-

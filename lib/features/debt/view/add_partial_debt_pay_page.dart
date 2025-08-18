@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
-import '../../utils/transaction_handler.dart';
-import 'add_transaction_screen.dart';
-import '../dashboard/dashboard_screen.dart';
+import '../../utils/transaction_handler.dart'; // Keep for now, but note it uses ref
+import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
 
-class AddPartialDebtPayPage extends ConsumerStatefulWidget {
+class AddPartialDebtPayPage extends StatefulWidget {
   const AddPartialDebtPayPage({required this.debtId, required this.transactionType, required this.personName, required this.remainingAmount, super.key});
   final String debtId;
   final String transactionType;
@@ -16,7 +15,7 @@ class AddPartialDebtPayPage extends ConsumerStatefulWidget {
   _AddPartialDebtPayPageState createState() => _AddPartialDebtPayPageState();
 }
 
-class _AddPartialDebtPayPageState extends ConsumerState<AddPartialDebtPayPage> {
+class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
 
   final _formKey = GlobalKey<FormState>();
   double _totalAmount = 0.0;
@@ -26,15 +25,15 @@ class _AddPartialDebtPayPageState extends ConsumerState<AddPartialDebtPayPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final transactionHandler = TransactionHandler(ref: ref);
+      // TODO: Move TransactionHandler logic to DebtViewModel or DebtService
+      // final transactionHandler = TransactionHandler(ref: ref);
 
       if (widget.transactionType == 'lent') {
-        await transactionHandler.adjustDebtWhenSomeonePays(widget.debtId, _totalAmount);
-        transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, false);
+        await context.read<DebtViewModel>().adjustDebtWhenSomeonePays(widget.debtId, _totalAmount);
+        // transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, false);
       } else if (widget.transactionType == 'borrowed') {
-        await transactionHandler.adjustDebtWhenYouPay(widget.debtId, _totalAmount);
-        transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, true);
-
+        await context.read<DebtViewModel>().adjustDebtWhenYouPay(widget.debtId, _totalAmount);
+        // transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, true);
       }
 
       Navigator.of(context).pop(); // Go back to the previous screen

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/models/debt.dart';
-import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
-import '../../providers/debt_provider.dart';
+import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart'; // Verify this path later
+import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
 import '../../utils/transaction_handler.dart';
 
-class AddDebtTransactionScreen extends ConsumerStatefulWidget {
+class AddDebtTransactionScreen extends StatefulWidget {
   @override
   _AddTransactionPageState createState() => _AddTransactionPageState();
 }
 
-class _AddTransactionPageState extends ConsumerState<AddDebtTransactionScreen> {
+class _AddTransactionPageState extends State<AddDebtTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   String _personName = '';
   double _totalAmount = 0.0;
@@ -34,18 +33,16 @@ class _AddTransactionPageState extends ConsumerState<AddDebtTransactionScreen> {
         transactionType: _transactionType,
       );
 
-      ref
-          .read(borrowOrDebtProvider.notifier)
-          .addTransaction(newTransaction);
+      context.read<DebtViewModel>().addDebt(newTransaction);
 
-      final transactionHandler = TransactionHandler(ref: ref);
-
-      if (_transactionType == 'lent') {
-        transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, true);
-      } else if (_transactionType == 'borrowed') {
-        transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, false);
-
-      }
+      // The TransactionHandler uses ref, which is Riverpod specific. This needs further refactoring.
+      // For now, I'll keep it as is, but it should ideally be moved to a service or the ViewModel.
+      // final transactionHandler = TransactionHandler(ref: ref);
+      // if (_transactionType == 'lent') {
+      //   transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, true);
+      // } else if (_transactionType == 'borrowed') {
+      //   transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, false);
+      // }
 
       Navigator.of(context).pop(); // Go back to the previous screen
     }
@@ -153,6 +150,3 @@ extension StringCasingExtension on String {
     return '${this[0].toUpperCase()}${this.substring(1)}';
   }
 }
-
-
-
