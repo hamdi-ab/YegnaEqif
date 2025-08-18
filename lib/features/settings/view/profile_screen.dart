@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/providers/user_provider.dart';
-import 'package:yegna_eqif_new/screens/setting_page.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/auth/view/splash_screen.dart';
+import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
+import 'package:yegna_eqif_new/features/settings/view/settings_screen.dart';
 
-import '../splash_screen.dart';
-
-class ProfilePage extends ConsumerWidget {
-  const ProfilePage({super.key});
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
@@ -24,12 +25,12 @@ class ProfilePage extends ConsumerWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'Hamdi Abdulfetah', // Replace with user's name
+              authViewModel.user?.displayName ?? 'N/A', // Replace with user's name
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'hamoodybrown10@gmail.com', // Replace with user's email
+              authViewModel.user?.email ?? 'N/A', // Replace with user's email
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 32),
@@ -37,16 +38,14 @@ class ProfilePage extends ConsumerWidget {
               leading: Icon(Icons.settings),
               title: Text('Settings'),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
               },
             ),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Logout'),
               onTap: () {
-                ref
-                    .read(userProvider.notifier)
-                    .logout();
+                context.read<AuthViewModel>().logout();
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => SplashScreen()),
