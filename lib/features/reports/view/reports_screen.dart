@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
+import 'package:yegna_eqif_new/features/reports/view/reports_generated_screen.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
 import 'package:yegna_eqif_new/models/category.dart';

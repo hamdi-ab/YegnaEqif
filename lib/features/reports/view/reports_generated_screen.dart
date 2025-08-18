@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:yegna_eqif_new/providers/category_provider.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/reports/viewmodel/report_viewmodel.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../providers/time_period_provider.dart';
-import '../../providers/transaction_provider.dart';
+import 'package:yegna_eqif_new/features/reports/view/reports_screen.dart';
 
 class ReportsGeneratedScreen extends StatelessWidget {
   const ReportsGeneratedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final reportViewModel = context.watch<ReportViewModel>();
+
+    if (reportViewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (reportViewModel.error != null) {
+      return Center(child: Text('Error: ${reportViewModel.error}'));
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -29,7 +36,7 @@ class ReportsGeneratedScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              TimePeriodToggle(),
+              // TimePeriodToggle(), // TODO: Refactor
               const SizedBox(height: 16),
               TotalBalanceContainer(),
               const SizedBox(height: 20),
@@ -49,22 +56,15 @@ class ReportsGeneratedScreen extends StatelessWidget {
   }
 }
 
-class TotalBalanceContainer extends ConsumerWidget {
+class TotalBalanceContainer extends StatelessWidget {
   const TotalBalanceContainer({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionProvider);
-
-    // Calculate total balance
-    final double totalBalance = transactions.fold(0, (sum, transaction) {
-      if (transaction.type == 'Income') {
-        return sum + transaction.amount;
-      } else if (transaction.type == 'Expense') {
-        return sum - transaction.amount;
-      }
-      return sum;
-    });
+  Widget build(BuildContext context) {
+    final reportViewModel = context.watch<ReportViewModel>();
+    final totalIncome = reportViewModel.reportModel?.totalIncome ?? 0;
+    final totalExpense = reportViewModel.reportModel?.totalExpense ?? 0;
+    final totalBalance = totalIncome - totalExpense;
 
     return ContainerWIthBoxShadow(padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
         margin: const EdgeInsets.symmetric(horizontal: 16.0),child: Column(
@@ -86,16 +86,13 @@ class TotalBalanceContainer extends ConsumerWidget {
 }
 
 
-class WeeklyNetIncomeCard extends ConsumerWidget {
+class WeeklyNetIncomeCard extends StatelessWidget {
   const WeeklyNetIncomeCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionProvider);
-    final selectedTimePeriod = ref.watch(timePeriodProvider);
-
-    final groupedData = _calculateGroupedData(transactions, selectedTimePeriod);
-    final netIncome = _calculateNetIncome(transactions, selectedTimePeriod);
+  Widget build(BuildContext context) {
+    final reportViewModel = context.watch<ReportViewModel>();
+    final netIncome = (reportViewModel.reportModel?.totalIncome ?? 0) - (reportViewModel.reportModel?.totalExpense ?? 0);
 
     return Container(
       height: 300,
@@ -126,7 +123,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: _buildChart(selectedTimePeriod, groupedData),
+            child: _buildChart(reportViewModel.reportModel?.categoryBreakdowns ?? []),
           ),
           const SizedBox(height: 16),
           _buildLegend(),
@@ -135,66 +132,47 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildChart(TimePeriod period, List<BarChartGroupData> groupedData) {
-    if (period == TimePeriod.month) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: 600,
-          child: BarChart(_buildChartData(groupedData, period)), // Pass period here
-        ),
-      );
-    }
-    return BarChart(_buildChartData(groupedData, period)); // Pass period here
+  Widget _buildChart(List<CategoryBreakdown> categoryBreakdowns) {
+    return BarChart(_buildChartData(categoryBreakdowns));
   }
 
 
-  BarChartData _buildChartData(List<BarChartGroupData> groupedData, TimePeriod selectedTimePeriod) {
+  BarChartData _buildChartData(List<CategoryBreakdown> categoryBreakdowns) {
+    final barGroups = categoryBreakdowns.asMap().entries.map((entry) {
+      final index = entry.key;
+      final data = entry.value;
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(toY: data.amount, color: data.color),
+        ],
+      );
+    }).toList();
+
     return BarChartData(
-      barGroups: groupedData,
+      barGroups: barGroups,
       gridData: const FlGridData(
         show: true,
         drawVerticalLine: false,
         drawHorizontalLine: true,
       ),
-      borderData: FlBorderData(show: false),// In the _buildChartData method, modify the titlesData section like this:
+      borderData: FlBorderData(show: false),
       titlesData: FlTitlesData(
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, meta) {
-              // Changed: Remove meta.axis check and use selectedTimePeriod parameter
-              final period = selectedTimePeriod; // Use the period passed from parent
-              switch (period) {
-                case TimePeriod.week:
-                  const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                        weekDays[value.toInt() % 7],
-                        style: const TextStyle(fontSize: 12)
-                    ),
-                  );
-                case TimePeriod.month:
-                  return Text(
-                      'Week ${value.toInt() + 1}',
-                      style: const TextStyle(fontSize: 12)
-                  );
-                case TimePeriod.year:
-                  final months = ['Jan','Feb','Mar','Apr','May','Jun',
-                    'Jul','Aug','Sep','Oct','Nov','Dec'];
-                  return Text(
-                      months[value.toInt()],
-                      style: const TextStyle(fontSize: 12)
-                  );
-                default:
-                  return const SizedBox();
-              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  categoryBreakdowns[value.toInt()].categoryName,
+                  style: const TextStyle(fontSize: 12)
+                ),
+              );
             },
             reservedSize: 30,
           ),
         ),
-        // ... rest of the titlesData configuration
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
@@ -208,7 +186,7 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
         topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
-      maxY: _calculateMaxY(groupedData),
+      maxY: _calculateMaxY(barGroups),
     );
   }
 
@@ -220,58 +198,6 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
       }
     }
     return max * 1.2; // Add 20% padding
-  }
-
-  List<BarChartGroupData> _calculateGroupedData(List transactions, TimePeriod period) {
-    final incomeMap = <int, double>{};
-    final expenseMap = <int, double>{};
-
-    for (var transactionData in transactions) {
-      final transaction = transactionData;
-      final date = transaction.date;
-      int groupKey;
-
-      switch (period) {
-        case TimePeriod.week:
-          groupKey = date.weekday - 1; // 0-6 (Monday-Sunday)
-          break;
-        case TimePeriod.month:
-        // Group by week of month (0-3), weeks starting on Monday
-          final firstDayOfMonth = DateTime(date.year, date.month, 1);
-          final firstMonday = firstDayOfMonth.weekday == DateTime.monday
-              ? firstDayOfMonth
-              : firstDayOfMonth.add(Duration(days: DateTime.monday - firstDayOfMonth.weekday));
-          groupKey = ((date.difference(firstMonday).inDays) ~/ 7).clamp(0, 3);
-          break;
-        case TimePeriod.year:
-          groupKey = date.month - 1; // 0-11 (Jan-Dec)
-          break;
-        default:
-          groupKey = 0;
-      }
-
-      if (transaction.type == 'Income') {
-        incomeMap[groupKey] = (incomeMap[groupKey] ?? 0) + transaction.amount;
-      } else {
-        expenseMap[groupKey] = (expenseMap[groupKey] ?? 0) + transaction.amount;
-      }
-    }
-
-    final maxGroups = period == TimePeriod.week ? 7
-        : period == TimePeriod.month ? 4
-        : 12;
-
-    return List.generate(maxGroups, (i) {
-      final income = incomeMap[i] ?? 0;
-      final expense = expenseMap[i] ?? 0;
-      return BarChartGroupData(
-        x: i,
-        barRods: [
-          BarChartRodData(toY: income, color: Colors.green),
-          BarChartRodData(toY: expense, color: Colors.red),
-        ],
-      );
-    });
   }
 
   Widget _buildLegend() {
@@ -300,46 +226,11 @@ class WeeklyNetIncomeCard extends ConsumerWidget {
       ],
     );
   }
-
-  double _calculateNetIncome(List transactions, TimePeriod period) {
-    final now = DateTime.now();
-    final filteredTransactions = transactions.where((transactionData) {
-      final transaction = transactionData;
-      final date = transaction.date;
-
-      switch (period) {
-        case TimePeriod.week:
-          return date.isAfter(now.subtract(const Duration(days: 7)));
-        case TimePeriod.month:
-          final firstDayOfMonth = DateTime(now.year, now.month, 1);
-          return date.isAfter(firstDayOfMonth);
-        case TimePeriod.year:
-          final firstDayOfYear = DateTime(now.year, 1, 1);
-          return date.isAfter(firstDayOfYear);
-        default:
-          return true;
-      }
-    }).toList();
-
-    double income = 0;
-    double expense = 0;
-
-    for (var transactionData in filteredTransactions) {
-      final transaction = transactionData;
-      if (transaction.type == 'Income') {
-        income += transaction.amount;
-      } else {
-        expense += transaction.amount;
-      }
-    }
-
-    return income - expense;
-  }
 }
 
 
 
-class IncomeExpenseBreakdownCard extends ConsumerWidget {
+class IncomeExpenseBreakdownCard extends StatelessWidget {
   final String title; // "Income" or "Expense"
 
   IncomeExpenseBreakdownCard({
@@ -347,56 +238,11 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionProvider);
-    final selectedTimePeriod = ref.watch(timePeriodProvider);
-    final categories = ref.watch(categoryProvider);
+  Widget build(BuildContext context) {
+    final reportViewModel = context.watch<ReportViewModel>();
     final isIncome = title == 'Income';
-
-    // Filter the transactions based on the selected time period
-    final filteredTransactions = transactions.where((transactionData) {
-      final transaction = transactionData;
-      final now = DateTime.now();
-      switch (selectedTimePeriod) {
-        case TimePeriod.week:
-          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
-        case TimePeriod.month:
-          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
-        case TimePeriod.year:
-          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
-        default:
-          return true;
-      }
-    }).map((transactionData) => transactionData).toList();
-
-    // Filter transactions based on type (Income or Expense)
-    final filteredByType = filteredTransactions.where((transaction) => transaction.type == (isIncome ? 'Income' : 'Expense')).toList();
-
-    // Calculate total value
-    final double totalValue = filteredByType.fold(0, (sum, transaction) => sum + transaction.amount);
-
-    // Calculate category data
-    final categoryData = categories.map((category) {
-      final double categoryTotal = filteredByType
-          .where((transaction) => transaction.category == category.name)
-          .fold(0, (sum, transaction) => sum + transaction.amount);
-
-      final double percent = totalValue != 0 ? (categoryTotal / totalValue) * 100 : 0;
-
-      final int totalTransaction = filteredByType
-          .where((transaction) => transaction.category == category.name)
-          .length;
-
-      return {
-        'name': category.name,
-        'amount': categoryTotal,
-        'percent': percent,
-        'color': category.color,
-        'icon': category.icon,
-        'totalTransaction': totalTransaction,
-      };
-
-    }).where((data) => (data['amount'] as double) > 0).toList();
+    final categoryData = reportViewModel.reportModel?.categoryBreakdowns ?? [];
+    final totalValue = isIncome ? reportViewModel.reportModel?.totalIncome ?? 0 : reportViewModel.reportModel?.totalExpense ?? 0;
 
     return Container(
       margin: const EdgeInsets.all(16.0),
@@ -459,9 +305,9 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
               PieChartData(
                 sections: categoryData.map((data) {
                   return PieChartSectionData(
-                    color: data['color'] as Color,
-                    value: data['amount'] as double,
-                    title: '${(data['percent'] as double).toStringAsFixed(1)}%',
+                    color: data.color,
+                    value: data.amount,
+                    title: '${data.percent.toStringAsFixed(1)}%',
                     radius: 50,
                     titleStyle: const TextStyle(
                       fontSize: 14,
@@ -486,26 +332,26 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: category['color'] as Color,
-                      child: Icon(category['icon'] as IconData , color: Colors.white),
+                      backgroundColor: category.color,
+                      child: Icon(category.icon, color: Colors.white),
                     ),
                     title: Text(
-                      category['name'] as String,
+                      category.categoryName,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      '${(category['totalTransaction'] as int).toString()} Transactions ',
+                      '${category.totalTransaction.toString()} Transactions ',
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                     trailing: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '${(category['amount'] as double) .toStringAsFixed(2)} Br.',
+                          '${category.amount.toStringAsFixed(2)} Br.',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${(category['percent'] as double).toStringAsFixed(1)}%',
+                          '${category.percent.toStringAsFixed(1)}%',
                           style: const TextStyle(fontSize: 14, color: Colors.black54),
                         ),
                       ],
@@ -519,16 +365,16 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
                         height: 8,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: (category['color'] as Color).withOpacity(0.2),
+                          color: category.color.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       // Filled progress bar
                       Container(
                         height: 8,
-                        width: MediaQuery.of(context).size.width * (category['percent'] as double) / 100,
+                        width: MediaQuery.of(context).size.width * category.percent / 100,
                         decoration: BoxDecoration(
-                          color: category['color'] as Color,
+                          color: category.color,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -544,9 +390,3 @@ class IncomeExpenseBreakdownCard extends ConsumerWidget {
     );
   }
 }
-
-
-
-
-
-

@@ -6,6 +6,7 @@ import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 import 'package:yegna_eqif_new/features/dashboard/viewmodel/dashboard_viewmodel.dart';
+import 'package:yegna_eqif_new/features/reports/viewmodel/report_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 
 void main() async {
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransactionViewModel()),
         ChangeNotifierProvider(create: (_) => BankCardViewModel()),
         ChangeNotifierProvider(create: (_) => DashboardViewModel()),
+        ChangeNotifierProvider(create: (_) => ReportViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
