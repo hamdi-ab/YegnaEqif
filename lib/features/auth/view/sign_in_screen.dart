@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/auth/view/sign_up_screen.dart';
 import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
-import 'package:yegna_eqif_new/screens/home_screen.dart';
+import 'package:yegna_eqif_new/features/dashboard/view/dashboard_container_screen.dart';
 import 'package:yegna_eqif_new/core/generic_dialog.dart';
 
 class SignIn extends StatefulWidget {
@@ -34,7 +34,8 @@ class _SignInState extends State<SignIn> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(
+              builder: (context) => const DashboardContainerScreen()),
         );
       });
     }
@@ -51,7 +52,7 @@ class _SignInState extends State<SignIn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               width: 160,
               height: 140,
               child: Image.asset('assets/icon.png'),
