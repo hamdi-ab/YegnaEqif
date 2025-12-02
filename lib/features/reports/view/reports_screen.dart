@@ -4,10 +4,8 @@ import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 import 'package:yegna_eqif_new/features/reports/view/reports_generated_screen.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
+import 'package:yegna_eqif_new/features/settings/viewmodel/time_period_viewmodel.dart';
 import 'package:intl/intl.dart';
-
-// import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor
-// import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart'; // TODO: Refactor
 import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
 import '../../../core/time_period.dart';
 
@@ -23,9 +21,7 @@ class ReportsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 30),
-              // const ProfileBalance(), // TODO: Refactor
               const SizedBox(height: 30),
-              // TimePeriodToggle(), // TODO: Refactor
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
@@ -61,8 +57,8 @@ class BudgetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final budgetViewModel = context.watch<BudgetViewModel>();
     final budgets = budgetViewModel.budgets;
-    // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    const selectedTimePeriod = TimePeriod.month; // Placeholder
+    final timePeriodViewModel = context.watch<TimePeriodViewModel>();
+    final selectedTimePeriod = timePeriodViewModel.selectedTimePeriod;
 
     String title;
     int daysInPeriod;

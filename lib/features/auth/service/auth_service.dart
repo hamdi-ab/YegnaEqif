@@ -37,19 +37,5 @@ class AuthService {
       return null;
     }
   }
-
-  // Sign out
-  Future<void> signOut() async {
-    try {
-      return await _auth.signOut();
-    } catch (e) {
-      print(e.toString());
-      return;
-    }
-  }
-
-  // Stream to listen to authentication state changes
-  Stream<User?> get user {
-    return _auth.authStateChanges();
   }
 }

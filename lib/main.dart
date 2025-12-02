@@ -12,6 +12,7 @@ import 'package:yegna_eqif_new/features/settings/viewmodel/settings_viewmodel.da
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
+import 'package:yegna_eqif_new/features/settings/viewmodel/time_period_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
         ChangeNotifierProvider(create: (_) => CategoryViewModel()),
         ChangeNotifierProvider(create: (_) => DebtViewModel()),
+        ChangeNotifierProvider(create: (_) => TimePeriodViewModel()),
       ],
       child: Consumer<SettingsViewModel>(
         builder: (context, settingsViewModel, child) {
