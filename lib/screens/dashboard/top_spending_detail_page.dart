@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/category.dart';
-import '../../providers/category_provider.dart';
-import '../../providers/transaction_provider.dart';
-import 'dashboard_screen.dart';
+// import '../../models/category.dart';  // Commented out - unused until refactored
+// TODO: Refactor to use new ViewModels from features/ directory
+// import '../../providers/category_provider.dart';
+// import '../../providers/transaction_provider.dart';
 
+// TODO: Refactor this widget to use new ViewModels from features/
 class TopSpendingDetailPage extends ConsumerWidget {
-  const TopSpendingDetailPage({Key? key}) : super(key: key);
+  const TopSpendingDetailPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Temporary placeholder until refactored to use new ViewModels
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Top Spending'),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text(
+          'This feature needs to be refactored to use new ViewModels',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+
+    /* Original implementation - commented out until refactored
     final transactions = ref.watch(transactionProvider);
     final categories = ref.watch(categoryProvider);
 
@@ -47,7 +64,7 @@ class TopSpendingDetailPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Top Spending'),
+        title: const Text('Top Spending'),
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -59,10 +76,10 @@ class TopSpendingDetailPage extends ConsumerWidget {
           final transactionCount = item['transactionCount'] as int;
 
           return ContainerWIthBoxShadow(
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            padding: EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            padding: const EdgeInsets.all(16),
             child: ListTile(
-              contentPadding: EdgeInsets.all(0),
+              contentPadding: const EdgeInsets.all(0),
               leading: Container(
                   width: 50,
                   height: 50,
@@ -93,7 +110,7 @@ class TopSpendingDetailPage extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -115,5 +132,6 @@ class TopSpendingDetailPage extends ConsumerWidget {
         },
       ),
     );
+    */
   }
 }

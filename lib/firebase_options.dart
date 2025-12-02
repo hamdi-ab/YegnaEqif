@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -51,7 +48,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBs7NV8bPVSoznwFhXdWwCkL5gU5KkKHnY',
-    appId: '1:86907972753:android:9c15e819292d5dc0c76330',
+    appId: '1:86907972753:android:c068b45872ff6796c76330',
     messagingSenderId: '86907972753',
     projectId: 'yegna-eqif',
     storageBucket: 'yegna-eqif.firebasestorage.app',
@@ -65,4 +62,14 @@ class DefaultFirebaseOptions {
     storageBucket: 'yegna-eqif.firebasestorage.app',
     iosBundleId: 'com.yegnaeqif.yegnaEqifNew',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyARwT94k8hHMsencLwn86NySQneKPwYfho',
+    appId: '1:86907972753:web:60404510d1f16756c76330',
+    messagingSenderId: '86907972753',
+    projectId: 'yegna-eqif',
+    authDomain: 'yegna-eqif.firebaseapp.com',
+    storageBucket: 'yegna-eqif.firebasestorage.app',
+  );
+
 }
