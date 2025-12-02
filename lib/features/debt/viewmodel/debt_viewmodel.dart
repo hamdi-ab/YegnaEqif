@@ -53,5 +53,11 @@ class DebtViewModel extends ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
+  }
+
   // TODO: Implement other debt-related state and logic here, e.g., fetching from a service
 }

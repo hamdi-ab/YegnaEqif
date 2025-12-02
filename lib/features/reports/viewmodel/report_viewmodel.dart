@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:yegna_eqif_new/features/reports/model/report_model.dart';
 import 'package:yegna_eqif_new/features/reports/service/report_service.dart';
@@ -32,5 +31,11 @@ class ReportViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

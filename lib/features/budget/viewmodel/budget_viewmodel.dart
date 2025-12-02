@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../model/budget.dart';
 import '../service/local_budget_repository.dart';
@@ -62,5 +61,11 @@ class BudgetViewModel extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import '../model/transaction.dart';
 import '../service/local_transaction_repository.dart';
 
 class TransactionViewModel extends ChangeNotifier {
-  final LocalTransactionRepository _transactionRepository = LocalTransactionRepository();
+  final LocalTransactionRepository _transactionRepository =
+      LocalTransactionRepository();
 
   List<Transaction> _transactions = [];
   List<Transaction> get transactions => _transactions;
@@ -62,5 +62,11 @@ class TransactionViewModel extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

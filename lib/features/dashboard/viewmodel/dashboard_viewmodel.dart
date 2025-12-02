@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:yegna_eqif_new/features/dashboard/model/dashboard_model.dart';
 import 'package:yegna_eqif_new/features/dashboard/service/dashboard_service.dart';
@@ -32,5 +31,11 @@ class DashboardViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

@@ -1,8 +1,8 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yegna_eqif_new/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yegna_eqif_new/features/auth/view/splash_screen.dart';
 import 'package:yegna_eqif_new/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
@@ -13,13 +13,22 @@ import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewm
 import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
 import 'package:yegna_eqif_new/features/settings/viewmodel/time_period_viewmodel.dart';
+import 'package:flutter/foundation.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:yegna_eqif_new/core/theme/app_theme.dart';
+import 'package:yegna_eqif_new/core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -42,12 +51,17 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<SettingsViewModel>(
         builder: (context, settingsViewModel, child) {
-          return MaterialApp(
+          final router = AppRouter.createRouter(context);
+
+          return ShadApp.router(
+            routerConfig: router,
+            locale: DevicePreview.locale(context),
+            builder: DevicePreview.appBuilder,
             debugShowCheckedModeBanner: false,
-            themeMode: settingsViewModel.userSettings?.themeMode,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            home: const SplashScreen(),
+            themeMode:
+                settingsViewModel.userSettings?.themeMode ?? ThemeMode.system,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
           );
         },
       ),

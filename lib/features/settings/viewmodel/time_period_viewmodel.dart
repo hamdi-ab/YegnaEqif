@@ -100,4 +100,10 @@ class TimePeriodViewModel extends ChangeNotifier {
         return now;
     }
   }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
+  }
 }

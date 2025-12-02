@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
+import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 import 'package:yegna_eqif_new/features/category/view/add_category_screen.dart';
 // import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor to ViewModel
 // import 'package:yegna_eqif_new/providers/category_provider.dart'; // TODO: Re
@@ -96,8 +97,8 @@ class CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor to ViewModel
-    final categories = []; // Placeholder
+    final categoryViewModel = context.watch<CategoryViewModel>();
+    final categories = categoryViewModel.categories;
 
     return ContainerWIthBoxShadow(
       width: double.infinity,
@@ -314,8 +315,8 @@ class MonthlyBudget extends StatelessWidget {
   Widget build(BuildContext context) {
     final budgetViewModel = context.watch<BudgetViewModel>();
     final budgets = budgetViewModel.budgets;
-    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
-    final categories = []; // Placeholder
+    final categoryViewModel = context.watch<CategoryViewModel>();
+    final categories = categoryViewModel.categories;
 
     if (budgets.isEmpty || categories.isEmpty) {
       return const Center(

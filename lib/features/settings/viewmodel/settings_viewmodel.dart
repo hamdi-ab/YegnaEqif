@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:yegna_eqif_new/features/settings/model/user_settings_model.dart';
 import 'package:yegna_eqif_new/features/settings/service/settings_service.dart';
@@ -50,5 +49,11 @@ class SettingsViewModel extends ChangeNotifier {
       final newSettings = UserSettingsModel(themeMode: themeMode);
       saveSettings(newSettings);
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

@@ -3,19 +3,13 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:yegna_eqif_new/features/dashboard/viewmodel/dashboard_viewmodel.dart';
+import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 import 'package:yegna_eqif_new/features/settings/view/profile_screen.dart';
 import 'package:yegna_eqif_new/features/settings/view/settings_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:yegna_eqif_new/screens/dashboard/top_spending_detail_page.dart';
 import '../../../models/category.dart';
-import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
-import '../../../core/time_period.dart'; // Added TimePeriod import
-// import '../../providers/debt_provider.dart';
-// TODO: Refactor
-import '../../../core/string_formater.dart';
-// import '../../budget/view/budget_screen.dart';  // Removed to avoid duplicate import
-import '../../../shared/widgets/forms/container_with_box_shadow.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -82,59 +76,59 @@ class ProfileBalance extends StatelessWidget {
     final double progress = (1 - progressInRation) * 100;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.yellow[700],
-                child: IconButton(
-                  color: Colors.yellow[900],
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfileScreen()),
-                    );
-                  },
-                  icon: const Icon(CupertinoIcons.person_fill),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfileScreen()),
+                  );
+                },
+                child: ShadAvatar(
+                  'assets/profile_picture.png',
+                  placeholder: Container(
+                    color: Colors.yellow[700],
+                    child: Icon(
+                      CupertinoIcons.person_fill,
+                      color: Colors.yellow[900],
+                    ),
+                  ),
+                  size: const Size(50, 50),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Hamdi Abdulfetah',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: ShadTheme.of(context).textTheme.large,
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
-                    // TODO: Implement ProgressBar widget
-                    // child: ProgressBar(
-                    //   value: progress,
-                    //   maxValue: 100,
-                    //   label: "${progress.toStringAsFixed(0)} / 100",
-                    // ),
-                    child: Text('Progress: ${progress.toStringAsFixed(0)}%'),
+                    child: Text(
+                      'Progress: ${progress.toStringAsFixed(0)}%',
+                      style: ShadTheme.of(context).textTheme.muted,
+                    ),
                   ),
                 ],
               )
             ],
           ),
-          IconButton(
+          ShadButton.ghost(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
-            icon: const Icon(Icons.settings),
+            child: const Icon(Icons.settings),
           ),
         ],
       ),
@@ -148,14 +142,14 @@ class MonthlyBudget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dashboardViewModel = context.watch<DashboardViewModel>();
-    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
-    final categories = []; // Placeholder
+    final categoryViewModel = context.watch<CategoryViewModel>();
+    final categories = categoryViewModel.categories;
 
     if (dashboardViewModel.dashboardModel == null || categories.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No budgets or categories available.',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: ShadTheme.of(context).textTheme.muted,
         ),
       );
     }
@@ -173,7 +167,7 @@ class MonthlyBudget extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 170,
+      height: 180,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 1, // Placeholder
@@ -185,37 +179,43 @@ class MonthlyBudget extends StatelessWidget {
               : 0;
           final Color progressColor = category.color;
 
-          return ContainerWIthBoxShadow(
-            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10.0),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          return ShadCard(
             width: 230,
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: progressColor.withOpacity(0.1),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: progressColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
                       child: Icon(
                         category.icon,
                         color: progressColor,
+                        size: 20,
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.name,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${budget.totalBudget.toStringAsFixed(0)} Br. total',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            category.name,
+                            style: ShadTheme.of(context).textTheme.large,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '${budget.totalBudget.toStringAsFixed(0)} Br. total',
+                            style: ShadTheme.of(context).textTheme.muted,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -279,16 +279,12 @@ class RecentTransaction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dashboardViewModel = context.watch<DashboardViewModel>();
-    // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
-    final categories = []; // Placeholder
-    // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
 
     if (dashboardViewModel.dashboardModel == null) {
-      return const Center(
+      return Center(
         child: Text(
           'No recent transactions available.',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: ShadTheme.of(context).textTheme.muted,
         ),
       );
     }
@@ -301,36 +297,23 @@ class RecentTransaction extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 1, // Placeholder
           itemBuilder: (context, dateIndex) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 2.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Date:',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
+            return ShadCard(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Date:',
+                    style: ShadTheme.of(context).textTheme.muted,
                   ),
-                ),
-              ],
+                  Text(
+                    DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                    style: ShadTheme.of(context).textTheme.p.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -338,8 +321,6 @@ class RecentTransaction extends StatelessWidget {
     );
   }
 }
-
-// ... (rest of the file remains the same, with ConsumerWidgets that don't use budgetProvider)
 
 class TotalBalanceCard extends StatelessWidget {
   const TotalBalanceCard({super.key});
@@ -351,54 +332,72 @@ class TotalBalanceCard extends StatelessWidget {
     final totalIncome = dashboardViewModel.dashboardModel?.totalIncome ?? 0;
     final totalExpense = dashboardViewModel.dashboardModel?.totalSpent ?? 0;
 
-    return ContainerWIthBoxShadow(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          const Text('Total Balance',
-              style: TextStyle(fontSize: 16, color: Colors.grey)),
-          const SizedBox(height: 8),
-          Text('${totalBalance.toStringAsFixed(2)} Br.',
-              style:
-                  const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.arrow_downward, color: Colors.green, size: 16),
-                      SizedBox(width: 4),
-                      Text('Income', style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                  Text('${totalIncome.toStringAsFixed(2)} Br.',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.arrow_upward, color: Colors.red, size: 16),
-                      SizedBox(width: 4),
-                      Text('Expense', style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                  Text('${totalExpense.toStringAsFixed(2)} Br.',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                ],
-              ),
-            ],
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ShadCard(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Text('Total Balance', style: ShadTheme.of(context).textTheme.muted),
+            const SizedBox(height: 8),
+            Text('${totalBalance.toStringAsFixed(2)} Br.',
+                style: ShadTheme.of(context).textTheme.h2),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.arrow_downward,
+                              color: Colors.green, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Income',
+                            style: ShadTheme.of(context).textTheme.muted),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('${totalIncome.toStringAsFixed(2)} Br.',
+                        style: ShadTheme.of(context).textTheme.large),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.arrow_upward,
+                              color: Colors.red, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Expense',
+                            style: ShadTheme.of(context).textTheme.muted),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('${totalExpense.toStringAsFixed(2)} Br.',
+                        style: ShadTheme.of(context).textTheme.large),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -429,22 +428,19 @@ class SectionWithHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: ShadTheme.of(context).textTheme.h4,
               ),
-              GestureDetector(
-                onTap: viewAllCallback,
+              ShadButton.ghost(
+                onPressed: viewAllCallback,
                 child: Text(
                   leftText,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                      color: ShadTheme.of(context).colorScheme.primary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           child,
         ],
       ),

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../model/card_model.dart';
 import '../service/bank_card_service.dart';
@@ -52,5 +51,11 @@ class BankCardViewModel extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    super.dispose();
   }
 }

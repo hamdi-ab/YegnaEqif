@@ -6,9 +6,11 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Sign in with email and password
-  Future<User?> signInWithEmailAndPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       return result.user;
     } catch (e) {
       print(e.toString());
@@ -17,9 +19,11 @@ class AuthService {
   }
 
   // Register with email and password
-  Future<User?> registerWithEmailAndPassword(String email, String password) async {
+  Future<User?> registerWithEmailAndPassword(
+      String email, String password) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
       User? user = result.user;
 
       if (user != null) {
@@ -37,5 +41,19 @@ class AuthService {
       return null;
     }
   }
+
+  // Sign out
+  Future<void> signOut() async {
+    try {
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return;
+    }
+  }
+
+  // Stream to listen to authentication state changes
+  Stream<User?> get user {
+    return _auth.authStateChanges();
   }
 }

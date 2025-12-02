@@ -70,6 +70,20 @@ class LocalBudgetRepository {
       category: '8',
       allocatedAmount: 120.00,
       spentAmount: 90.00,
+      startDate: DateTime(2024, 4, 1),
+      endDate: DateTime(2024, 4, 30),
+    ),
+  ];
+
+  Future<List<Budget>> fetchBudgets() async {
+    print('Returning budgets: $_budgets');
+    return _budgets;
+  }
+
+  Future<void> addBudget(Budget budget) async {
+    _budgets.add(budget);
+  }
+
   Future<void> updateBudget(Budget budget) async {
     int index = _budgets.indexWhere((b) => b.id == budget.id);
     if (index != -1) {
