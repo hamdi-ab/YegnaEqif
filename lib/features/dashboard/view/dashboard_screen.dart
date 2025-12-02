@@ -347,8 +347,8 @@ class TotalBalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dashboardViewModel = context.watch<DashboardViewModel>();
-    final totalBalance = 0.0; // TODO: Add totalBalance to DashboardModel
-    final totalIncome = 0.0; // TODO: Add totalIncome to DashboardModel
+    final totalBalance = dashboardViewModel.dashboardModel?.totalBalance ?? 0;
+    final totalIncome = dashboardViewModel.dashboardModel?.totalIncome ?? 0;
     final totalExpense = dashboardViewModel.dashboardModel?.totalSpent ?? 0;
 
     return ContainerWIthBoxShadow(

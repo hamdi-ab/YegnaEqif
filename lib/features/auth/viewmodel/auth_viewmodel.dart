@@ -75,4 +75,10 @@ class AuthViewModel extends ChangeNotifier {
       _setUser(user);
     });
   }
+
+  @override
+  void dispose() {
+    // Clean up any streams or listeners
+    super.dispose();
+  }
 }
