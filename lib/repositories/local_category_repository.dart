@@ -1,5 +1,6 @@
 import '../models/category.dart';
 import 'package:flutter/material.dart';
+import 'package:yegna_eqif_new/core/utils/app_logger.dart';
 
 class LocalCategoryRepository {
   final List<Category> _categories = [
@@ -54,7 +55,7 @@ class LocalCategoryRepository {
   ];
 
   Future<List<Category>> fetchCategories() async {
-    print('Returning categories: $_categories'); // Debug log
+    AppLogger.debug('Returning categories from local repository', _categories);
     return _categories;
   }
 

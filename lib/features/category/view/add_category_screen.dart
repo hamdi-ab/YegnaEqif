@@ -80,7 +80,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                   width: double.infinity,
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -107,7 +107,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                       },
                     ),
                   )),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   padding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -142,7 +142,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                       ),
                     ],
                   )),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   padding: const EdgeInsets.only(
                       top: 10, bottom: 10, left: 16, right: 6.0),
@@ -162,7 +162,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                       ),
                     ],
                   )),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   padding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 16),

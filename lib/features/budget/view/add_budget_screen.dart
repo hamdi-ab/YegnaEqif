@@ -77,7 +77,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   padding:

@@ -41,7 +41,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ContainerWIthBoxShadow(
+                  ContainerWithBoxShadow(
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.symmetric(
@@ -67,7 +67,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                           },
                         ),
                       )),
-                  ContainerWIthBoxShadow(
+                  ContainerWithBoxShadow(
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.symmetric(
@@ -93,7 +93,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                           },
                         ),
                       )),
-                  ContainerWIthBoxShadow(
+                  ContainerWithBoxShadow(
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.symmetric(
@@ -119,7 +119,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                           },
                         ),
                       )),
-                  ContainerWIthBoxShadow(
+                  ContainerWithBoxShadow(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       padding: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 16),

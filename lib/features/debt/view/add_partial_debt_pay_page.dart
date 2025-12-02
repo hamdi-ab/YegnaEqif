@@ -78,7 +78,7 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
               const SizedBox(height: 20),
               BankCardDropdown(onBankSelected: _updateSelectedBank),
               const SizedBox(height: 20.0),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding:
@@ -90,7 +90,7 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding:

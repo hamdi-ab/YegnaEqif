@@ -75,7 +75,7 @@ class TopSpendingDetailPage extends ConsumerWidget {
           final amount = item['amount'] as double;
           final transactionCount = item['transactionCount'] as int;
 
-          return ContainerWIthBoxShadow(
+          return ContainerWithBoxShadow(
             margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             padding: const EdgeInsets.all(16),
             child: ListTile(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ContainerWIthBoxShadow extends StatelessWidget {
+class ContainerWithBoxShadow extends StatelessWidget {
   final Widget? child;
   final EdgeInsets margin;
   final EdgeInsets padding;
@@ -10,7 +10,7 @@ class ContainerWIthBoxShadow extends StatelessWidget {
   final BorderRadiusGeometry? borderRadius;
   final BoxShadow? boxShadow;
 
-  const ContainerWIthBoxShadow({
+  const ContainerWithBoxShadow({
     super.key,
     this.child,
     this.margin = const EdgeInsets.all(0),

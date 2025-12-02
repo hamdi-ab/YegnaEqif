@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:yegna_eqif_new/core/utils/app_logger.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
@@ -13,7 +14,7 @@ class AuthService {
           email: email, password: password);
       return result.user;
     } catch (e) {
-      print(e.toString());
+      AppLogger.error('Sign up failed', e);
       return null;
     }
   }
@@ -37,7 +38,7 @@ class AuthService {
 
       return user;
     } catch (e) {
-      print(e.toString());
+      AppLogger.error('Sign in failed', e);
       return null;
     }
   }
@@ -47,7 +48,7 @@ class AuthService {
     try {
       return await _auth.signOut();
     } catch (e) {
-      print(e.toString());
+      AppLogger.error('Sign out failed', e);
       return;
     }
   }

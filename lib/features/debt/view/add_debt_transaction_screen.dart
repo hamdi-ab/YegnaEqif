@@ -96,7 +96,7 @@ class _AddTransactionPageState extends State<AddDebtTransactionScreen> {
               const SizedBox(height: 20),
               BankCardDropdown(onBankSelected: _updateSelectedBank),
               const SizedBox(height: 20.0),
-              ContainerWIthBoxShadow(
+              ContainerWithBoxShadow(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 16),

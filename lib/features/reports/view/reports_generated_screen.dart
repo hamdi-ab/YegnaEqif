@@ -71,7 +71,7 @@ class TotalBalanceContainer extends StatelessWidget {
     final totalExpense = reportViewModel.reportModel?.totalExpense ?? 0;
     final totalBalance = totalIncome - totalExpense;
 
-    return ContainerWIthBoxShadow(
+    return ContainerWithBoxShadow(
         padding: const EdgeInsets.only(
             top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
         margin: const EdgeInsets.symmetric(horizontal: 16.0),

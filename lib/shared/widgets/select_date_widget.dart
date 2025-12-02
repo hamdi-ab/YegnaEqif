@@ -18,7 +18,7 @@ class SelectDateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ContainerWIthBoxShadow(
+    return ContainerWithBoxShadow(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       child: Row(

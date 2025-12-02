@@ -4,12 +4,12 @@ import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.da
 import '../../helpers/widget_test_helpers.dart';
 
 void main() {
-  group('ContainerWIthBoxShadow Tests', () {
+  group('ContainerWithBoxShadow Tests', () {
     testWidgets('renders with child widget', (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             child: Text('Test Content'),
           ),
         ),
@@ -24,7 +24,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             child: Text('Content'),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
       // Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             margin: customMargin,
             child: Text('Content'),
           ),
@@ -68,7 +68,7 @@ void main() {
       // Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             padding: customPadding,
             child: Text('Content'),
           ),
@@ -88,7 +88,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             width: 200,
             height: 100,
             child: Text('Content'),
@@ -97,7 +97,7 @@ void main() {
       );
 
       // Assert - Widget renders successfully with dimensions
-      expect(find.byType(ContainerWIthBoxShadow), findsOneWidget);
+      expect(find.byType(ContainerWithBoxShadow), findsOneWidget);
     });
 
     testWidgets('applies default white background color',
@@ -105,7 +105,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             child: Text('Content'),
           ),
         ),
@@ -124,7 +124,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             color: Colors.blue,
             child: Text('Content'),
           ),
@@ -144,7 +144,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             child: Text('Content'),
           ),
         ),
@@ -166,7 +166,7 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(
+          const ContainerWithBoxShadow(
             child: Text('Content'),
           ),
         ),
@@ -186,12 +186,12 @@ void main() {
       // Arrange & Act
       await tester.pumpWidget(
         WidgetTestHelpers.wrapWithMaterialApp(
-          const ContainerWIthBoxShadow(),
+          const ContainerWithBoxShadow(),
         ),
       );
 
       // Assert - Should render without error
-      expect(find.byType(ContainerWIthBoxShadow), findsOneWidget);
+      expect(find.byType(ContainerWithBoxShadow), findsOneWidget);
     });
   });
 }

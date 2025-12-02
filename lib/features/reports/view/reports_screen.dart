@@ -430,7 +430,7 @@ class RecentTransaction extends StatelessWidget {
                   final amountColor =
                       transaction.type == 'Income' ? Colors.green : Colors.red;
 
-                  return ContainerWIthBoxShadow(
+                  return ContainerWithBoxShadow(
                     margin:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                     padding: const EdgeInsets.symmetric(

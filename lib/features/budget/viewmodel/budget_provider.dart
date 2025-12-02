@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../model/budget.dart';
 import '../../../services/firestore_service.dart';
+import 'package:yegna_eqif_new/core/utils/app_logger.dart';
 
 // Provider for FirestoreService
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
@@ -52,7 +53,7 @@ class BudgetNotifier extends StateNotifier<List<Budget>> {
     } catch (e) {
       // Handle errors if any
       // ignore: avoid_print
-      print('Error updating spent amount: $e');
+      AppLogger.error('Error updating spent amount', e);
     }
   }
 

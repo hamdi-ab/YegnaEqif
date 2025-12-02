@@ -26,36 +26,38 @@ class DashboardScreen extends StatelessWidget {
       return Center(child: Text('Error: ${dashboardViewModel.error}'));
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          const ProfileBalance(),
-          const SizedBox(height: 20),
-          const TotalBalanceCard(),
-          const SizedBox(height: 20),
-          SectionWithHeader(
-            title: 'Monthly Budget',
-            leftText: 'View All',
-            viewAllCallback: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const TopSpendingDetailPage(),
-              //   ),
-              // );
-            },
-            child: const MonthlyBudget(),
-          ),
-          const SizedBox(height: 20),
-          SectionWithHeader(
-            title: 'Recent Transactions',
-            leftText: 'View All',
-            viewAllCallback: () {},
-            child: const RecentTransaction(),
-          ),
-          const SizedBox(height: 20),
-        ],
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            const ProfileBalance(),
+            const SizedBox(height: 20),
+            const TotalBalanceCard(),
+            const SizedBox(height: 20),
+            SectionWithHeader(
+              title: 'Monthly Budget',
+              leftText: 'View All',
+              viewAllCallback: () {
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => const TopSpendingDetailPage(),
+                //   ),
+                // );
+              },
+              child: const MonthlyBudget(),
+            ),
+            const SizedBox(height: 20),
+            SectionWithHeader(
+              title: 'Recent Transactions',
+              leftText: 'View All',
+              viewAllCallback: () {},
+              child: const RecentTransaction(),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

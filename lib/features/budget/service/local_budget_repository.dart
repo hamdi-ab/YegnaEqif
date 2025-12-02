@@ -1,4 +1,5 @@
 import '../model/budget.dart';
+import 'package:yegna_eqif_new/core/utils/app_logger.dart';
 
 class LocalBudgetRepository {
   final List<Budget> _budgets = [
@@ -76,7 +77,7 @@ class LocalBudgetRepository {
   ];
 
   Future<List<Budget>> fetchBudgets() async {
-    print('Returning budgets: $_budgets');
+    AppLogger.debug('Returning budgets from local repository', _budgets);
     return _budgets;
   }
 

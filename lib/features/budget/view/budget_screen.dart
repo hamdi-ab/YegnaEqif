@@ -100,7 +100,7 @@ class CategoriesGrid extends StatelessWidget {
     final categoryViewModel = context.watch<CategoryViewModel>();
     final categories = categoryViewModel.categories;
 
-    return ContainerWIthBoxShadow(
+    return ContainerWithBoxShadow(
       width: double.infinity,
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -371,7 +371,7 @@ class MonthlyBudget extends StatelessWidget {
             statusColor = Colors.red;
           }
 
-          return ContainerWIthBoxShadow(
+          return ContainerWithBoxShadow(
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             child: Column(
@@ -519,7 +519,7 @@ class BudgetOverview extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: ContainerWIthBoxShadow(
+      child: ContainerWithBoxShadow(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -616,13 +616,13 @@ class BudgetOverview extends StatelessWidget {
   }
 }
 
-// TODO: Define or import ContainerWIthBoxShadow, SectionWithHeader, TimePeriodToggle, TimePeriod
-class ContainerWIthBoxShadow extends StatelessWidget {
+// TODO: Define or import ContainerWithBoxShadow, SectionWithHeader, TimePeriodToggle, TimePeriod
+class ContainerWithBoxShadow extends StatelessWidget {
   final Widget child;
   final double? width;
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
-  const ContainerWIthBoxShadow(
+  const ContainerWithBoxShadow(
       {super.key, required this.child, this.width, this.margin, this.padding});
 
   @override

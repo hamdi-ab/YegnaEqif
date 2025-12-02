@@ -117,7 +117,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 const SizedBox(height: 20),
                 // BankCardDropdown(onBankSelected: _updateSelectedBank), // TODO: Refactor
                 const SizedBox(height: 16),
-                ContainerWIthBoxShadow(
+                ContainerWithBoxShadow(
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   width: double.infinity,
@@ -142,7 +142,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 ),
                 // EnterAmountTile(onAmountSaved: _updateAmount), // TODO: Refactor
-                ContainerWIthBoxShadow(
+                ContainerWithBoxShadow(
                   margin:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   padding:
