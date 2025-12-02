@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../service/auth_service.dart';
@@ -8,6 +9,8 @@ class AuthViewModel extends ChangeNotifier {
   User? _user;
   bool _loading = false;
   String? _error;
+  bool _disposed = false;
+  StreamSubscription<User?>? _authStateSubscription;
 
   User? get user => _user;
   bool get loading => _loading;
@@ -19,17 +22,23 @@ class AuthViewModel extends ChangeNotifier {
 
   void _setLoading(bool loading) {
     _loading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setError(String? error) {
     _error = error;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setUser(User? user) {
     _user = user;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
+      notifyListeners();
+    }
   }
 
   Future<void> signIn(String email, String password) async {
@@ -71,14 +80,15 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   void checkAuthState() {
-    _authService.user.listen((user) {
+    _authStateSubscription = _authService.user.listen((user) {
       _setUser(user);
     });
   }
 
   @override
   void dispose() {
-    // Clean up any streams or listeners
+    _disposed = true;
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 }

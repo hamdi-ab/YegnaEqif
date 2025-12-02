@@ -14,6 +14,8 @@ class SettingsViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  bool _disposed = false;
+
   SettingsViewModel() {
     loadSettings();
   }
@@ -21,7 +23,7 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> loadSettings() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _userSettings = await _settingsService.getSettings();
@@ -29,6 +31,12 @@ class SettingsViewModel extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
@@ -37,10 +45,10 @@ class SettingsViewModel extends ChangeNotifier {
     try {
       await _settingsService.saveSettings(settings);
       _userSettings = settings;
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -53,7 +61,7 @@ class SettingsViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

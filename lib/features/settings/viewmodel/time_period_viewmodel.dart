@@ -7,6 +7,7 @@ import '../../../core/time_period.dart';
 /// time period (Week, Month, Year) for Reports, Budget, and Dashboard screens.
 class TimePeriodViewModel extends ChangeNotifier {
   TimePeriod _selectedTimePeriod = TimePeriod.month;
+  bool _disposed = false;
 
   TimePeriod get selectedTimePeriod => _selectedTimePeriod;
 
@@ -14,6 +15,12 @@ class TimePeriodViewModel extends ChangeNotifier {
   void setTimePeriod(TimePeriod period) {
     if (_selectedTimePeriod != period) {
       _selectedTimePeriod = period;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
@@ -103,7 +110,7 @@ class TimePeriodViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

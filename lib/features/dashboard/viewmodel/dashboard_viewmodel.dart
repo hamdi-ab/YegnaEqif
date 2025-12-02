@@ -14,6 +14,8 @@ class DashboardViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  bool _disposed = false;
+
   DashboardViewModel() {
     loadDashboardData();
   }
@@ -21,7 +23,7 @@ class DashboardViewModel extends ChangeNotifier {
   Future<void> loadDashboardData() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _dashboardModel = await _dashboardService.getDashboardData();
@@ -29,13 +31,19 @@ class DashboardViewModel extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

@@ -9,6 +9,7 @@ class CategoryViewModel extends ChangeNotifier {
   List<app_category.Category> _categories = [];
   bool _isLoading = false;
   String? _error;
+  bool _disposed = false;
 
   List<app_category.Category> get categories => _categories;
   bool get isLoading => _isLoading;
@@ -18,7 +19,7 @@ class CategoryViewModel extends ChangeNotifier {
   Future<void> fetchCategories() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _categories = await _service.fetchCategories();
@@ -28,6 +29,12 @@ class CategoryViewModel extends ChangeNotifier {
       _categories = [];
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
@@ -37,10 +44,10 @@ class CategoryViewModel extends ChangeNotifier {
     try {
       await _service.addCategory(category);
       _categories.add(category);
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
       rethrow;
     }
   }
@@ -50,10 +57,10 @@ class CategoryViewModel extends ChangeNotifier {
     try {
       await _service.deleteCategory(categoryId);
       _categories.removeWhere((cat) => cat.id == categoryId);
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
       rethrow;
     }
   }
@@ -65,18 +72,18 @@ class CategoryViewModel extends ChangeNotifier {
       final index = _categories.indexWhere((cat) => cat.id == category.id);
       if (index != -1) {
         _categories[index] = category;
-        notifyListeners();
+        _safeNotifyListeners();
       }
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
       rethrow;
     }
   }
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

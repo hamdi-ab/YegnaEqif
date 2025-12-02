@@ -14,6 +14,8 @@ class ReportViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  bool _disposed = false;
+
   ReportViewModel() {
     loadReportData();
   }
@@ -21,7 +23,7 @@ class ReportViewModel extends ChangeNotifier {
   Future<void> loadReportData() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _reportModel = await _reportService.getReportData();
@@ -29,13 +31,19 @@ class ReportViewModel extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

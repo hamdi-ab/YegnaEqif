@@ -14,6 +14,8 @@ class BudgetViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  bool _disposed = false;
+
   BudgetViewModel() {
     loadBudgets();
   }
@@ -21,7 +23,7 @@ class BudgetViewModel extends ChangeNotifier {
   Future<void> loadBudgets() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _budgets = await _budgetRepository.fetchBudgets();
@@ -29,6 +31,12 @@ class BudgetViewModel extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
@@ -39,7 +47,7 @@ class BudgetViewModel extends ChangeNotifier {
       await loadBudgets(); // Refresh the list
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -49,7 +57,7 @@ class BudgetViewModel extends ChangeNotifier {
       await loadBudgets(); // Refresh the list
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -59,13 +67,13 @@ class BudgetViewModel extends ChangeNotifier {
       await loadBudgets(); // Refresh the list
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }

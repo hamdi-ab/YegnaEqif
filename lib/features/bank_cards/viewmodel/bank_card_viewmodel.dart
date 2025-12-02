@@ -14,6 +14,8 @@ class BankCardViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  bool _disposed = false;
+
   BankCardViewModel() {
     loadBankCards();
   }
@@ -21,7 +23,7 @@ class BankCardViewModel extends ChangeNotifier {
   Future<void> loadBankCards() async {
     _isLoading = true;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _bankCards = await _bankCardService.getBankCards();
@@ -29,6 +31,12 @@ class BankCardViewModel extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  void _safeNotifyListeners() {
+    if (!_disposed) {
       notifyListeners();
     }
   }
@@ -39,7 +47,7 @@ class BankCardViewModel extends ChangeNotifier {
       await loadBankCards();
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -49,13 +57,13 @@ class BankCardViewModel extends ChangeNotifier {
       await loadBankCards();
     } catch (e) {
       _error = e.toString();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
   @override
   void dispose() {
-    // Clean up resources
+    _disposed = true;
     super.dispose();
   }
 }
