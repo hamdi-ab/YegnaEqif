@@ -1,18 +1,19 @@
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 import 'package:yegna_eqif_new/features/reports/view/reports_generated_screen.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
-import 'package:yegna_eqif_new/models/category.dart';
 import 'package:intl/intl.dart';
 
 // import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor
 // import 'package:yegna_eqif_new/providers/total_balance_card_provider.dart'; // TODO: Refactor
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
+import '../../../core/time_period.dart';
 
 class ReportsScreen extends StatelessWidget {
+  const ReportsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +62,7 @@ class BudgetCard extends StatelessWidget {
     final budgetViewModel = context.watch<BudgetViewModel>();
     final budgets = budgetViewModel.budgets;
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
+    const selectedTimePeriod = TimePeriod.month; // Placeholder
 
     String title;
     int daysInPeriod;
@@ -72,7 +73,8 @@ class BudgetCard extends StatelessWidget {
         break;
       case TimePeriod.month:
         title = "Monthly Budget";
-        daysInPeriod = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+        daysInPeriod =
+            DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
         break;
       case TimePeriod.year:
         title = "Yearly Budget";
@@ -80,7 +82,8 @@ class BudgetCard extends StatelessWidget {
         break;
       default:
         title = "Monthly Budget";
-        daysInPeriod = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+        daysInPeriod =
+            DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
     }
 
     final filteredBudgets = budgets.where((budget) {
@@ -88,20 +91,24 @@ class BudgetCard extends StatelessWidget {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return budgetDate.isAfter(now.subtract(Duration(days: 7)));
+          return budgetDate.isAfter(now.subtract(const Duration(days: 7)));
         case TimePeriod.month:
-          return budgetDate.isAfter(now.subtract(Duration(days: 30)));
+          return budgetDate.isAfter(now.subtract(const Duration(days: 30)));
         case TimePeriod.year:
-          return budgetDate.isAfter(now.subtract(Duration(days: 365)));
+          return budgetDate.isAfter(now.subtract(const Duration(days: 365)));
         default:
           return true;
       }
     }).toList();
 
-    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
-    final double progress = totalAllocatedAmount > 0 ? totalSpentAmount / totalAllocatedAmount : 0;
-    final double dailyBudget = totalAllocatedAmount > 0 ? totalAllocatedAmount / daysInPeriod : 0;
+    final double totalAllocatedAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double progress =
+        totalAllocatedAmount > 0 ? totalSpentAmount / totalAllocatedAmount : 0;
+    final double dailyBudget =
+        totalAllocatedAmount > 0 ? totalAllocatedAmount / daysInPeriod : 0;
 
     final String totalExpense = totalSpentAmount.toStringAsFixed(2);
     final String totalBudget = totalAllocatedAmount.toStringAsFixed(2);
@@ -166,12 +173,16 @@ class BudgetCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '${totalExpense} Br. Exp',
-              style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
+              '$totalExpense Br. Exp',
+              style: const TextStyle(
+                  color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Of ${totalBudget} Br.',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black54),
+              'Of $totalBudget Br.',
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54),
             ),
           ],
         ),
@@ -197,7 +208,7 @@ class ReportsButton extends StatelessWidget {
         },
         style: TextButton.styleFrom(
           backgroundColor: Colors.blue,
-          padding: EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -227,29 +238,35 @@ class ReportsButton extends StatelessWidget {
 }
 
 class SummaryCardContainer extends StatelessWidget {
-  const SummaryCardContainer({Key? key}) : super(key: key);
+  const SummaryCardContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final transactionViewModel = context.watch<TransactionViewModel>();
     final transactionsWithCategoryDetails = transactionViewModel.transactions;
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
+    const selectedTimePeriod = TimePeriod.month; // Placeholder
 
-    final filteredTransactions = transactionsWithCategoryDetails.where((transactionData) {
-      final transaction = transactionData;
-      final now = DateTime.now();
-      switch (selectedTimePeriod) {
-        case TimePeriod.week:
-          return transaction.date.isAfter(now.subtract(Duration(days: 7)));
-        case TimePeriod.month:
-          return transaction.date.isAfter(now.subtract(Duration(days: 30)));
-        case TimePeriod.year:
-          return transaction.date.isAfter(now.subtract(Duration(days: 365)));
-        default:
-          return true;
-      }
-    }).map((transactionData) => transactionData).toList();
+    final filteredTransactions = transactionsWithCategoryDetails
+        .where((transactionData) {
+          final transaction = transactionData;
+          final now = DateTime.now();
+          switch (selectedTimePeriod) {
+            case TimePeriod.week:
+              return transaction.date
+                  .isAfter(now.subtract(const Duration(days: 7)));
+            case TimePeriod.month:
+              return transaction.date
+                  .isAfter(now.subtract(const Duration(days: 30)));
+            case TimePeriod.year:
+              return transaction.date
+                  .isAfter(now.subtract(const Duration(days: 365)));
+            default:
+              return true;
+          }
+        })
+        .map((transactionData) => transactionData)
+        .toList();
 
     final double totalIncome = filteredTransactions
         .where((transaction) => transaction.type == 'Income')
@@ -287,11 +304,11 @@ class SummaryCard extends StatelessWidget {
   final Color color;
 
   const SummaryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.amount,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -334,17 +351,20 @@ class RecentTransaction extends StatelessWidget {
     // final categories = context.watch<CategoryProvider>().categories; // TODO: Refactor
     final categories = []; // Placeholder
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
+    const selectedTimePeriod = TimePeriod.month; // Placeholder
 
     final now = DateTime.now();
     final filteredTransactions = transactions.where((transaction) {
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 7)));
+          return transaction.date
+              .isAfter(now.subtract(const Duration(days: 7)));
         case TimePeriod.month:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 30)));
+          return transaction.date
+              .isAfter(now.subtract(const Duration(days: 30)));
         case TimePeriod.year:
-          return transaction.date.isAfter(now.subtract(const Duration(days: 365)));
+          return transaction.date
+              .isAfter(now.subtract(const Duration(days: 365)));
         default:
           return true;
       }
@@ -383,7 +403,8 @@ class RecentTransaction extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 2.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -408,12 +429,16 @@ class RecentTransaction extends StatelessWidget {
                   ),
                 ),
                 ...transactionsOnDate.map((transaction) {
-                  final category = categories.firstWhere((cat) => cat.name == transaction.category); // Placeholder
-                  final amountColor = transaction.type == 'Income' ? Colors.green : Colors.red;
+                  final category = categories.firstWhere(
+                      (cat) => cat.name == transaction.category); // Placeholder
+                  final amountColor =
+                      transaction.type == 'Income' ? Colors.green : Colors.red;
 
                   return ContainerWIthBoxShadow(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 10),
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
@@ -435,13 +460,14 @@ class RecentTransaction extends StatelessWidget {
                           ),
                           Text(
                             transaction.bankType,
-                            style: const TextStyle(color: Colors.black, fontSize: 14),
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 14),
                           ),
                         ],
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             );
           },
@@ -457,7 +483,12 @@ class SectionWithHeader extends StatelessWidget {
   final VoidCallback viewAllCallback;
   final Widget child;
 
-  const SectionWithHeader({Key? key, required this.title, required this.leftText, required this.viewAllCallback, required this.child}) : super(key: key);
+  const SectionWithHeader(
+      {super.key,
+      required this.title,
+      required this.leftText,
+      required this.viewAllCallback,
+      required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -471,7 +502,8 @@ class SectionWithHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               GestureDetector(
                 onTap: viewAllCallback,
@@ -492,46 +524,3 @@ class SectionWithHeader extends StatelessWidget {
     );
   }
 }
-
-class ContainerWIthBoxShadow extends StatelessWidget {
-  const ContainerWIthBoxShadow(
-      {super.key, this.width, required this.child, this.margin, this.padding});
-
-  final Widget child;
-  final double? width;
-  final EdgeInsetsGeometry? margin;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      padding: padding,
-      margin: margin,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.13), // Darker shadow
-            blurRadius: 15, // Increased blur for smoother shadow edges
-            spreadRadius: 2, // Slight spread for better visibility
-            offset: const Offset(
-                0, 4), // Adjust offset to balance top and bottom shadows
-          ),
-          BoxShadow(
-            color: Colors.black
-                .withOpacity(0.05), // Lighter shadow for subtle effect
-            blurRadius: 10,
-            spreadRadius: -1,
-            offset: const Offset(
-                0, -3), // Slight upward shadow to enhance the top edge
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
-enum TimePeriod { week, month, year }

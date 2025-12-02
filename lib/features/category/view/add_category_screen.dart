@@ -3,11 +3,14 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/models/category.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart'; // Verify this path later
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
+// Verify this path later
 
 import 'package:yegna_eqif_new/features/category/viewmodel/category_viewmodel.dart';
 
 class AddCategoryPage extends StatefulWidget {
+  const AddCategoryPage({super.key});
+
   @override
   _AddCategoryPageState createState() => _AddCategoryPageState();
 }
@@ -44,21 +47,22 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       IconData categoryIcon = _selectedIcon ?? Icons.question_mark;
       Color categoryColor = _selectedColor;
 
-      await context.read<CategoryViewModel>().addCategory(
-        Category(
-          id: DateTime.now().toString(), // Generate a unique ID
-          name: categoryName,
-          icon: categoryIcon,
-          color: categoryColor,
-        ),
-      );
+      context.read<CategoryViewModel>().addCategory(
+            Category(
+              id: DateTime.now().toString(), // Generate a unique ID
+              name: categoryName,
+              icon: categoryIcon,
+              color: categoryColor,
+            ),
+          );
 
       // Clear input fields after saving
       _categoryNameController.clear();
       _selectedIcon = null;
       _selectedColor = Colors.blue;
-          // Optionally, show feedback
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Category saved successfully')));
+      // Optionally, show feedback
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Category saved successfully')));
     }
   }
 
@@ -76,12 +80,17 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ContainerWIthBoxShadow(width: double.infinity,
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: SizedBox(
+              ContainerWIthBoxShadow(
+                  width: double.infinity,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  child: SizedBox(
                     width: 250,
                     child: TextFormField(
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                       controller: _categoryNameController,
                       decoration: const InputDecoration(
                         hintStyle: TextStyle(fontWeight: FontWeight.bold),
@@ -98,14 +107,18 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                       },
                     ),
                   )),
-              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: Row(
+              ContainerWIthBoxShadow(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text(
                         'Icon Type',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(width: 16),
                       DropdownButtonHideUnderline(
@@ -117,23 +130,29 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                               _selectedIconPack = newValue!;
                             });
                           },
-                          items: IconPack.values.map<DropdownMenuItem<IconPack>>((IconPack value) {
+                          items: IconPack.values
+                              .map<DropdownMenuItem<IconPack>>(
+                                  (IconPack value) {
                             return DropdownMenuItem<IconPack>(
                               value: value,
                               child: Text(value.toString().split('.').last),
                             );
                           }).toList(),
                         ),
-                      )
-                      ,
+                      ),
                     ],
                   )),
-              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 16, right: 6.0),child: Row(
+              ContainerWIthBoxShadow(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.only(
+                      top: 10, bottom: 10, left: 16, right: 6.0),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Select Icon:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      SizedBox(width: 16),
+                      const Text('Select Icon:',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 16),
                       IconButton(
                         icon: Icon(_selectedIcon ?? Icons.category),
                         color: _selectedColor,
@@ -143,10 +162,15 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                       ),
                     ],
                   )),
-              ContainerWIthBoxShadow(margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),child: ListTile(
+              ContainerWIthBoxShadow(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Select Color:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    title: const Text('Select Color:',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
                     trailing: GestureDetector(
                       onTap: () {
                         showDialog(
@@ -182,7 +206,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Make the button cover the full width
+                    minimumSize: const Size(double.infinity,
+                        50), // Make the button cover the full width
                   ),
                   child: const Text(
                     'Save Category',
@@ -195,13 +220,15 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Categories:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Categories:',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: context.watch<CategoryViewModel>().categories.length,
                 itemBuilder: (context, index) {
-                  final category = context.watch<CategoryViewModel>().categories[index];
+                  final category =
+                      context.watch<CategoryViewModel>().categories[index];
                   return ListTile(
                     leading: Icon(category.icon, color: category.color),
                     title: Text(category.name),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/debt/view/add_partial_debt_pay_page.dart'; // Updated path
 
-import '../../models/debt.dart';
-import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart'; // New import
+import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
+import 'package:yegna_eqif_new/models/debt.dart'; // New import
 
 class DebtTrackerPage extends StatefulWidget {
+  const DebtTrackerPage({super.key});
+
   @override
   _DebtTrackerPageState createState() => _DebtTrackerPageState();
 }
@@ -40,7 +42,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Debt Tracker'),
+        title: const Text('Debt Tracker'),
         centerTitle: true,
       ),
       body: Padding(
@@ -73,7 +75,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Money Lent',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
@@ -83,17 +85,18 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                         children: [
                           Text(
                             '${totalLentAmount.toStringAsFixed(2)} Br.',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Row(
                             children: [
-                              Icon(Icons.person, color: Colors.grey, size: 16),
-                              SizedBox(width: 4),
+                              const Icon(Icons.person,
+                                  color: Colors.grey, size: 16),
+                              const SizedBox(width: 4),
                               Text(
                                 'People: $lentPeopleCount',
-                                style:
-                                    TextStyle(fontSize: 14, color: Colors.grey),
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -101,11 +104,11 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Money Owed',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
@@ -115,19 +118,20 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                         children: [
                           Text(
                             '${totalOwedAmount.toStringAsFixed(2)} Br.',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Row(
                             children: [
-                              Icon(Icons.person, color: Colors.grey, size: 16),
-                              SizedBox(width: 4),
+                              const Icon(Icons.person,
+                                  color: Colors.grey, size: 16),
+                              const SizedBox(width: 4),
                               Text(
                                 'People: $borrowedPeopleCount',
-                                style:
-                                    TextStyle(fontSize: 14, color: Colors.grey),
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.grey),
                               ),
                             ],
                           ),
@@ -141,7 +145,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
             const SizedBox(height: 16),
             TabBar(
               controller: _tabController,
-              tabs: [
+              tabs: const [
                 Tab(
                   // Add an icon
                   child: Text(
@@ -173,15 +177,18 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                     itemCount: lentTransactions.length,
                     itemBuilder: (context, index) {
                       if (lentTransactions.isEmpty) {
-                        return Text(
+                        return const Text(
                           'No transactions available.',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         );
                       }
                       final transaction = lentTransactions[index];
                       return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 2),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 16.0),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -201,38 +208,45 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                           ],
                         ),
                         child: ListTile(
-                          contentPadding: EdgeInsets.all(0),
+                          contentPadding: const EdgeInsets.all(0),
                           leading: CircleAvatar(
                             backgroundColor: Colors.green.withOpacity(0.1),
                             radius: 24,
-                            child: Icon(Icons.person, color: Colors.green, size: 24),
+                            child: const Icon(Icons.person,
+                                color: Colors.green, size: 24),
                           ),
                           title: Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     transaction.personName,
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     'Remaining: ${transaction.remainingAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(fontSize: 15),
+                                    style: const TextStyle(fontSize: 15),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Amount: ${transaction.totalAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
                                     'Days Left: ${transaction.daysLeft}',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
                                   ),
                                 ],
                               ),
@@ -245,13 +259,14 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                             ],
                           ),
                           trailing: PopupMenuButton<String>(
-                            icon: Icon(Icons.more_vert),
+                            icon: const Icon(Icons.more_vert),
                             onSelected: (value) async {
                               if (value == 'Edit') {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => EditDebtPage(debt: transaction),
+                                    builder: (context) =>
+                                        EditDebtPage(debt: transaction),
                                   ),
                                 );
                               } else if (value == 'Delete') {
@@ -259,21 +274,28 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     title: const Text('Delete Debt'),
-                                    content: Text('Are you sure you want to delete this debt for ${transaction.personName}?'),
+                                    content: Text(
+                                        'Are you sure you want to delete this debt for ${transaction.personName}?'),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('Delete',
+                                            style:
+                                                TextStyle(color: Colors.red)),
                                       ),
                                     ],
                                   ),
                                 );
                                 if (deleteConfirmed) {
-                                  context.read<DebtViewModel>().removeDebt(transaction.id);
+                                  context
+                                      .read<DebtViewModel>()
+                                      .removeDebt(transaction.id);
                                 }
                               } else if (value == 'Pay') {
                                 Navigator.push(
@@ -281,9 +303,11 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                   MaterialPageRoute(
                                     builder: (context) => AddPartialDebtPayPage(
                                       debtId: transaction.id,
-                                      transactionType: transaction.transactionType,
+                                      transactionType:
+                                          transaction.transactionType,
                                       personName: transaction.personName,
-                                      remainingAmount: transaction.remainingAmount,
+                                      remainingAmount:
+                                          transaction.remainingAmount,
                                     ),
                                   ),
                                 );
@@ -291,7 +315,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                             },
                             itemBuilder: (BuildContext context) {
                               return [
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Edit',
                                   child: Row(
                                     children: [
@@ -301,7 +325,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                     ],
                                   ),
                                 ),
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Delete',
                                   child: Row(
                                     children: [
@@ -311,7 +335,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                     ],
                                   ),
                                 ),
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Pay',
                                   child: Row(
                                     children: [
@@ -358,12 +382,12 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                           ],
                         ),
                         child: ListTile(
-                          contentPadding: EdgeInsets.all(0),
+                          contentPadding: const EdgeInsets.all(0),
                           leading: CircleAvatar(
                             backgroundColor: Colors.red.withOpacity(0.1),
                             radius: 24,
-                            child:
-                                Icon(Icons.person, color: Colors.red, size: 24),
+                            child: const Icon(Icons.person,
+                                color: Colors.red, size: 24),
                           ),
                           title: Column(
                             children: [
@@ -373,13 +397,13 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                 children: [
                                   Text(
                                     transaction.personName,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     'Remaining: ${transaction.remainingAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(fontSize: 15),
+                                    style: const TextStyle(fontSize: 15),
                                   ),
                                 ],
                               ),
@@ -390,12 +414,12 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                 children: [
                                   Text(
                                     'Amount: ${transaction.totalAmount.toStringAsFixed(2)} Br.',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                   Text(
                                     'Days Left: ${transaction.daysLeft}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 14, color: Colors.grey),
                                   ),
                                 ],
@@ -409,13 +433,14 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                             ],
                           ),
                           trailing: PopupMenuButton<String>(
-                            icon: Icon(Icons.more_vert),
+                            icon: const Icon(Icons.more_vert),
                             onSelected: (value) async {
                               if (value == 'Edit') {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => EditDebtPage(debt: transaction),
+                                    builder: (context) =>
+                                        EditDebtPage(debt: transaction),
                                   ),
                                 );
                               } else if (value == 'Delete') {
@@ -423,21 +448,28 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     title: const Text('Delete Debt'),
-                                    content: Text('Are you sure you want to delete this debt for ${transaction.personName}?'),
+                                    content: Text(
+                                        'Are you sure you want to delete this debt for ${transaction.personName}?'),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
-                                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
+                                        child: const Text('Delete',
+                                            style:
+                                                TextStyle(color: Colors.red)),
                                       ),
                                     ],
                                   ),
                                 );
                                 if (deleteConfirmed) {
-                                  context.read<DebtViewModel>().removeDebt(transaction.id);
+                                  context
+                                      .read<DebtViewModel>()
+                                      .removeDebt(transaction.id);
                                 }
                               } else if (value == 'Pay') {
                                 Navigator.push(
@@ -445,9 +477,11 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                   MaterialPageRoute(
                                     builder: (context) => AddPartialDebtPayPage(
                                       debtId: transaction.id,
-                                      transactionType: transaction.transactionType,
+                                      transactionType:
+                                          transaction.transactionType,
                                       personName: transaction.personName,
-                                      remainingAmount: transaction.remainingAmount,
+                                      remainingAmount:
+                                          transaction.remainingAmount,
                                     ),
                                   ),
                                 );
@@ -455,7 +489,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                             },
                             itemBuilder: (BuildContext context) {
                               return [
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Edit',
                                   child: Row(
                                     children: [
@@ -465,7 +499,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                     ],
                                   ),
                                 ),
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Delete',
                                   child: Row(
                                     children: [
@@ -475,7 +509,7 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
                                     ],
                                   ),
                                 ),
-                                PopupMenuItem<String>(
+                                const PopupMenuItem<String>(
                                   value: 'Pay',
                                   child: Row(
                                     children: [
@@ -502,8 +536,8 @@ class _DebtTrackerPageState extends State<DebtTrackerPage>
   }
 }
 
-
-class EditDebtPage extends StatefulWidget { // Changed from ConsumerStatefulWidget
+class EditDebtPage extends StatefulWidget {
+  // Changed from ConsumerStatefulWidget
   final Debt debt;
 
   const EditDebtPage({super.key, required this.debt});
@@ -512,7 +546,8 @@ class EditDebtPage extends StatefulWidget { // Changed from ConsumerStatefulWidg
   _EditDebtPageState createState() => _EditDebtPageState();
 }
 
-class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerState
+class _EditDebtPageState extends State<EditDebtPage> {
+  // Changed from ConsumerState
   final _formKey = GlobalKey<FormState>();
   late String personName;
   late double remainingAmount;
@@ -560,8 +595,10 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
         progress: (totalAmount - remainingAmount) / totalAmount,
         transactionType: transactionType,
       );
-      context.read<DebtViewModel>().updateDebt(widget.debt.id, updatedDebt); // Using Provider
-      Navigator.of(context).pop();  // Go back to the previous screen
+      context
+          .read<DebtViewModel>()
+          .updateDebt(widget.debt.id, updatedDebt); // Using Provider
+      Navigator.of(context).pop(); // Go back to the previous screen
     }
   }
 
@@ -569,7 +606,7 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Debt'),
+        title: const Text('Edit Debt'),
         centerTitle: true,
       ),
       body: Form(
@@ -581,7 +618,7 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
             children: [
               TextFormField(
                 initialValue: personName,
-                decoration: InputDecoration(labelText: 'Person Name'),
+                decoration: const InputDecoration(labelText: 'Person Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a name';
@@ -595,7 +632,8 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: remainingAmount.toString(),
-                decoration: InputDecoration(labelText: 'Remaining Amount'),
+                decoration:
+                    const InputDecoration(labelText: 'Remaining Amount'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
@@ -610,7 +648,7 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: totalAmount.toString(),
-                decoration: InputDecoration(labelText: 'Total Amount'),
+                decoration: const InputDecoration(labelText: 'Total Amount'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || double.tryParse(value) == null) {
@@ -624,9 +662,10 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: bankType,
-                decoration: InputDecoration(labelText: 'Bank Type'),
-                items: <String>['Cash', 'Credit Card', 'Debit Card'].map((String value) {
+                initialValue: bankType,
+                decoration: const InputDecoration(labelText: 'Bank Type'),
+                items: <String>['Cash', 'Credit Card', 'Debit Card']
+                    .map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -643,14 +682,16 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: Text('Due Date: ${dueDate.toLocal().toShortDateString()}'),
-                trailing: Icon(Icons.calendar_today),
+                title:
+                    Text('Due Date: ${dueDate.toLocal().toShortDateString()}'),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectDueDate(context),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: transactionType,
-                decoration: InputDecoration(labelText: 'Transaction Type'),
+                initialValue: transactionType,
+                decoration:
+                    const InputDecoration(labelText: 'Transaction Type'),
                 items: <String>['lent', 'borrowed'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -681,6 +722,6 @@ class _EditDebtPageState extends State<EditDebtPage> { // Changed from ConsumerS
 
 extension DateTimeExtension on DateTime {
   String toShortDateString() {
-    return "${this.year}-${this.month.toString().padLeft(2, '0')}-${this.day.toString().padLeft(2, '0')}";
+    return "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
   }
 }

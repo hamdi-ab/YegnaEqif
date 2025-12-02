@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:yegna_eqif_new/features/bank_cards/view/add_bank_card_screen.dart';
-import 'package:yegna_eqif_new/screens/add%20pages/add_budget_screen.dart';
-import 'package:yegna_eqif_new/screens/add%20pages/add_debt_transaction_screen.dart';
-import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
-import 'package:yegna_eqif_new/screens/budget/budget_screen.dart';
+import 'package:yegna_eqif_new/features/budget/view/add_budget_screen.dart';
+import 'package:yegna_eqif_new/features/budget/view/budget_screen.dart';
 import 'package:yegna_eqif_new/features/dashboard/view/dashboard_screen.dart';
-import 'package:yegna_eqif_new/screens/debt/ows_money_screen.dart';
-import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:yegna_eqif_new/features/debt/view/add_debt_transaction_screen.dart';
+import 'package:yegna_eqif_new/features/debt/view/debt_tracker_screen.dart';
+import 'package:yegna_eqif_new/features/reports/view/reports_screen.dart';
+import 'package:yegna_eqif_new/features/transactions/view/add_transaction_screen.dart';
 
 class DashboardContainerScreen extends StatefulWidget {
+  const DashboardContainerScreen({super.key});
+
   @override
-  _DashboardContainerScreenState createState() => _DashboardContainerScreenState();
+  _DashboardContainerScreenState createState() =>
+      _DashboardContainerScreenState();
 }
 
 class _DashboardContainerScreenState extends State<DashboardContainerScreen> {
   int _selectedIndex = 0;
 
   static final List<Widget> _pages = <Widget>[
-    DashboardScreen(),
+    const DashboardScreen(),
     ReportsScreen(),
     BudgetScreen(scrollToMonthlyBudget: false),
     DebtTrackerPage(),
@@ -54,7 +57,7 @@ class _DashboardContainerScreenState extends State<DashboardContainerScreen> {
           BottomNavigationBarItem(
             icon: Padding(
               padding: EdgeInsets.only(right: 30.0),
-              child: const FaIcon(
+              child: FaIcon(
                 FontAwesomeIcons.chartPie,
                 size: 22,
               ),
@@ -86,29 +89,32 @@ class _DashboardContainerScreenState extends State<DashboardContainerScreen> {
         foregroundColor: Colors.white,
         activeBackgroundColor: Colors.red,
         activeForegroundColor: Colors.white,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         spacing: 6, // Adjust spacing between SpeedDial children
         spaceBetweenChildren: 14, // Add space between SpeedDial children
         children: [
           SpeedDialChild(
-            child: Icon(Icons.payments, color: Colors.green),
+            child: const Icon(Icons.payments, color: Colors.green),
             backgroundColor: Colors.green.shade200,
             labelWidget: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // Add padding to label
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 4.0), // Add padding to label
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300, width: 1), // Add border
+                border: Border.all(
+                    color: Colors.grey.shade300, width: 1), // Add border
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
-                    offset: Offset(2, 2),
+                    offset: const Offset(2, 2),
                   ),
                 ],
               ),
-              constraints: BoxConstraints(maxWidth: 150), // Limit the label width
-              child: Text(
+              constraints:
+                  const BoxConstraints(maxWidth: 150), // Limit the label width
+              child: const Text(
                 'Add Transaction',
                 style: TextStyle(fontSize: 16.0),
               ),
@@ -121,90 +127,104 @@ class _DashboardContainerScreenState extends State<DashboardContainerScreen> {
             },
           ),
           SpeedDialChild(
-            child: Icon(Icons.account_balance_wallet, color: Colors.blue),
+            child: const Icon(Icons.account_balance_wallet, color: Colors.blue),
             backgroundColor: Colors.blue.shade200,
             labelWidget: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // Add padding to label
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 4.0), // Add padding to label
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300, width: 1), // Add border
+                border: Border.all(
+                    color: Colors.grey.shade300, width: 1), // Add border
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
-                    offset: Offset(2, 2),
+                    offset: const Offset(2, 2),
                   ),
                 ],
               ),
-              constraints: BoxConstraints(maxWidth: 150), // Limit the label width
-              child: Text(
+              constraints:
+                  const BoxConstraints(maxWidth: 150), // Limit the label width
+              child: const Text(
                 'Add Card or Wallet',
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddBankCardScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AddBankCardScreen()));
             },
           ),
           SpeedDialChild(
-            child: Icon(Icons.category, color: Colors.orange),
+            child: const Icon(Icons.category, color: Colors.orange),
             backgroundColor: Colors.orange.shade200,
             labelWidget: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // Add padding to label
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 4.0), // Add padding to label
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300, width: 1), // Add border
+                border: Border.all(
+                    color: Colors.grey.shade300, width: 1), // Add border
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
-                    offset: Offset(2, 2),
+                    offset: const Offset(2, 2),
                   ),
                 ],
               ),
-              constraints: BoxConstraints(maxWidth: 150), // Limit the label width
-              child: Text(
+              constraints:
+                  const BoxConstraints(maxWidth: 150), // Limit the label width
+              child: const Text(
                 'Add Budget',
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddBudgetPage()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddBudgetPage()));
             },
           ),
           SpeedDialChild(
-            child: Icon(Icons.people, color: Colors.red),
+            child: const Icon(Icons.people, color: Colors.red),
             backgroundColor: Colors.red.shade200,
             labelWidget: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // Add padding to label
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 4.0), // Add padding to label
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300, width: 1), // Add border
+                border: Border.all(
+                    color: Colors.grey.shade300, width: 1), // Add border
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
                     blurRadius: 4,
-                    offset: Offset(2, 2),
+                    offset: const Offset(2, 2),
                   ),
                 ],
               ),
-              constraints: BoxConstraints(maxWidth: 150), // Limit the label width
-              child: Text(
+              constraints:
+                  const BoxConstraints(maxWidth: 150), // Limit the label width
+              child: const Text(
                 'Add Debt',
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddDebtTransactionScreen()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddDebtTransactionScreen()));
             },
           )
         ],
-      )
-
-      ,
+      ),
     );
   }
 }

@@ -4,17 +4,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/dashboard/viewmodel/dashboard_viewmodel.dart';
-import 'package:yegna_eqif_new/screens/profile_page.dart';
-import 'package:yegna_eqif_new/screens/setting_page.dart';
+import 'package:yegna_eqif_new/features/settings/view/profile_screen.dart';
+import 'package:yegna_eqif_new/features/settings/view/settings_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:yegna_eqif_new/screens/dashboard/top_spending_detail_page.dart';
-import '../../models/category.dart';
+import '../../../models/category.dart';
 import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
-// import '../../providers/debt_provider.dart'; // TODO: Refactor
-import '../../utils/string_formater.dart';
-import '../budget/budget_screen.dart';
+import '../../../core/time_period.dart'; // Added TimePeriod import
+// import '../../providers/debt_provider.dart';
+// TODO: Refactor
+import '../../../core/string_formater.dart';
+// import '../../budget/view/budget_screen.dart';  // Removed to avoid duplicate import
+import '../../../shared/widgets/forms/container_with_box_shadow.dart';
 
 class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final dashboardViewModel = context.watch<DashboardViewModel>();
@@ -31,50 +36,26 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 30),
-          ProfileBalance(),
+          const ProfileBalance(),
           const SizedBox(height: 20),
-          // TotalBalanceCard(), // TODO: Refactor
+          const TotalBalanceCard(),
           const SizedBox(height: 20),
-          SectionWithHeader(
-            title: 'Top Spending',
-            leftText: 'View All',
-            viewAllCallback: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TopSpendingDetailPage(),
-                ),
-              );
-            },
-            child: const TopSpending(),
-          ),
           SectionWithHeader(
             title: 'Monthly Budget',
             leftText: 'View All',
             viewAllCallback: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BudgetScreen(scrollToMonthlyBudget: true),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => const TopSpendingDetailPage(),
+              //   ),
+              // );
             },
-            child: MonthlyBudget(),
+            child: const MonthlyBudget(),
           ),
+          const SizedBox(height: 20),
           SectionWithHeader(
-            title: 'Lent',
-            leftText: 'View All',
-            viewAllCallback: () {},
-            child: PeopleList(isOwed: true),
-          ),
-          SectionWithHeader(
-            title: 'Borrowed',
-            leftText: 'View All',
-            viewAllCallback: () {},
-            child: PeopleList(isOwed: false),
-          ),
-          SectionWithHeader(
-            title: 'Recent Transaction',
+            title: 'Recent Transactions',
             leftText: 'View All',
             viewAllCallback: () {},
             child: const RecentTransaction(),
@@ -95,9 +76,8 @@ class ProfileBalance extends StatelessWidget {
     final totalBudget = dashboardViewModel.dashboardModel?.totalBudget ?? 0;
     final totalSpent = dashboardViewModel.dashboardModel?.totalSpent ?? 0;
 
-    final double progressInRation = (totalBudget != 0)
-        ? totalSpent / totalBudget
-        : 0.0;
+    final double progressInRation =
+        (totalBudget != 0) ? totalSpent / totalBudget : 0.0;
 
     final double progress = (1 - progressInRation) * 100;
 
@@ -116,10 +96,11 @@ class ProfileBalance extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const ProfileScreen()),
                     );
                   },
-                  icon: Icon(CupertinoIcons.person_fill),
+                  icon: const Icon(CupertinoIcons.person_fill),
                 ),
               ),
               const SizedBox(width: 8),
@@ -129,16 +110,18 @@ class ProfileBalance extends StatelessWidget {
                   Text(
                     'Hamdi Abdulfetah',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
-                    child: ProgressBar(
-                      value: progress,
-                      maxValue: 100,
-                      label: "${progress.toStringAsFixed(0)} / 100",
-                    ),
+                    // TODO: Implement ProgressBar widget
+                    // child: ProgressBar(
+                    //   value: progress,
+                    //   maxValue: 100,
+                    //   label: "${progress.toStringAsFixed(0)} / 100",
+                    // ),
+                    child: Text('Progress: ${progress.toStringAsFixed(0)}%'),
                   ),
                 ],
               )
@@ -148,7 +131,7 @@ class ProfileBalance extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SettingsPage()),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
             icon: const Icon(Icons.settings),
@@ -179,7 +162,7 @@ class MonthlyBudget extends StatelessWidget {
 
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-            (cat) => cat.name == categoryId,
+        (cat) => cat.name == categoryId,
         orElse: () => Category(
           id: '',
           name: 'Unknown',
@@ -197,7 +180,9 @@ class MonthlyBudget extends StatelessWidget {
         itemBuilder: (context, index) {
           final budget = dashboardViewModel.dashboardModel!;
           final category = getCategoryDetails('1'); // Placeholder
-          final double progress = budget.totalBudget > 0 ? budget.totalSpent / budget.totalBudget : 0;
+          final double progress = budget.totalBudget > 0
+              ? budget.totalSpent / budget.totalBudget
+              : 0;
           final Color progressColor = category.color;
 
           return ContainerWIthBoxShadow(
@@ -320,7 +305,8 @@ class RecentTransaction extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 2.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -354,3 +340,114 @@ class RecentTransaction extends StatelessWidget {
 }
 
 // ... (rest of the file remains the same, with ConsumerWidgets that don't use budgetProvider)
+
+class TotalBalanceCard extends StatelessWidget {
+  const TotalBalanceCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final dashboardViewModel = context.watch<DashboardViewModel>();
+    final totalBalance = 0.0; // TODO: Add totalBalance to DashboardModel
+    final totalIncome = 0.0; // TODO: Add totalIncome to DashboardModel
+    final totalExpense = dashboardViewModel.dashboardModel?.totalSpent ?? 0;
+
+    return ContainerWIthBoxShadow(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Text('Total Balance',
+              style: TextStyle(fontSize: 16, color: Colors.grey)),
+          const SizedBox(height: 8),
+          Text('${totalBalance.toStringAsFixed(2)} Br.',
+              style:
+                  const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.arrow_downward, color: Colors.green, size: 16),
+                      SizedBox(width: 4),
+                      Text('Income', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Text('${totalIncome.toStringAsFixed(2)} Br.',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.arrow_upward, color: Colors.red, size: 16),
+                      SizedBox(width: 4),
+                      Text('Expense', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Text('${totalExpense.toStringAsFixed(2)} Br.',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SectionWithHeader extends StatelessWidget {
+  final String title;
+  final String leftText;
+  final VoidCallback viewAllCallback;
+  final Widget child;
+
+  const SectionWithHeader(
+      {super.key,
+      required this.title,
+      required this.leftText,
+      required this.viewAllCallback,
+      required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              GestureDetector(
+                onTap: viewAllCallback,
+                child: Text(
+                  leftText,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+  }
+}

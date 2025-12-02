@@ -1,13 +1,16 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'package:yegna_eqif_new/features/budget/model/budget.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 import 'package:yegna_eqif_new/features/transactions/viewmodel/transaction_viewmodel.dart';
 import 'package:yegna_eqif_new/models/category.dart';
 import 'package:yegna_eqif_new/features/transactions/model/transaction.dart';
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
+import 'package:yegna_eqif_new/shared/widgets/toggle.dart';
 
 class AddTransactionScreen extends StatefulWidget {
+  const AddTransactionScreen({super.key});
+
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
@@ -53,12 +56,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Transaction Saved')),
+        const SnackBar(content: Text('Transaction Saved')),
       );
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter all required fields.')),
+        const SnackBar(content: Text('Please enter all required fields.')),
       );
     }
   }
@@ -107,18 +110,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             key: _formKey,
             child: Column(
               children: [
-                SizedBox(height: 20),
-                Toggle(onToggle: _updateIncomeExpense, labels: ["Income", "Expense"]),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
+                Toggle(
+                    onToggle: _updateIncomeExpense,
+                    labels: const ["Income", "Expense"]),
+                const SizedBox(height: 20),
                 // BankCardDropdown(onBankSelected: _updateSelectedBank), // TODO: Refactor
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 ContainerWIthBoxShadow(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 14.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 14.0),
                   child: TextFormField(
                     controller: noteController,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 18),
                     decoration: const InputDecoration(
                       hintStyle: TextStyle(fontWeight: FontWeight.bold),
                       hintText: 'Enter Name',
@@ -135,8 +143,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 // EnterAmountTile(onAmountSaved: _updateAmount), // TODO: Refactor
                 ContainerWIthBoxShadow(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   child: GestureDetector(
                     onTap: () {
                       // Navigator.push(
@@ -152,21 +162,32 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor: selectedCategory != null ? selectedCategory!.color.withOpacity(0.2) : Colors.grey.shade300,
+                        backgroundColor: selectedCategory != null
+                            ? selectedCategory!.color.withOpacity(0.2)
+                            : Colors.grey.shade300,
                         child: Icon(
-                          selectedCategory != null ? selectedCategory!.icon : Icons.category,
-                          color: selectedCategory != null ? selectedCategory!.color : Colors.black54,
+                          selectedCategory != null
+                              ? selectedCategory!.icon
+                              : Icons.category,
+                          color: selectedCategory != null
+                              ? selectedCategory!.color
+                              : Colors.black54,
                         ),
                       ),
                       title: Text(
-                        selectedCategory != null ? selectedCategory!.name : 'Select Category',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54),
+                        selectedCategory != null
+                            ? selectedCategory!.name
+                            : 'Select Category',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54),
                       ),
                     ),
                   ),
                 ),
                 // SelectDateWidget(label: 'Set Date', firstDay: DateTime(2000), lastDay: DateTime.now(), onDateSelected: _updateDueDate), // TODO: Refactor
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 SaveButton(
                   isValid: (_formKey.currentState?.validate() ?? false) &&
                       isCategorySelected &&
@@ -186,7 +207,7 @@ class SaveButton extends StatelessWidget {
   final bool isValid;
   final VoidCallback onSave;
 
-  SaveButton({required this.isValid, required this.onSave});
+  const SaveButton({super.key, required this.isValid, required this.onSave});
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +221,7 @@ class SaveButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          minimumSize: Size(double.infinity, 50),
+          minimumSize: const Size(double.infinity, 50),
         ),
         child: const Text(
           'Save',
@@ -211,100 +232,6 @@ class SaveButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Toggle extends StatefulWidget {
-  final Function(String) onToggle;
-  final List<String> labels;
-
-  const Toggle({required this.onToggle, Key? key, required this.labels}) : super(key: key);
-
-  @override
-  _ToggleState createState() => _ToggleState();
-}
-
-class _ToggleState extends State<Toggle> {
-  int selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: List.generate(widget.labels.length, (index) {
-          final isSelected = index == selectedIndex;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedIndex = index;
-                });
-                widget.onToggle(widget.labels[index]);
-              },
-              child: Container(
-                height: 42,
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  widget.labels[index],
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isSelected ? Colors.white : Colors.black54,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class ContainerWIthBoxShadow extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? margin;
-  final double? width;
-  final EdgeInsetsGeometry? padding;
-
-  const ContainerWIthBoxShadow({
-    Key? key,
-    required this.child,
-    this.margin,
-    this.width,
-    this.padding,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: margin,
-      width: width,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

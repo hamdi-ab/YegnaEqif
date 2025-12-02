@@ -35,7 +35,7 @@ class _SignUpState extends State<SignUp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               width: 160,
               height: 140,
               child: Image.asset('assets/icon.png'),
@@ -110,7 +110,7 @@ class _SignUpState extends State<SignUp> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => HomeScreen()),
+                              builder: (context) => const HomeScreen()),
                         );
                       }
                     }

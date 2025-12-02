@@ -1,15 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/bank_account_provider.dart';
-import '../providers/cash_card_provider.dart';
-import '../providers/debt_provider.dart';
-import '../providers/total_balance_card_provider.dart';
+// TODO: Refactor to use new ViewModels from features/ directory
+// import '../providers/bank_account_provider.dart';
+// import '../providers/cash_card_provider.dart';
+// import '../providers/debt_provider.dart';
+// import '../providers/total_balance_card_provider.dart';
 
+// TODO: Refactor this class to use new ViewModels instead of deleted Riverpod providers
 class TransactionHandler {
   final WidgetRef ref;
 
   TransactionHandler({required this.ref});
 
+  /* TODO: Refactor to use new architecture
   void handleTransaction(String accountName, double amount, String type) async {
     // Determine if it's income or expense
     bool isIncome = type == 'Income';
@@ -42,6 +45,5 @@ class TransactionHandler {
   Future<void> adjustDebtWhenYouPay(String debtId, double amountPaid) async {
     await ref.read(borrowOrDebtProvider.notifier).updateDebtAmount(debtId, amountPaid);
   }
-
-
+  */
 }

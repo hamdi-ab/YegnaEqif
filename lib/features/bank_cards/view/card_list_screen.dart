@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
 
 class CardListScreen extends StatelessWidget {
-  const CardListScreen({Key? key}) : super(key: key);
+  const CardListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

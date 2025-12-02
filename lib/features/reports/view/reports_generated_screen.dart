@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:yegna_eqif_new/features/reports/model/report_model.dart';
 import 'package:yegna_eqif_new/features/reports/viewmodel/report_viewmodel.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:yegna_eqif_new/features/reports/view/reports_screen.dart';
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
 
 class ReportsGeneratedScreen extends StatelessWidget {
   const ReportsGeneratedScreen({super.key});
@@ -22,27 +24,30 @@ class ReportsGeneratedScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Report', style: TextStyle(fontWeight: FontWeight.w500),),
+        title: const Text(
+          'Report',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: (){
-
-          }, icon: const Icon(Icons.calendar_month))
+          IconButton(onPressed: () {}, icon: const Icon(Icons.calendar_month))
         ],
       ),
-      body:  SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               // TimePeriodToggle(), // TODO: Refactor
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TotalBalanceContainer(),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: Text('Income & Expense', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                padding: EdgeInsets.only(left: 16.0),
+                child: Text('Income & Expense',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
               WeeklyNetIncomeCard(),
               SizedBox(height: 20),
@@ -57,7 +62,7 @@ class ReportsGeneratedScreen extends StatelessWidget {
 }
 
 class TotalBalanceContainer extends StatelessWidget {
-  const TotalBalanceContainer({Key? key}) : super(key: key);
+  const TotalBalanceContainer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +71,22 @@ class TotalBalanceContainer extends StatelessWidget {
     final totalExpense = reportViewModel.reportModel?.totalExpense ?? 0;
     final totalBalance = totalIncome - totalExpense;
 
-    return ContainerWIthBoxShadow(padding: const EdgeInsets.only(top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
-        margin: const EdgeInsets.symmetric(horizontal: 16.0),child: Column(
+    return ContainerWIthBoxShadow(
+        padding: const EdgeInsets.only(
+            top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Total Balance', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54)),
-              subtitle: Text('${totalBalance.toStringAsFixed(2)} Br.', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              title: const Text('Total Balance',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black54)),
+              subtitle: Text('${totalBalance.toStringAsFixed(2)} Br.',
+                  style: const TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.bold)),
               trailing: const CircleAvatar(
                 backgroundColor: Colors.blue,
                 child: Icon(Icons.account_balance_wallet, color: Colors.white),
@@ -85,14 +99,14 @@ class TotalBalanceContainer extends StatelessWidget {
   }
 }
 
-
 class WeeklyNetIncomeCard extends StatelessWidget {
   const WeeklyNetIncomeCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final reportViewModel = context.watch<ReportViewModel>();
-    final netIncome = (reportViewModel.reportModel?.totalIncome ?? 0) - (reportViewModel.reportModel?.totalExpense ?? 0);
+    final netIncome = (reportViewModel.reportModel?.totalIncome ?? 0) -
+        (reportViewModel.reportModel?.totalExpense ?? 0);
 
     return Container(
       height: 300,
@@ -119,11 +133,13 @@ class WeeklyNetIncomeCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${netIncome.toStringAsFixed(2)} Br.',
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
+            style: const TextStyle(
+                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: _buildChart(reportViewModel.reportModel?.categoryBreakdowns ?? []),
+            child: _buildChart(
+                reportViewModel.reportModel?.categoryBreakdowns ?? []),
           ),
           const SizedBox(height: 16),
           _buildLegend(),
@@ -135,7 +151,6 @@ class WeeklyNetIncomeCard extends StatelessWidget {
   Widget _buildChart(List<CategoryBreakdown> categoryBreakdowns) {
     return BarChart(_buildChartData(categoryBreakdowns));
   }
-
 
   BarChartData _buildChartData(List<CategoryBreakdown> categoryBreakdowns) {
     final barGroups = categoryBreakdowns.asMap().entries.map((entry) {
@@ -164,10 +179,8 @@ class WeeklyNetIncomeCard extends StatelessWidget {
             getTitlesWidget: (value, meta) {
               return Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  categoryBreakdowns[value.toInt()].categoryName,
-                  style: const TextStyle(fontSize: 12)
-                ),
+                child: Text(categoryBreakdowns[value.toInt()].categoryName,
+                    style: const TextStyle(fontSize: 12)),
               );
             },
             reservedSize: 30,
@@ -183,8 +196,9 @@ class WeeklyNetIncomeCard extends StatelessWidget {
             reservedSize: 40,
           ),
         ),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles:
+            const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       maxY: _calculateMaxY(barGroups),
     );
@@ -228,12 +242,11 @@ class WeeklyNetIncomeCard extends StatelessWidget {
   }
 }
 
-
-
 class IncomeExpenseBreakdownCard extends StatelessWidget {
   final String title; // "Income" or "Expense"
 
-  IncomeExpenseBreakdownCard({
+  const IncomeExpenseBreakdownCard({
+    super.key,
     required this.title,
   });
 
@@ -242,7 +255,9 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
     final reportViewModel = context.watch<ReportViewModel>();
     final isIncome = title == 'Income';
     final categoryData = reportViewModel.reportModel?.categoryBreakdowns ?? [];
-    final totalValue = isIncome ? reportViewModel.reportModel?.totalIncome ?? 0 : reportViewModel.reportModel?.totalExpense ?? 0;
+    final totalValue = isIncome
+        ? reportViewModel.reportModel?.totalIncome ?? 0
+        : reportViewModel.reportModel?.totalExpense ?? 0;
 
     return Container(
       margin: const EdgeInsets.all(16.0),
@@ -284,7 +299,7 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                       color: isIncome ? Colors.green : Colors.red,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Total',
                     style: TextStyle(
                       fontSize: 14,
@@ -337,22 +352,26 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                     ),
                     title: Text(
                       category.categoryName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
                       '${category.totalTransaction.toString()} Transactions ',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                     trailing: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
                           '${category.amount.toStringAsFixed(2)} Br.',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '${category.percent.toStringAsFixed(1)}%',
-                          style: const TextStyle(fontSize: 14, color: Colors.black54),
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black54),
                         ),
                       ],
                     ),
@@ -372,7 +391,9 @@ class IncomeExpenseBreakdownCard extends StatelessWidget {
                       // Filled progress bar
                       Container(
                         height: 8,
-                        width: MediaQuery.of(context).size.width * category.percent / 100,
+                        width: MediaQuery.of(context).size.width *
+                            category.percent /
+                            100,
                         decoration: BoxDecoration(
                           color: category.color,
                           borderRadius: BorderRadius.circular(8),

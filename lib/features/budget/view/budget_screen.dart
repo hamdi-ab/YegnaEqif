@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
+import 'package:yegna_eqif_new/features/category/view/add_category_screen.dart';
 // import 'package:yegna_eqif_new/providers/time_period_provider.dart'; // TODO: Refactor to ViewModel
-// import 'package:yegna_eqif_new/providers/category_provider.dart'; // TODO: Refactor to ViewModel
-import 'package:yegna_eqif_new/screens/add%20pages/add_category_screen.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+// import 'package:yegna_eqif_new/providers/category_provider.dart'; // TODO: Re
 import 'manage_budget_page.dart';
-import 'package:yegna_eqif_new/screens/report/reports_screen.dart';
 import 'package:yegna_eqif_new/models/category.dart';
 
 class BudgetScreen extends StatefulWidget {
   final bool scrollToMonthlyBudget;
 
-  BudgetScreen({this.scrollToMonthlyBudget = false});
+  const BudgetScreen({super.key, this.scrollToMonthlyBudget = false});
 
   @override
   _BudgetScreenState createState() => _BudgetScreenState();
@@ -35,7 +33,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   void _scrollToMonthlyBudget() {
     Scrollable.ensureVisible(
       _monthlyBudgetKey.currentContext!,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       curve: Curves.easeInOut,
     );
   }
@@ -53,32 +51,37 @@ class _BudgetScreenState extends State<BudgetScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // TimePeriodToggle(), // TODO: Refactor
-              SizedBox(height: 40),
-              CircularProgressBar(),
-              SizedBox(height: 20),
+              const SizedBox(height: 40),
+              const CircularProgressBar(),
+              const SizedBox(height: 20),
               SectionWithHeader(
                 title: 'Budget Summary',
                 leftText: 'Manage budget',
                 viewAllCallback: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ManageBudgetPage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ManageBudgetPage()));
                 },
-                child: BudgetOverview(),
+                child: const BudgetOverview(),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0),
+              const Padding(
+                padding: EdgeInsets.only(left: 16.0),
                 child: Text('Category List',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
-              CategoriesGrid(),
-              SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0),
+              const CategoriesGrid(),
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.only(left: 16.0),
                 child: Text('Category Budget',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               MonthlyBudget(key: _monthlyBudgetKey),
             ],
           ),
@@ -102,118 +105,122 @@ class CategoriesGrid extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: categories.isEmpty
           ? FutureBuilder(
-        future: Future.delayed(Duration(seconds: 1)),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Align(
-              alignment: AlignmentDirectional.topStart,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AddCategoryPage()),
+              future: Future.delayed(const Duration(seconds: 1)),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddCategoryPage()),
+                        );
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.grey.withOpacity(0.2),
+                            child: const Icon(Icons.add,
+                                color: Colors.black, size: 20),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Add',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
-                },
-                child: Column(
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            )
+          : GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.8,
+              ),
+              itemCount: categories.length + 1,
+              itemBuilder: (context, index) {
+                if (index == categories.length) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddCategoryPage()),
+                      );
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.grey.withOpacity(0.2),
+                          child: const Icon(Icons.add,
+                              color: Colors.black, size: 20),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Add',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final category = categories[index];
+
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: 24,
-                      backgroundColor: Colors.grey.withOpacity(0.2),
-                      child: const Icon(Icons.add, color: Colors.black, size: 20),
+                      backgroundColor: category.color.withOpacity(0.1),
+                      child: Icon(
+                        category.icon,
+                        color: category.color,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Add',
+                    Text(
+                      category.name,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                ),
-              ),
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      )
-          : GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.8,
-        ),
-        itemCount: categories.length + 1,
-        itemBuilder: (context, index) {
-          if (index == categories.length) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddCategoryPage()),
                 );
               },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.grey.withOpacity(0.2),
-                    child: const Icon(Icons.add, color: Colors.black, size: 20),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Add',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final category = categories[index];
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: category.color.withOpacity(0.1),
-                child: Icon(
-                  category.icon,
-                  color: category.color,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                category.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          );
-        },
-      ),
+            ),
     );
   }
 }
 
 class CircularProgressBar extends StatelessWidget {
-  const CircularProgressBar({Key? key}) : super(key: key);
+  const CircularProgressBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     final budgetViewModel = context.watch<BudgetViewModel>();
     final budgets = budgetViewModel.budgets;
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
+    const selectedTimePeriod = TimePeriod.month; // Placeholder
 
     if (budgetViewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -227,19 +234,25 @@ class CircularProgressBar extends StatelessWidget {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 7)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 7)));
         case TimePeriod.month:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 30)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 30)));
         case TimePeriod.year:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 365)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 365)));
         default:
           return true;
       }
     }).toList();
 
-    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
-    final double progress = totalAllocatedAmount > 0 ? totalSpentAmount / totalAllocatedAmount : 0;
+    final double totalAllocatedAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double progress =
+        totalAllocatedAmount > 0 ? totalSpentAmount / totalAllocatedAmount : 0;
 
     Color progressColor;
     if (progress <= 0.5) {
@@ -293,6 +306,7 @@ class CircularProgressBar extends StatelessWidget {
 }
 
 class MonthlyBudget extends StatelessWidget {
+  @override
   final Key? key;
   const MonthlyBudget({this.key}) : super(key: key);
 
@@ -314,7 +328,7 @@ class MonthlyBudget extends StatelessWidget {
 
     Category getCategoryDetails(String categoryId) {
       return categories.firstWhere(
-            (cat) => cat.name == categoryId,
+        (cat) => cat.name == categoryId,
         orElse: () => Category(
           id: '',
           name: 'Unknown',
@@ -333,7 +347,9 @@ class MonthlyBudget extends StatelessWidget {
           final budget = budgets[index];
           final double dailyBudget = budget.allocatedAmount / 7;
           final category = getCategoryDetails(budget.category);
-          final double progress = budget.allocatedAmount > 0 ? budget.spentAmount / budget.allocatedAmount : 0;
+          final double progress = budget.allocatedAmount > 0
+              ? budget.spentAmount / budget.allocatedAmount
+              : 0;
           final Color progressColor = category.color;
 
           String statusText;
@@ -465,95 +481,136 @@ class MonthlyBudget extends StatelessWidget {
 }
 
 class BudgetOverview extends StatelessWidget {
+  const BudgetOverview({super.key});
+
   @override
   Widget build(BuildContext context) {
     final budgetViewModel = context.watch<BudgetViewModel>();
     final budgets = budgetViewModel.budgets;
     // final selectedTimePeriod = context.watch<TimePeriodProvider>().selectedTimePeriod; // TODO: Refactor
-    final selectedTimePeriod = TimePeriod.month; // Placeholder
+    const selectedTimePeriod = TimePeriod.month; // Placeholder
 
     final filteredBudgets = budgets.where((budget) {
       final now = DateTime.now();
       switch (selectedTimePeriod) {
         case TimePeriod.week:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 7)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 7)));
         case TimePeriod.month:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 30)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 30)));
         case TimePeriod.year:
-          return budget.startDate.isAfter(now.subtract(Duration(days: 365)));
+          return budget.startDate
+              .isAfter(now.subtract(const Duration(days: 365)));
         default:
           return true;
       }
     }).toList();
 
-    final double totalAllocatedAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
-    final double totalSpentAmount = filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
+    final double totalAllocatedAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.allocatedAmount);
+    final double totalSpentAmount =
+        filteredBudgets.fold(0, (sum, budget) => sum + budget.spentAmount);
     final double remainingBudget = totalAllocatedAmount - totalSpentAmount;
-    final double savingPercentage = totalAllocatedAmount != 0 ? (remainingBudget / totalAllocatedAmount) * 100 : 0;
+    final double savingPercentage = totalAllocatedAmount != 0
+        ? (remainingBudget / totalAllocatedAmount) * 100
+        : 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: ContainerWIthBoxShadow(padding: const EdgeInsets.all(16.0), child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green.withOpacity(0.1),
-                    radius: 22,
-                    child: Icon(Icons.attach_money, color: Colors.green, size: 22),
+      child: ContainerWIthBoxShadow(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.green.withOpacity(0.1),
+                      radius: 22,
+                      child: const Icon(Icons.attach_money,
+                          color: Colors.green, size: 22),
+                    ),
+                    title: const Text('Total Budget',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey)),
+                    subtitle: Text(
+                        '${totalAllocatedAmount.toStringAsFixed(0)} Br.',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  title: const Text('Total Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('${totalAllocatedAmount.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.red.withOpacity(0.1),
-                    radius: 22,
-                    child: Icon(Icons.money_off, color: Colors.red, size: 22),
+                Expanded(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.red.withOpacity(0.1),
+                      radius: 22,
+                      child: const Icon(Icons.money_off,
+                          color: Colors.red, size: 22),
+                    ),
+                    title: const Text('Budget Spent',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey)),
+                    subtitle: Text('${totalSpentAmount.toStringAsFixed(0)} Br.',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  title: const Text('Budget Spent', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('${totalSpentAmount.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.withOpacity(0.1),
-                    radius: 22,
-                    child: Icon(Icons.account_balance_wallet, color: Colors.blue, size: 22),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.blue.withOpacity(0.1),
+                      radius: 22,
+                      child: const Icon(Icons.account_balance_wallet,
+                          color: Colors.blue, size: 22),
+                    ),
+                    title: const Text('Remaining Budget',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey)),
+                    subtitle: Text('${remainingBudget.toStringAsFixed(0)} Br.',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  title: const Text('Remaining Budget', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('${remainingBudget.toStringAsFixed(0)} Br.', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.purple.withOpacity(0.1),
-                    radius: 22,
-                    child: Icon(Icons.percent, color: Colors.purple, size: 22),
+                Expanded(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.purple.withOpacity(0.1),
+                      radius: 22,
+                      child: const Icon(Icons.percent,
+                          color: Colors.purple, size: 22),
+                    ),
+                    title: const Text('Saving Percentage',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey)),
+                    subtitle: Text('${savingPercentage.toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  title: const Text('Saving Percentage', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  subtitle: Text('${savingPercentage.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -564,7 +621,8 @@ class ContainerWIthBoxShadow extends StatelessWidget {
   final double? width;
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
-  const ContainerWIthBoxShadow({Key? key, required this.child, this.width, this.margin, this.padding}) : super(key: key);
+  const ContainerWIthBoxShadow(
+      {super.key, required this.child, this.width, this.margin, this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -580,7 +638,7 @@ class ContainerWIthBoxShadow extends StatelessWidget {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3), // changes position of shadow
           ),
         ],
       ),
@@ -595,7 +653,12 @@ class SectionWithHeader extends StatelessWidget {
   final VoidCallback viewAllCallback;
   final Widget child;
 
-  const SectionWithHeader({Key? key, required this.title, required this.leftText, required this.viewAllCallback, required this.child}) : super(key: key);
+  const SectionWithHeader(
+      {super.key,
+      required this.title,
+      required this.leftText,
+      required this.viewAllCallback,
+      required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +670,9 @@ class SectionWithHeader extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               TextButton(onPressed: viewAllCallback, child: Text(leftText)),
             ],
           ),

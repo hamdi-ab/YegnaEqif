@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../utils/transaction_handler.dart'; // Keep for now, but note it uses ref
 import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
+import 'package:yegna_eqif_new/shared/widgets/bank_card_dropdown.dart';
+import 'package:yegna_eqif_new/shared/widgets/enter_amount_tile.dart';
+// TODO: Refactor - TransactionHandler needs to be updated to use new ViewModels
+// import '../../../core/transaction_handler.dart';
 
 class AddPartialDebtPayPage extends StatefulWidget {
-  const AddPartialDebtPayPage({required this.debtId, required this.transactionType, required this.personName, required this.remainingAmount, super.key});
+  const AddPartialDebtPayPage(
+      {required this.debtId,
+      required this.transactionType,
+      required this.personName,
+      required this.remainingAmount,
+      super.key});
   final String debtId;
   final String transactionType;
   final String personName;
@@ -16,7 +24,6 @@ class AddPartialDebtPayPage extends StatefulWidget {
 }
 
 class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
-
   final _formKey = GlobalKey<FormState>();
   double _totalAmount = 0.0;
   String _selectedBank = "Cash";
@@ -29,10 +36,14 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
       // final transactionHandler = TransactionHandler(ref: ref);
 
       if (widget.transactionType == 'lent') {
-        await context.read<DebtViewModel>().adjustDebtWhenSomeonePays(widget.debtId, _totalAmount);
+        await context
+            .read<DebtViewModel>()
+            .adjustDebtWhenSomeonePays(widget.debtId, _totalAmount);
         // transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, false);
       } else if (widget.transactionType == 'borrowed') {
-        await context.read<DebtViewModel>().adjustDebtWhenYouPay(widget.debtId, _totalAmount);
+        await context
+            .read<DebtViewModel>()
+            .adjustDebtWhenYouPay(widget.debtId, _totalAmount);
         // transactionHandler.handleLendingAndBorrowing(_selectedBank, _totalAmount, true);
       }
 
@@ -46,7 +57,6 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
     });
   }
 
-
   void _updateSelectedBank(String bank) {
     setState(() {
       _selectedBank = bank;
@@ -57,7 +67,7 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pay Back'),
+        title: const Text('Pay Back'),
         centerTitle: true,
       ),
       body: Form(
@@ -65,42 +75,58 @@ class _AddPartialDebtPayPageState extends State<AddPartialDebtPayPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               BankCardDropdown(onBankSelected: _updateSelectedBank),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               ContainerWIthBoxShadow(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                child: Text('${widget.personName}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                child: Text(
+                  widget.personName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ContainerWIthBoxShadow(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Remaining Amount:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
-                    Text('${widget.remainingAmount} Br.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red)),
+                    const Text(
+                      'Remaining Amount:',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text('${widget.remainingAmount} Br.',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red)),
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               EnterAmountTile(onAmountSaved: _updateAmount),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TextButton(
                   onPressed: _submitForm,
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.blue, // Change color based on validation
+                    backgroundColor:
+                        Colors.blue, // Change color based on validation
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Make the button cover the full width
+                    minimumSize: const Size(double.infinity,
+                        50), // Make the button cover the full width
                   ),
                   child: const Text(
                     'Save',

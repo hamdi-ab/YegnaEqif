@@ -3,10 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/budget/model/budget.dart';
 import 'package:yegna_eqif_new/models/category.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
-import 'package:yegna_eqif_new/screens/add%20pages/add_transaction_screen.dart';
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
+import 'package:yegna_eqif_new/shared/widgets/select_date_widget.dart';
 
 class AddBudgetPage extends StatefulWidget {
-  const AddBudgetPage({Key? key}) : super(key: key);
+  const AddBudgetPage({super.key});
 
   @override
   _AddBudgetPageState createState() => _AddBudgetPageState();
@@ -68,7 +69,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Budget'),
+        title: const Text('Add Budget'),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -144,7 +145,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    minimumSize: Size(double.infinity,
+                    minimumSize: const Size(double.infinity,
                         50), // Make the button cover the full width
                   ),
                   child: const Text(
@@ -161,59 +162,6 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class SelectDateWidget extends StatelessWidget {
-  final String label;
-  final DateTime firstDay;
-  final DateTime lastDay;
-  final Function(DateTime) onDateSelected;
-
-  const SelectDateWidget({
-    Key? key,
-    required this.label,
-    required this.firstDay,
-    required this.lastDay,
-    required this.onDateSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(); // Placeholder
-  }
-}
-
-class ContainerWIthBoxShadow extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? margin;
-  final EdgeInsetsGeometry? padding;
-
-  const ContainerWIthBoxShadow({
-    Key? key,
-    required this.child,
-    this.margin,
-    this.padding,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: margin,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }

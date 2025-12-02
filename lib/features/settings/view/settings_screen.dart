@@ -11,30 +11,30 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Update Personal Information'),
+            leading: const Icon(Icons.person),
+            title: const Text('Update Personal Information'),
             onTap: () {
               // Navigate to update personal information page
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Manage Notifications'),
+            leading: const Icon(Icons.notifications),
+            title: const Text('Manage Notifications'),
             onTap: () {
               // Navigate to manage notifications page
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.palette),
-            title: Text('Change Theme'),
+            leading: const Icon(Icons.palette),
+            title: const Text('Change Theme'),
             trailing: Switch(
               value: settingsViewModel.userSettings?.themeMode == ThemeMode.dark,
               onChanged: (value) {
@@ -43,23 +43,23 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.lock),
-            title: Text('Privacy Settings'),
+            leading: const Icon(Icons.lock),
+            title: const Text('Privacy Settings'),
             onTap: () {
               // Navigate to privacy settings page
             },
           ),
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.help),
-            title: Text('Help & Support'),
+            leading: const Icon(Icons.help),
+            title: const Text('Help & Support'),
             onTap: () {
               // Navigate to help & support page
             },
           ),
-          Divider(),
+          const Divider(),
         ],
       ),
     );

@@ -36,7 +36,8 @@ class AuthViewModel extends ChangeNotifier {
     _setLoading(true);
     _setError(null);
     try {
-      final user = await _authService.signInWithEmailAndPassword(email, password);
+      final user =
+          await _authService.signInWithEmailAndPassword(email, password);
       _setUser(user);
     } catch (e) {
       _setError(e.toString());
@@ -49,7 +50,8 @@ class AuthViewModel extends ChangeNotifier {
     _setLoading(true);
     _setError(null);
     try {
-      final user = await _authService.registerWithEmailAndPassword(email, password);
+      final user =
+          await _authService.registerWithEmailAndPassword(email, password);
       _setUser(user);
     } catch (e) {
       _setError(e.toString());
@@ -61,6 +63,11 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> signOut() async {
     await _authService.signOut();
     _setUser(null);
+  }
+
+  // Alias for logout to match expected method name in profile_screen
+  Future<void> logout() async {
+    await signOut();
   }
 
   void checkAuthState() {

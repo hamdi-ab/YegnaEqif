@@ -5,7 +5,7 @@ import 'package:yegna_eqif_new/models/category.dart';
 import 'package:yegna_eqif_new/features/budget/viewmodel/budget_viewmodel.dart';
 
 class ManageBudgetPage extends StatelessWidget {
-  const ManageBudgetPage({Key? key}) : super(key: key);
+  const ManageBudgetPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ManageBudgetPage extends StatelessWidget {
       );
     }
 
-    void _addNewBudget() {
+    void addNewBudget() {
       showDialog(
         context: context,
         builder: (context) => _BudgetDialog(
@@ -41,7 +41,7 @@ class ManageBudgetPage extends StatelessWidget {
       );
     }
 
-    void _editBudget(Budget budget) {
+    void editBudget(Budget budget) {
       showDialog(
         context: context,
         builder: (context) => _BudgetDialog(
@@ -63,7 +63,7 @@ class ManageBudgetPage extends StatelessWidget {
       );
     }
 
-    void _deleteBudget(String id) {
+    void deleteBudget(String id) {
       context.read<BudgetViewModel>().deleteBudget(id);
     }
 
@@ -90,12 +90,12 @@ class ManageBudgetPage extends StatelessWidget {
           return Dismissible(
             key: Key(budget.id),
             background: Container(
-              margin: EdgeInsets.symmetric(vertical: 6.0),
+              margin: const EdgeInsets.symmetric(vertical: 6.0),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(16)
                 ),
-              child: Icon(Icons.delete, color: Colors.white,),
+              child: const Icon(Icons.delete, color: Colors.white,),
             ),
             confirmDismiss: (direction) async {
               return await showDialog(
@@ -116,7 +116,7 @@ class ManageBudgetPage extends StatelessWidget {
                 ),
               );
             },
-            onDismissed: (direction) => _deleteBudget(budget.id),
+            onDismissed: (direction) => deleteBudget(budget.id),
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -172,10 +172,10 @@ class ManageBudgetPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(width: 16,),
+                      const SizedBox(width: 16,),
                       IconButton(
                         icon: const Icon(Icons.edit, size: 20),
-                        onPressed: () => _editBudget(budget),
+                        onPressed: () => editBudget(budget),
                       ),
                     ],
                   ),
@@ -231,9 +231,9 @@ class ManageBudgetPage extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: _addNewBudget,
+        onPressed: addNewBudget,
         tooltip: 'Add New Budget',
+        child: const Icon(Icons.add),
       ),
     );
   }

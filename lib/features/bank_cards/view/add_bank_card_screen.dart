@@ -1,13 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:yegna_eqif_new/features/bank_cards/model/card_model.dart';
 import 'package:yegna_eqif_new/features/bank_cards/viewmodel/bank_card_viewmodel.dart';
-import 'package:yegna_eqif_new/screens/dashboard/dashboard_screen.dart';
+import 'package:yegna_eqif_new/shared/widgets/forms/container_with_box_shadow.dart';
 
 class AddBankCardScreen extends StatefulWidget {
-  const AddBankCardScreen({Key? key}) : super(key: key);
+  const AddBankCardScreen({super.key});
 
   @override
   _AddBankCardScreenState createState() => _AddBankCardScreenState();
@@ -32,7 +31,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Bank Card'),
+          title: const Text('Add Bank Card'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -166,7 +165,8 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                           final double balance =
                               double.parse(_balanceController.text);
 
-                          final newBankCard = BankCard( // Generate a unique ID
+                          final newBankCard = BankCard(
+                            // Generate a unique ID
                             id: DateTime.now().toString(),
                             accountName: accountName,
                             accountNumber: accountNumber,
@@ -174,7 +174,9 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                             cardColor: _selectedColor,
                           );
 
-                          context.read<BankCardViewModel>().addBankCard(newBankCard);
+                          context
+                              .read<BankCardViewModel>()
+                              .addBankCard(newBankCard);
 
                           Navigator.pop(context); // Close the page
                         }
@@ -185,7 +187,7 @@ class _AddBankCardScreenState extends State<AddBankCardScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        minimumSize: Size(double.infinity,
+                        minimumSize: const Size(double.infinity,
                             50), // Make the button cover the full width
                       ),
                       child: const Text(

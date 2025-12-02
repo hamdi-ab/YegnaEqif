@@ -2,7 +2,7 @@ import '../models/debt.dart';
 
 class LocalDebtRepository {
   // Initialize with some sample data
-  List<Debt> _borrowOrDebtList = [
+  final List<Debt> _borrowOrDebtList = [
     Debt(
       id: '1',
       personName: 'Person 1',

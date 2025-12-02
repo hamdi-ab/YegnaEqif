@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yegna_eqif_new/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yegna_eqif_new/features/auth/view/splash_screen.dart';
@@ -14,8 +15,10 @@ import 'package:yegna_eqif_new/features/debt/viewmodel/debt_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -42,7 +45,7 @@ class MyApp extends StatelessWidget {
             themeMode: settingsViewModel.userSettings?.themeMode,
             theme: ThemeData.light(),
             darkTheme: ThemeData.dark(),
-            home: SplashScreen(),
+            home: const SplashScreen(),
           );
         },
       ),
